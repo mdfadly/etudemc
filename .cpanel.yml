@@ -2,10 +2,6 @@
 deployment:
   tasks:
     - export DEPLOYPATH=/home/u1703657/public_html/
-    - /bin/cp r application $DEPLOYPATH
-    - /bin/cp r assets $DEPLOYPATH
-    - /bin/cp r system $DEPLOYPATH
-    - /bin/cp r user_guide $DEPLOYPATH
     - /bin/cp .editorconfig $DEPLOYPATH
     - /bin/cp .gitignore $DEPLOYPATH
     - /bin/cp .htaccess $DEPLOYPATH
@@ -14,3 +10,7 @@ deployment:
     - /bin/cp index.php $DEPLOYPATH
     - /bin/cp license.txt $DEPLOYPATH
     - /bin/cp readme.rst $DEPLOYPATH
+    - /bin/cp -r application $DEPLOYPATH
+    - /bin/cp -r assets $DEPLOYPATH
+    - /bin/cp -r system $DEPLOYPATH
+    - /bin/cp -r user_guide $DEPLOYPATH
