@@ -34,8 +34,8 @@
                     <input type="hidden" class="form-control" value="<?= date('Y-m-d H:i:s') ?>" name="tgl_order" readonly>
                     <div class="form-group">
                         <label for="name_student">Student Name</label><br>
-                        <select class="form-control select-form" style="width:100%;" name="id_student">
-                            <option>Choose</option>
+                        <select class="form-control select-form" style="width:100%;" name="id_student" required>
+                            <option value="">Choose</option>
                             <?php foreach ($student as $s) : ?>
                                 <option value="<?= $s['id_student'] ?>">
                                     <?= $s['name_student'] ?>
@@ -45,8 +45,8 @@
                     </div>
                     <div class="form-group">
                         <label for="title">Book Title</label><br>
-                        <select class="form-control select-form" style="width:100%;" name="" onchange="myFunction(event)">
-                            <option>Choose</option>
+                        <select class="form-control select-form" style="width:100%;" name="" required onchange="myFunction(event)">
+                            <option value="">Choose</option>
                             <?php foreach ($book as $s) : ?>
                                 <option value="<?= $s['id_book'] ?>-<?= $s['distributor_price'] ?>-<?= $s['qty'] ?>-<?= $s['selling_price'] ?>">
                                     <?= $s['title'] ?>
@@ -145,12 +145,15 @@
 
         var selling_price = document.getElementById("selling_price").value;
         let rumus = parseInt(selling_price) * parseInt(this.value);
+        var discount = $('#discount').val();
+        var shipping_price = $('#shipping_price').val();
 
         // document.getElementById("price").value = total;
         // document.getElementById("temp_price").value = "Rp " + formatRupiah(total.toString());
 
-        document.getElementById("price").value = rumus;
-        document.getElementById("temp_price").value = "Rp " + formatRupiah(rumus.toString());
+        var temp_price = rumus + parseInt(shipping_price) - parseInt(discount);
+        $('#temp_price').val('Rp ' + formatRupiah(String(temp_price)));
+        $('#price').val(temp_price);
     });
 
     var shipping_price_rupiah = document.getElementById('shipping_price_rupiah');
@@ -161,9 +164,10 @@
         valuee = shipping_price_rupiah.value;
         shipping_price.value = valuee.split('.').join("");
 
+        var qty = $('#qty').val();
         var selling_price = $('#selling_price').val();
         var discount = $('#discount').val();
-        var temp_price = parseInt(selling_price) + parseInt(shipping_price.value) - parseInt(discount);
+        var temp_price = (parseInt(selling_price) * parseInt(qty)) + parseInt(shipping_price.value) - parseInt(discount);
 
         $('#temp_price').val('Rp ' + formatRupiah(String(temp_price)));
         $('#price').val(temp_price);
@@ -177,9 +181,10 @@
         valuee = discount_rupiah.value;
         discount.value = valuee.split('.').join("");
 
+        var qty = $('#qty').val();
         var selling_price = $('#selling_price').val();
         var shipping_price = $('#shipping_price').val();
-        var temp_price = parseInt(selling_price) - parseInt(discount.value) + parseInt(shipping_price);
+        var temp_price = (parseInt(selling_price) * parseInt(qty)) - parseInt(discount.value) + parseInt(shipping_price);
 
         $('#temp_price').val('Rp ' + formatRupiah(String(temp_price)));
         $('#price').val(temp_price);

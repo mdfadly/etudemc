@@ -151,6 +151,8 @@ class C_Teacher extends CI_Controller
         $this->cekLogin();
         $id_teacher = $_POST['id_teacher'];
         $jenis = $_POST['jenis'];
+        // $id_teacher = '200005';
+        // $jenis = 2;
         $this->get_ajax_online_theory($id_teacher, $jenis);
     }
 
@@ -235,10 +237,18 @@ class C_Teacher extends CI_Controller
 
             $data[] = $row;
         }
+        $temp = $this->M_Teacher->count_filtered($dbTable, $id_teacher, null, null, $jenis);
+        $temp2 = $this->M_Teacher->count_filtered('list_package', $id_teacher, null, null, $jenis);
+        // echo var_dump($temp);
+        // echo "<br>";
+        // echo "<br>";
+        // echo var_dump($temp2);
+        // echo var_dump(array_merge($temp, $temp2));
+        // die();
         $output = array(
             "draw" => @$_POST['draw'],
-            "recordsTotal" => $this->M_Teacher->count_all($dbTable, $id_teacher, null, null, $jenis),
-            "recordsFiltered" => $this->M_Teacher->count_filtered($dbTable, $id_teacher, null, null, $jenis),
+            "recordsTotal" => $temp + $temp2,
+            "recordsFiltered" => $temp + $temp2,
             "data" => $data,
         );
         // output to json format

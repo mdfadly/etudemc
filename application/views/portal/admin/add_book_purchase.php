@@ -47,7 +47,7 @@
                     <div class="form-group">
                         <label for="distributor">Distributor</label>
                         <select class="form-control" style="width:100%;" name="distributor" id="distributor" onchange="distributorFunc(event)">
-                            <option value="Quatro Store">Quatro Store</option>
+                            <option value="Partner Store">Partner Store</option>
                             <option value="Others">Others</option>
                         </select>
                         <div id="inputOthers">

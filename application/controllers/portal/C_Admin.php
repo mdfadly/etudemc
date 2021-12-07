@@ -3108,7 +3108,15 @@ class C_Admin extends CI_Controller
     }
 
     public function add_data_book_order()
-    {
+    {   
+        if($this->input->post('id_student') == ""){
+            $this->session->set_flashdata('warning', 'Not Select Student');
+            redirect('portal/book/sell');
+        }
+        if ($this->input->post('id_book') == "") {
+            $this->session->set_flashdata('warning', 'Not Select Book');
+            redirect('portal/book/sell');
+        }
         $res = $this->M_Admin->insertDataBookOrder();
         $res2 = $this->M_Admin->updateDataStockBook();
         if ($res >= 1) {

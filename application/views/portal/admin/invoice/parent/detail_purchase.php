@@ -52,11 +52,13 @@
                 </div>
 
                 <?php $currency = "Rp" ?>
-                <?php if ($package[0]['currency'] == '3') : ?>
-                    <?php $currency = "€" ?>
-                <?php endif ?>
-                <?php if ($package[0]['currency'] == '2') : ?>
-                    <?php $currency = "$" ?>
+                <?php if (count($package) > 0) : ?>
+                    <?php if ($package[0]['currency'] == '3') : ?>
+                        <?php $currency = "€" ?>
+                    <?php endif ?>
+                    <?php if ($package[0]['currency'] == '2') : ?>
+                        <?php $currency = "$" ?>
+                    <?php endif ?>
                 <?php endif ?>
 
                 <div class="row mb-5">

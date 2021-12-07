@@ -21,6 +21,11 @@
                         <?= $this->session->flashdata('success') ?>
                     </div>
                 <?php endif; ?>
+                <?php if ($this->session->flashdata('warning') != null) : ?>
+                    <div class="alert alert-danger" role="alert">
+                        <?= $this->session->flashdata('warning') ?>
+                    </div>
+                <?php endif; ?>
             </div>
 
             <div class="col-lg-12 pt-3">

@@ -187,7 +187,7 @@
                 <div class="sidebar-header">
                     <div class="user-pic">
                         <?php if (substr($this->session->userdata('id'), 0, 1) == 3) { ?>
-                            <img class="img-responsive rounded-circle" src="https://raw.githubusercontent.com/azouaoui-med/pro-sidebar-template/gh-pages/src/img/user.jpg" alt="User picture">
+                            <img class="img-responsive rounded-circle" src="<?= base_url(); ?>assets/img/avatar.png" alt="User picture">
                         <?php } else { ?>
                             <!-- <img class="img-responsive rounded-circle" src="" alt="User picture"> -->
                             <?php foreach ($teacher as $t) : ?>
