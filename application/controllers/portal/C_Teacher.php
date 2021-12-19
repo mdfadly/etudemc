@@ -74,18 +74,18 @@ class C_Teacher extends CI_Controller
             $no++;
             $row = array();
             // $row[] = $no . ".";
-            
+
             $count_done = 0;
             $count_cancel = 0;
             $count_ongoing = 0;
             $data_schedule = $this->M_Teacher->getData_schedule_package(null, $item->id_list_pack, null, null, $jenis);
             foreach ($data_schedule as $ds) {
-                if($ds['status'] == '1' || ($ds['status'] == '3' && $ds['date_update_cancel'] == null)){
-                    $count_ongoing += 1; 
-                }else if ($ds['status'] == '2' || ($ds['status'] == '3' && $ds['date_update_cancel'] != null)){
-                    $count_done += 1; 
-                }else if ($ds['status'] == '3' && $ds['date_update_cancel'] == null) {
-                    $count_cancel += 1; 
+                if ($ds['status'] == '1' || ($ds['status'] == '3' && $ds['date_update_cancel'] == null)) {
+                    $count_ongoing += 1;
+                } else if ($ds['status'] == '2' || ($ds['status'] == '3' && $ds['date_update_cancel'] != null)) {
+                    $count_done += 1;
+                } else if ($ds['status'] == '3' && $ds['date_update_cancel'] == null) {
+                    $count_cancel += 1;
                 }
             }
 
@@ -109,7 +109,7 @@ class C_Teacher extends CI_Controller
                     $status_pack = '<span class="badge badge-danger">Done</span>';
                 } else if (($count_ongoing == 3 || $count_ongoing == 4) && $count_done > 0) {
                     $status_pack = '<span class="badge badge-warning text-white">2 pack more!</span>';
-                }else if (($count_ongoing == 2 || $count_ongoing == 1) && $count_done > 0) {
+                } else if (($count_ongoing == 2 || $count_ongoing == 1) && $count_done > 0) {
                     $status_pack = '<span class="badge badge-warning text-white">1 pack more!</span>';
                 } else {
                     $status_pack = '<span class="badge text-white" style="background-color:#00B050">On Going</span>';
@@ -595,7 +595,7 @@ class C_Teacher extends CI_Controller
         $this->cekLogin();
         $teacher = $this->M_Teacher->getData_teacher();
         $offline_lesson = $this->M_Teacher->getData_offline_lesson($id_course);
-        $feereport = $this->M_Teacher->getData_sirkulasi_feereport(null,null,null, $offline_lesson[0]['id_teacher']);
+        $feereport = $this->M_Teacher->getData_sirkulasi_feereport(null, null, null, $offline_lesson[0]['id_teacher']);
         $title = "Attendance Offline Lesson | Portal Etude";
         $description = "Welcome to Portal Etude";
         $this->load->view('portal/reuse/header', array('title' => $title, 'description' => $description, 'teacher' => $teacher));
@@ -620,7 +620,7 @@ class C_Teacher extends CI_Controller
         $teacher = $this->M_Teacher->getData_teacher();
         // $online_pratical = $this->M_Teacher->getData_online_pratical($id_course);
         $pack_online = $this->M_Teacher->getData_pack_online($id_package, 1);
-        $schedule_online = $this->M_Teacher->getData_schedule_package(null, $id_package);
+        $schedule_online = $this->M_Teacher->getData_schedule_package(null, $id_package, null, null, $jenis);
         $count_theory = [];
         $count_pratical = [];
         foreach ($schedule_online as $so) {
@@ -633,6 +633,14 @@ class C_Teacher extends CI_Controller
         }
         $feereport = $this->M_Teacher->getData_sirkulasi_feereport(null, null, null, $schedule_online[0]['id_teacher']);
 
+        // var_dump($schedule_online);
+        // echo "<br>";
+        // echo "<br>";
+        // echo $jenis;
+        // echo "<br>";
+        // echo "<br>";
+        // var_dump($feereport);
+        // die();
         $title = "Attendance Offline Lesson | Portal Etude";
         $description = "Welcome to Portal Etude";
         $this->load->view('portal/reuse/header', array('title' => $title, 'description' => $description, 'teacher' => $teacher));
@@ -658,7 +666,7 @@ class C_Teacher extends CI_Controller
         $online_theory = $this->M_Teacher->getData_online_theory($id_course);
 
         $feereport = $this->M_Teacher->getData_sirkulasi_feereport(null, null, null, $online_theory[0]['id_teacher']);
-        
+
         $title = "Attendance Offline Lesson | Portal Etude";
         $description = "Welcome to Portal Etude";
         $this->load->view('portal/reuse/header', array('title' => $title, 'description' => $description, 'teacher' => $teacher));
@@ -811,52 +819,55 @@ class C_Teacher extends CI_Controller
 
         $data2 = [];
         $data3 = [];
-        if ($data_sirkulasi_feereport[0]['status_approved'] == 0) {
-            if (count($data_sirkulasi_feereport) == 0) {
-                if (count($counter) == 0) {
-                    $data2 =  [
-                        'no_sirkulasi_feereport' => $no_sirkulasi_feereport . "/001",
-                        'id_teacher' => $this->input->post('id_teacher'),
-                        'created_at' => $created_at,
-                        'updated_at' => $created_at,
-                        'price' => $this->input->post('fee'),
-                    ];
-                    $data3 = [
-                        'no_sirkulasi_feereport' => $no_sirkulasi_feereport . "/001",
-                        'id_teacher' => $this->input->post('id_teacher'),
-                        'tipe' => $tipe,
-                        'price' => $this->input->post('fee'),
-                    ];
-                } else {
-                    $x = 0;
-                    if (count($counter) < 10) {
-                        $x = "00" . count($counter);
-                    } else if (count($counter) < 100) {
-                        $x = "0" . count($counter);
-                    } else {
-                        $x = count($counter);
-                    }
-                    $data2 =  [
-                        'no_sirkulasi_feereport' => $no_sirkulasi_feereport . "/". $x,
-                        'id_teacher' => $this->input->post('id_teacher'),
-                        'created_at' => $created_at,
-                        'updated_at' => $created_at,
-                        'price' => $this->input->post('fee'),
-                    ];
-                    $data3 = [
-                        'no_sirkulasi_feereport' => $no_sirkulasi_feereport . "/". $x,
-                        'id_teacher' => $this->input->post('id_teacher'),
-                        'tipe' => $tipe,
-                        'price' => $this->input->post('fee'),
-                    ];
-                }
-                $this->db->insert('sirkulasi_feereport', $data2);
-                $this->db->insert('sirkulasi_feereport_detail', $data3);
-                // echo "<br>";
-                // echo var_dump($data2);
-                // echo "<br>";
-                // echo var_dump($data3);
-            } else {
+
+        if (count($data_sirkulasi_feereport) == 0) {
+
+            // if (count($counter) == 0) {
+            $data2 =  [
+                'no_sirkulasi_feereport' => $no_sirkulasi_feereport . "/001",
+                'id_teacher' => $this->input->post('id_teacher'),
+                'created_at' => $created_at,
+                'updated_at' => $created_at,
+                'price' => $this->input->post('fee'),
+            ];
+            $data3 = [
+                'no_sirkulasi_feereport' => $no_sirkulasi_feereport . "/001",
+                'id_teacher' => $this->input->post('id_teacher'),
+                'tipe' => $tipe,
+                'price' => $this->input->post('fee'),
+            ];
+            // } 
+            // else {
+            //     $x = 0;
+            //     if (count($counter) < 10) {
+            //         $x = "00" . count($counter);
+            //     } else if (count($counter) < 100) {
+            //         $x = "0" . count($counter);
+            //     } else {
+            //         $x = count($counter);
+            //     }
+            //     $data2 =  [
+            //         'no_sirkulasi_feereport' => $no_sirkulasi_feereport . "/". $x,
+            //         'id_teacher' => $this->input->post('id_teacher'),
+            //         'created_at' => $created_at,
+            //         'updated_at' => $created_at,
+            //         'price' => $this->input->post('fee'),
+            //     ];
+            //     $data3 = [
+            //         'no_sirkulasi_feereport' => $no_sirkulasi_feereport . "/". $x,
+            //         'id_teacher' => $this->input->post('id_teacher'),
+            //         'tipe' => $tipe,
+            //         'price' => $this->input->post('fee'),
+            //     ];
+            // }
+            $this->db->insert('sirkulasi_feereport', $data2);
+            $this->db->insert('sirkulasi_feereport_detail', $data3);
+            // echo "<br>";
+            // echo var_dump($data2);
+            // echo "<br>";
+            // echo var_dump($data3);
+        } else {
+            if ($data_sirkulasi_feereport[0]['status_approved'] == 0) {
                 $data2 =  [
                     'price' => intval($data_sirkulasi_feereport[0]['price']) + intval($this->input->post('fee')),
                     'updated_at' => $created_at,
@@ -879,6 +890,7 @@ class C_Teacher extends CI_Controller
                 }
             }
         }
+
 
         echo json_encode($data2);
     }
@@ -950,7 +962,7 @@ class C_Teacher extends CI_Controller
                     }
                 }
                 $this->M_Teacher->updateDataSirkulasiLesson($data_update_sirkulasi, $no_sirkulasi_lesson);
-            }   
+            }
         }
 
         $data2 = $this->M_Teacher->delete_event_schedule($this->input->post('id_schedule'));
@@ -970,8 +982,8 @@ class C_Teacher extends CI_Controller
 
         $data2 = [];
         $data3 = [];
-        if ($data_sirkulasi_feereport[0]['status_approved'] == 0) {
-            if (count($data_sirkulasi_feereport) > 0) {
+        if (count($data_sirkulasi_feereport) > 0) {
+            if ($data_sirkulasi_feereport[0]['status_approved'] == 0) {
                 if (count($data_sirkulasi_feereport_detail) > 0) {
                     $price_now = intval($data_sirkulasi_feereport[0]['price']) - intval($fee);
                     $price_now_detail = intval($data_sirkulasi_feereport_detail[0]['price']) - intval($fee);
@@ -1114,7 +1126,7 @@ class C_Teacher extends CI_Controller
         $teacher = $this->M_Teacher->getData_teacher();
 
         $feereport = $this->M_Teacher->getData_sirkulasi_feereport(null, null, null, $this->session->userdata('id'));
-        
+
         $title = "Offline Trial | Portal Etude";
         $description = "Welcome to Portal Etude";
         $this->load->view('portal/reuse/header', array('title' => $title, 'description' => $description, 'teacher' => $teacher));
@@ -1158,48 +1170,50 @@ class C_Teacher extends CI_Controller
 
         $data2 = [];
         $data3 = [];
-        if ($data_sirkulasi_feereport[0]['status_approved'] == 0) {
-            if (count($data_sirkulasi_feereport) == 0) {
-                if (count($counter) == 0) {
-                    $data2 =  [
-                        'no_sirkulasi_feereport' => $no_sirkulasi_feereport . "/001",
-                        'id_teacher' => $this->input->post('id_teacher'),
-                        'created_at' => $created_at,
-                        'updated_at' => $created_at,
-                        'price' => $price,
-                    ];
-                    $data3 = [
-                        'no_sirkulasi_feereport' => $no_sirkulasi_feereport . "/001",
-                        'id_teacher' => $this->input->post('id_teacher'),
-                        'tipe' => $tipe,
-                        'price' => $price,
-                    ];
-                } else {
-                    $x = 0;
-                    if (count($counter) < 10) {
-                        $x = "00" . count($counter);
-                    } else if (count($counter) < 100) {
-                        $x = "0" . count($counter);
-                    } else {
-                        $x = count($counter);
-                    }
-                    $data2 =  [
-                        'no_sirkulasi_feereport' => $no_sirkulasi_feereport . "/" . $x,
-                        'id_teacher' => $this->input->post('id_teacher'),
-                        'created_at' => $created_at,
-                        'updated_at' => $created_at,
-                        'price' => $price,
-                    ];
-                    $data3 = [
-                        'no_sirkulasi_feereport' => $no_sirkulasi_feereport . "/" . $x,
-                        'id_teacher' => $this->input->post('id_teacher'),
-                        'tipe' => $tipe,
-                        'price' => $price,
-                    ];
-                }
-                $this->db->insert('sirkulasi_feereport', $data2);
-                $this->db->insert('sirkulasi_feereport_detail', $data3);
-            } else {
+        if (count($data_sirkulasi_feereport) == 0) {
+
+            // if (count($counter) == 0) {
+            $data2 =  [
+                'no_sirkulasi_feereport' => $no_sirkulasi_feereport . "/001",
+                'id_teacher' => $this->input->post('id_teacher'),
+                'created_at' => $created_at,
+                'updated_at' => $created_at,
+                'price' => $price,
+            ];
+            $data3 = [
+                'no_sirkulasi_feereport' => $no_sirkulasi_feereport . "/001",
+                'id_teacher' => $this->input->post('id_teacher'),
+                'tipe' => $tipe,
+                'price' => $price,
+            ];
+            // } 
+            // else {
+            //     $x = 0;
+            //     if (count($counter) < 10) {
+            //         $x = "00" . count($counter);
+            //     } else if (count($counter) < 100) {
+            //         $x = "0" . count($counter);
+            //     } else {
+            //         $x = count($counter);
+            //     }
+            //     $data2 =  [
+            //         'no_sirkulasi_feereport' => $no_sirkulasi_feereport . "/" . $x,
+            //         'id_teacher' => $this->input->post('id_teacher'),
+            //         'created_at' => $created_at,
+            //         'updated_at' => $created_at,
+            //         'price' => $price,
+            //     ];
+            //     $data3 = [
+            //         'no_sirkulasi_feereport' => $no_sirkulasi_feereport . "/" . $x,
+            //         'id_teacher' => $this->input->post('id_teacher'),
+            //         'tipe' => $tipe,
+            //         'price' => $price,
+            //     ];
+            // }
+            $this->db->insert('sirkulasi_feereport', $data2);
+            $this->db->insert('sirkulasi_feereport_detail', $data3);
+        } else {
+            if ($data_sirkulasi_feereport[0]['status_approved'] == 0) {
                 $data2 =  [
                     'price' => intval($data_sirkulasi_feereport[0]['price']) + intval($price),
                     'updated_at' => $created_at,
@@ -1263,8 +1277,8 @@ class C_Teacher extends CI_Controller
 
         $data2 = [];
         $data3 = [];
-        if ($data_sirkulasi_feereport[0]['status_approved'] == 0) {
-            if (count($data_sirkulasi_feereport) > 0) {
+        if (count($data_sirkulasi_feereport) > 0) {
+            if ($data_sirkulasi_feereport[0]['status_approved'] == 0) {
                 if (count($data_sirkulasi_feereport_detail) > 0) {
                     $price_now = intval($data_sirkulasi_feereport[0]['price']) - intval($fee);
                     $price_now_detail = intval($data_sirkulasi_feereport_detail[0]['price']) - intval($fee);
@@ -1530,9 +1544,9 @@ class C_Teacher extends CI_Controller
                         $color = '#f0a500';
                     }
                     if ($row['status'] == 2) {
-                        if(fmod($z++, 2) == 1){
+                        if (fmod($z++, 2) == 1) {
                             $title = 'Lesson ' . $x . ' a';
-                        }else{
+                        } else {
                             $title = 'Lesson ' . $x++ . ' b';
                         }
                         $color = '#fddb3a';
@@ -1635,7 +1649,8 @@ class C_Teacher extends CI_Controller
         echo json_encode($data);
     }
 
-    public function testWeek(){
+    public function testWeek()
+    {
         $today = date("Y-m-d");
         $tempDay = '';
 
@@ -1902,52 +1917,54 @@ class C_Teacher extends CI_Controller
 
             $data2 = [];
             $data3 = [];
-            if ($data_sirkulasi_feereport[0]['status_approved'] == 0) {
-                if (count($data_sirkulasi_feereport) == 0) {
-                    if (count($counter) == 0) {
-                        $data2 =  [
-                            'no_sirkulasi_feereport' => $no_sirkulasi_feereport . "/001",
-                            'id_teacher' => $this->input->post('id_teacher'),
-                            'created_at' => $created_at,
-                            'updated_at' => $created_at,
-                            'price' => $price,
-                        ];
-                        $data3 = [
-                            'no_sirkulasi_feereport' => $no_sirkulasi_feereport . "/001",
-                            'id_teacher' => $this->input->post('id_teacher'),
-                            'tipe' => $tipe,
-                            'price' => $price,
-                        ];
-                    } else {
-                        $x = 0;
-                        if (count($counter) < 10) {
-                            $x = "00" . count($counter);
-                        } else if (count($counter) < 100) {
-                            $x = "0" . count($counter);
-                        } else {
-                            $x = count($counter);
-                        }
-                        $data2 =  [
-                            'no_sirkulasi_feereport' => $no_sirkulasi_feereport . "/". $x,
-                            'id_teacher' => $this->input->post('id_teacher'),
-                            'created_at' => $created_at,
-                            'updated_at' => $created_at,
-                            'price' => $price,
-                        ];
-                        $data3 = [
-                            'no_sirkulasi_feereport' => $no_sirkulasi_feereport . "/". $x,
-                            'id_teacher' => $this->input->post('id_teacher'),
-                            'tipe' => $tipe,
-                            'price' => $price,
-                        ];
-                    }
-                    $this->db->insert('sirkulasi_feereport', $data2);
-                    $this->db->insert('sirkulasi_feereport_detail', $data3);
-                    // echo "<br>";
-                    // echo var_dump($data2);
-                    // echo "<br>";
-                    // echo var_dump($data3);
-                } else {
+            if (count($data_sirkulasi_feereport) == 0) {
+
+                // if (count($counter) == 0) {
+                $data2 =  [
+                    'no_sirkulasi_feereport' => $no_sirkulasi_feereport . "/001",
+                    'id_teacher' => $this->input->post('id_teacher'),
+                    'created_at' => $created_at,
+                    'updated_at' => $created_at,
+                    'price' => $price,
+                ];
+                $data3 = [
+                    'no_sirkulasi_feereport' => $no_sirkulasi_feereport . "/001",
+                    'id_teacher' => $this->input->post('id_teacher'),
+                    'tipe' => $tipe,
+                    'price' => $price,
+                ];
+                // }
+                // else {
+                //     $x = 0;
+                //     if (count($counter) < 10) {
+                //         $x = "00" . count($counter);
+                //     } else if (count($counter) < 100) {
+                //         $x = "0" . count($counter);
+                //     } else {
+                //         $x = count($counter);
+                //     }
+                //     $data2 =  [
+                //         'no_sirkulasi_feereport' => $no_sirkulasi_feereport . "/". $x,
+                //         'id_teacher' => $this->input->post('id_teacher'),
+                //         'created_at' => $created_at,
+                //         'updated_at' => $created_at,
+                //         'price' => $price,
+                //     ];
+                //     $data3 = [
+                //         'no_sirkulasi_feereport' => $no_sirkulasi_feereport . "/". $x,
+                //         'id_teacher' => $this->input->post('id_teacher'),
+                //         'tipe' => $tipe,
+                //         'price' => $price,
+                //     ];
+                // }
+                $this->db->insert('sirkulasi_feereport', $data2);
+                $this->db->insert('sirkulasi_feereport_detail', $data3);
+                // echo "<br>";
+                // echo var_dump($data2);
+                // echo "<br>";
+                // echo var_dump($data3);
+            } else {
+                if ($data_sirkulasi_feereport[0]['status_approved'] == 0) {
                     $data2 =  [
                         'price' => intval($data_sirkulasi_feereport[0]['price']) + intval($price),
                         'updated_at' => $created_at,
@@ -2169,52 +2186,54 @@ class C_Teacher extends CI_Controller
 
         $data2 = [];
         $data3 = [];
-        if ($data_sirkulasi_feereport[0]['status_approved'] == 0) {
-            if (count($data_sirkulasi_feereport) == 0) {
-                if (count($counter) == 0) {
-                    $data2 =  [
-                        'no_sirkulasi_feereport' => $no_sirkulasi_feereport . "/001",
-                        'id_teacher' => $this->input->post('id_teacher'),
-                        'created_at' => $created_at,
-                        'updated_at' => $created_at,
-                        'price' => $price,
-                    ];
-                    $data3 = [
-                        'no_sirkulasi_feereport' => $no_sirkulasi_feereport . "/001",
-                        'id_teacher' => $this->input->post('id_teacher'),
-                        'tipe' => $tipe,
-                        'price' => $price,
-                    ];
-                } else {
-                    $x = 0;
-                    if (count($counter) < 10) {
-                        $x = "00" . count($counter);
-                    } else if (count($counter) < 100) {
-                        $x = "0" . count($counter);
-                    } else {
-                        $x = count($counter);
-                    }
-                    $data2 =  [
-                        'no_sirkulasi_feereport' => $no_sirkulasi_feereport . "/". $x,
-                        'id_teacher' => $this->input->post('id_teacher'),
-                        'created_at' => $created_at,
-                        'updated_at' => $created_at,
-                        'price' => $price,
-                    ];
-                    $data3 = [
-                        'no_sirkulasi_feereport' => $no_sirkulasi_feereport . "/". $x,
-                        'id_teacher' => $this->input->post('id_teacher'),
-                        'tipe' => $tipe,
-                        'price' => $price,
-                    ];
-                }
-                $this->db->insert('sirkulasi_feereport', $data2);
-                $this->db->insert('sirkulasi_feereport_detail', $data3);
-                // echo "<br>";
-                // echo var_dump($data2);
-                // echo "<br>";
-                // echo var_dump($data3);
-            } else {
+        if (count($data_sirkulasi_feereport) == 0) {
+
+            // if (count($counter) == 0) {
+            $data2 =  [
+                'no_sirkulasi_feereport' => $no_sirkulasi_feereport . "/001",
+                'id_teacher' => $this->input->post('id_teacher'),
+                'created_at' => $created_at,
+                'updated_at' => $created_at,
+                'price' => $price,
+            ];
+            $data3 = [
+                'no_sirkulasi_feereport' => $no_sirkulasi_feereport . "/001",
+                'id_teacher' => $this->input->post('id_teacher'),
+                'tipe' => $tipe,
+                'price' => $price,
+            ];
+            // } 
+            // else {
+            //     $x = 0;
+            //     if (count($counter) < 10) {
+            //         $x = "00" . count($counter);
+            //     } else if (count($counter) < 100) {
+            //         $x = "0" . count($counter);
+            //     } else {
+            //         $x = count($counter);
+            //     }
+            //     $data2 =  [
+            //         'no_sirkulasi_feereport' => $no_sirkulasi_feereport . "/". $x,
+            //         'id_teacher' => $this->input->post('id_teacher'),
+            //         'created_at' => $created_at,
+            //         'updated_at' => $created_at,
+            //         'price' => $price,
+            //     ];
+            //     $data3 = [
+            //         'no_sirkulasi_feereport' => $no_sirkulasi_feereport . "/". $x,
+            //         'id_teacher' => $this->input->post('id_teacher'),
+            //         'tipe' => $tipe,
+            //         'price' => $price,
+            //     ];
+            // }
+            $this->db->insert('sirkulasi_feereport', $data2);
+            $this->db->insert('sirkulasi_feereport_detail', $data3);
+            // echo "<br>";
+            // echo var_dump($data2);
+            // echo "<br>";
+            // echo var_dump($data3);
+        } else {
+            if ($data_sirkulasi_feereport[0]['status_approved'] == 0) {
                 $data2 =  [
                     'price' => intval($data_sirkulasi_feereport[0]['price']) + intval($price),
                     'updated_at' => $created_at,

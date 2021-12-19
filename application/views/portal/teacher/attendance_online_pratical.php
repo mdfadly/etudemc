@@ -73,14 +73,13 @@
         </div>
         <hr>
         <?php if ($jenis == 1) : ?>
-            <h2 style="font-weight:bold">Attendance Online Lesson </h2>
+            <h2 style="font-weight:bold">Attendance Online Lesson</h2>
         <?php else : ?>
             <h2 style="font-weight:bold">Attendance Theory Lesson</h2>
         <?php endif; ?>
         <h5>
             (<?= $pack_online[0]['name_student'] ?>)
         </h5>
-
 
         <div class="row pt-3">
             <div class="col-lg-12">
@@ -146,71 +145,16 @@
                         <div id="modalBody" class="modal-body text-center">
                             <input type="hidden" class="form-control" name="id_schedule_online" id="id_schedule_online_back" aria-describedby="date_form">
                             <input type="hidden" class="form-control" name="date" id="date_back" aria-describedby="date_form">
-                            <!-- <form action="#" method="POST"> -->
-                            <h5 class="col-lg-12">Please change the schedule </h5>
-                            <!--<button id="btn_back" class="btn btn-danger col-lg-5 col-5">Not to cancel?</button>-->
-                            <button id="btn_cancel_attendance" class="btn btn-warning text-white col-lg-5 col-5">Yes</button>
+                            <h5 class="col-lg-12">Please input date to change the schedule </h5>
+                            <input type="date" class="form-control" name="date_reschedule" id="date_reschedule" value="" aria-describedby="date_form" required>
+                            <br>
+                            <button id="btn_cancel_attendance" class="btn btn-warning text-white col-lg-5 col-5">Submit</button>
+                            <!-- <h5 class="col-lg-12">Please change the schedule </h5> -->
+                            <!-- <button id="btn_cancel_attendance" class="btn btn-warning text-white col-lg-5 col-5">Yes</button> -->
                         </div>
                     </div>
                 </div>
             </div>
-            <div id="calendarModalAdd" class="modal fade" id="staticBackdrop" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-                <div class="modal-dialog modal-dialog-centered">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h4 class="modal-title">
-                                Reschedule lesson
-                                <small id="modalTitle"></small>
-                            </h4>
-                            <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span> <span class="sr-only">close</span></button>
-                        </div>
-                        <div id="modalBody" class="modal-body">
-                            <div class="form-group">
-                                <label for="jenis">Jenis</label>
-                                <?php if ($jenis == 1) : ?>
-                                    <input type="text" class="form-control" readonly value="Practical">
-                                    <input type="hidden" class="form-control" name="jenis" value="1" id="jenis" aria-describedby="jenis_form">
-                                <?php else : ?>
-                                    <input type="text" class="form-control" readonly value="Theory">
-                                    <input type="hidden" class="form-control" name="jenis" value="2" id="jenis" aria-describedby="jenis_form">
-                                <?php endif; ?>
-                                <input type="hidden" class="form-control" name="date_update_cancel" id="date_update_cancel" aria-describedby="date_form">
-                                <input type="hidden" class="form-control" name="id_schedule_pack" id="id_schedule_pack">
-                            </div>
-                            <input type="hidden" class="form-control" name="status" value="1" id="status" aria-describedby="status_form">
-                            <button id="btn_insert" class="btn btn-primary btn-block">Submit</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!-- <div id="calendarModalNewLesson" class="modal fade" id="staticBackdrop" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-                <div class="modal-dialog modal-dialog-centered">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h4 class="modal-title">
-                                New Schedule Lesson
-                                <small id="modalTitle"></small>
-                            </h4>
-                            <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span> <span class="sr-only">close</span></button>
-                        </div>
-                        <div id="modalBody" class="modal-body">
-                            <div class="form-group">
-                                <label for="jenis">Jenis</label>
-                                <?php if ($jenis == 1) : ?>
-                                    <input type="text" class="form-control" readonly value="Practical">
-                                    <input type="hidden" class="form-control" name="jenis" value="1" id="jenis" aria-describedby="jenis_form">
-                                <?php else : ?>
-                                    <input type="text" class="form-control" readonly value="Theory">
-                                    <input type="hidden" class="form-control" name="jenis" value="2" id="jenis" aria-describedby="jenis_form">
-                                <?php endif; ?>
-                                <input type="hidden" class="form-control" name="date_schedule" id="date_schedule">
-                            </div>
-                            <input type="hidden" class="form-control" name="status" value="2" id="status">
-                            <button id="btn_new_lesson" class="btn btn-primary btn-block">Submit</button>
-                        </div>
-                    </div>
-                </div>
-            </div> -->
         </div>
     </div>
 </main>
@@ -340,8 +284,6 @@
                 document.getElementById("id_schedule_online_update").value = event.id;
                 $('#calendarModalUpdate').modal();
             }
-            console.log(event.title)
-            console.log(event.status)
             if (event.status == 2 || event.status == 4 || event.title == "Reschedule") {
                 alert('Attendance was done');
             }
@@ -414,8 +356,6 @@
     $('#btn_update').click(function() {
         var id_teacher = "<?= $this->session->userdata('id') ?>";
         var tgl = $("#date_update").val();
-
-
         var datetemp = tgl.substr(0, 7).replace("-", "");
         var idtemp = id_teacher.substr(3);
         var no_sirkulasi = "FER/" + datetemp + "/" + idtemp + "/001";
@@ -430,6 +370,10 @@
                         document.getElementById("id_schedule_online_update").value = "";
                         $('#calendarModalUpdate').modal('hide');
                     }
+                } else {
+                    updateData();
+                    document.getElementById("id_schedule_online_update").value = "";
+                    $('#calendarModalUpdate').modal('hide');
                 }
             <?php endforeach ?>
         <?php else : ?>
@@ -450,39 +394,44 @@
     });
 
     $('#btn_cancel_attendance').click(function() {
-        var id_teacher = "<?= $this->session->userdata('id') ?>";
-        var tgl = $("#date_update").val();
+        var date_reschedule = $("#date_reschedule").val();
+        if (date_reschedule !== "") {
+            var id_teacher = "<?= $this->session->userdata('id') ?>";
+            var tgl = $("#date_update").val();
+            var datetemp = tgl.substr(0, 7).replace("-", "");
+            var idtemp = id_teacher.substr(3);
+            var no_sirkulasi = "FER/" + datetemp + "/" + idtemp + "/001";
 
-
-        var datetemp = tgl.substr(0, 7).replace("-", "");
-        var idtemp = id_teacher.substr(3);
-        var no_sirkulasi = "FER/" + datetemp + "/" + idtemp + "/001";
-
-        <?php if (count($feereport) > 0) : ?>
-            <?php foreach ($feereport as $f) : ?>
-                if (no_sirkulasi === '<?= $f['no_sirkulasi_feereport'] ?>') {
-                    if ('<?= $f['status_approved'] ?>' === '1') {
-                        alert("Can't cancel, fee report has been approved!");
+            <?php if (count($feereport) > 0) : ?>
+                <?php foreach ($feereport as $f) : ?>
+                    if (no_sirkulasi === '<?= $f['no_sirkulasi_feereport'] ?>') {
+                        if ('<?= $f['status_approved'] ?>' === '1') {
+                            alert("Can't cancel, fee report has been approved!");
+                        } else {
+                            // alert("masih bisa")
+                            cancelAttendance();
+                            rescheduleAttendance();
+                            document.getElementById("id_schedule_online_update").value = "";
+                            $('#calendarModalUpdate').modal('hide');
+                            $('#calendarModalCancel').modal('hide');
+                        }
                     } else {
-                        // alert("masih bisa")
-                        alert("Choose a change date now");
-                        cancelAttendance();
+                        rescheduleAttendance();
                         document.getElementById("id_schedule_online_update").value = "";
                         $('#calendarModalUpdate').modal('hide');
                         $('#calendarModalCancel').modal('hide');
-                        location.reload();
                     }
-                }
-            <?php endforeach ?>
-        <?php else : ?>
-            alert("Choose a change date now");
-            cancelAttendance();
-            document.getElementById("id_schedule_online_update").value = "";
-            $('#calendarModalUpdate').modal('hide');
-            $('#calendarModalCancel').modal('hide');
-            location.reload();
-        <?php endif ?>
-
+                <?php endforeach ?>
+            <?php else : ?>
+                cancelAttendance();
+                rescheduleAttendance();
+                document.getElementById("id_schedule_online_update").value = "";
+                $('#calendarModalUpdate').modal('hide');
+                $('#calendarModalCancel').modal('hide');
+            <?php endif ?>
+        } else {
+            alert("please input date valid!")
+        }
 
     });
 
@@ -564,8 +513,6 @@
         if (rate_dollar === '2') {
             price = "<?= $pack_online[0]['price_dollar'] ?>";
         }
-        // console.log(rate_dollar)
-        // console.log(price)
         $.ajax({
             url: "<?= base_url('portal/C_Teacher/update_schedule_package') ?>",
             type: "POST",
@@ -614,8 +561,8 @@
     }
 
     function rescheduleAttendance() {
-        var id_schedule_pack = $("#id_schedule_pack").val();
-        var date_update_cancel = $("#date_update_cancel").val();
+        var id_schedule_online = $("#id_schedule_online_update").val();
+        var date_update_cancel = $("#date_reschedule").val();
         var id_teacher = "<?= $this->session->userdata('id') ?>";
         var id_student = "<?= $pack_online[0]['id_student'] ?>";
         var price = "<?= $pack_online[0]['price_idr_paket'] ?>";
@@ -629,11 +576,14 @@
         if (rate_dollar === '2') {
             price = "<?= $pack_online[0]['price_dollar'] ?>";
         }
+
+        console.log(id_schedule_online);
+        console.log(date_update_cancel);
         $.ajax({
             url: "<?= base_url('portal/C_Teacher/reschedule_package') ?>",
             type: "POST",
             data: {
-                'id_schedule_pack': id_schedule_pack,
+                'id_schedule_pack': id_schedule_online,
                 'date_update_cancel': date_update_cancel,
                 'jenis': '<?= $jenis ?>',
                 'id_teacher': id_teacher,
@@ -646,7 +596,9 @@
             success: function(data) {
                 calendar.fullCalendar('refetchResources');
                 // $("#counter_pack").html(data);
+                alert("Reschedule Successfully");
                 cekPackage();
+                location.reload();
             }
         });
     }
