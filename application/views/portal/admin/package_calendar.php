@@ -293,7 +293,7 @@
             var dateString = event.start.format("YYYY-MM-DD");
 
             if (event.jenis == 1) {
-                if (event.status == 1 || event.status == 3) {
+                if (event.status == 1 || event.status == 3 || event.status == 5 || event.status == 7) {
                     $(view.el[0]).find('.fc-day[data-date=' + dateString + ']').css({
                         "background-color": "#f0a500",
                         "color": "white",
@@ -310,7 +310,7 @@
                 });
             }
             if (event.jenis == 2) {
-                if (event.status == 1 || event.status == 3) {
+                if (event.status == 1 || event.status == 3 || event.status == 5 || event.status == 7) {
                     $(view.el[0]).find('.fc-day[data-date=' + dateString + ']').css({
                         "background-color": "#056676",
                         "color": "white",
@@ -435,7 +435,7 @@
         $('#calendarModalUpdate').modal('hide');
     });
 
-     $('#btn_active').click(function() {
+    $('#btn_active').click(function() {
         <?php $feereport_temp = [] ?>
 
         var jenis = $("#jenis_active").val();

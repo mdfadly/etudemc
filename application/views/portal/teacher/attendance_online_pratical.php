@@ -127,11 +127,25 @@
                         <div id="modalBody" class="modal-body text-center">
                             <input type="hidden" class="form-control" name="id_schedule_online" id="id_schedule_online_update" aria-describedby="date_form">
                             <input type="hidden" class="form-control" name="date" id="date_update" aria-describedby="date_form">
-                            <!-- <form action="#" method="POST"> -->
                             <h5 class="col-lg-12">Does the class run today?</h5>
                             <button id="btn_update" class="btn btn-info col-lg-5 col-5">Yes</button>
-                            <button id="btn_cancel" class="btn btn-danger  col-lg-5 col-5">No</button>
-                            <!-- </form> -->
+                            <button id="btn_cancel_lesson" class="btn btn-danger  col-lg-5 col-5">No</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="calendarModalOption" class="modal fade" id="staticBackdrop" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span> <span class="sr-only">close</span></button>
+                        </div>
+                        <div id="modalBody" class="modal-body text-center">
+                            <input type="hidden" class="form-control" name="id_schedule_online" id="id_schedule_online_noles" aria-describedby="date_form">
+                            <input type="hidden" class="form-control" name="date" id="date_noles" aria-describedby="date_form">
+                            <h5 class="col-lg-12">Apakah murid akan pilih hari atau tidak?</h5>
+                            <button id="btn_cancel" class="btn btn-info  col-lg-5 col-5">Reschedule</button>
+                            <button id="btn_nolesson" class="btn btn-danger col-lg-5 col-5">No Lesson</button>
                         </div>
                     </div>
                 </div>
@@ -149,8 +163,6 @@
                             <input type="date" class="form-control" name="date_reschedule" id="date_reschedule" value="" aria-describedby="date_form" required>
                             <br>
                             <button id="btn_cancel_attendance" class="btn btn-warning text-white col-lg-5 col-5">Submit</button>
-                            <!-- <h5 class="col-lg-12">Please change the schedule </h5> -->
-                            <!-- <button id="btn_cancel_attendance" class="btn btn-warning text-white col-lg-5 col-5">Yes</button> -->
                         </div>
                     </div>
                 </div>
@@ -383,14 +395,50 @@
         <?php endif ?>
     });
 
-    $('#btn_cancel').click(function() {
+    $('#btn_cancel_lesson').click(function() {
         $('#calendarModalUpdate').modal('hide');
+        $('#calendarModalOption').modal('show');
+    });
+
+    $('#btn_cancel').click(function() {
+        $('#calendarModalOption').modal('hide');
         $('#calendarModalCancel').modal('show');
     });
 
     $('#btn_back').click(function() {
         $('#calendarModalCancel').modal('hide');
         $('#calendarModalUpdate').modal('show');
+    });
+
+    $('#btn_nolesson').click(function() {
+        var id_teacher = "<?= $this->session->userdata('id') ?>";
+        var tgl = $("#date_update").val();
+        var datetemp = tgl.substr(0, 7).replace("-", "");
+        var idtemp = id_teacher.substr(3);
+        var no_sirkulasi = "FER/" + datetemp + "/" + idtemp + "/001";
+
+        <?php if (count($feereport) > 0) : ?>
+            <?php foreach ($feereport as $f) : ?>
+                if (no_sirkulasi === '<?= $f['no_sirkulasi_feereport'] ?>') {
+                    if ('<?= $f['status_approved'] ?>' === '1') {
+                        alert("Can't cancel, fee report has been approved!");
+                    } else {
+                        // alert("masih bisa")
+                        cancelLesson();
+                        document.getElementById("id_schedule_online_update").value = "";
+                        $('#calendarModalOption').modal('hide');
+                    }
+                } else {
+                    cancelLesson();
+                    document.getElementById("id_schedule_online_update").value = "";
+                    $('#calendarModalOption').modal('hide');
+                }
+            <?php endforeach ?>
+        <?php else : ?>
+            cancelLesson();
+            document.getElementById("id_schedule_online_update").value = "";
+            $('#calendarModalOption').modal('hide');
+        <?php endif ?>
     });
 
     $('#btn_cancel_attendance').click(function() {
@@ -416,6 +464,7 @@
                             $('#calendarModalCancel').modal('hide');
                         }
                     } else {
+                        cancelAttendance();
                         rescheduleAttendance();
                         document.getElementById("id_schedule_online_update").value = "";
                         $('#calendarModalUpdate').modal('hide');
@@ -556,6 +605,32 @@
 
                 $("#counter_pack").html(data);
                 cekPackage();
+            }
+        });
+    }
+
+    function cancelLesson() {
+        var id_schedule_online = $("#id_schedule_online_update").val();
+        var id_list_pack = "<?= $pack_online[0]['id_list_pack'] ?>";
+        var tgl = $("#date_update").val();
+        $.ajax({
+            url: "<?= base_url('portal/C_Teacher/update_schedule_package') ?>",
+            type: "POST",
+            data: {
+                'id_schedule_online': id_schedule_online,
+                'id_list_pack': id_list_pack,
+                'status': '7',
+                'jenis': '<?= $jenis ?>',
+            },
+            success: function(data) {
+                // calendar.fullCalendar('destroy');
+                calendar.fullCalendar('refetchResources');
+                // calendar.fullCalendar('rerenderEvents');
+
+                $("#counter_pack").html(data);
+                alert("Cancel No Lesson Successfully");
+                cekPackage();
+                location.reload();
             }
         });
     }
