@@ -1735,7 +1735,7 @@ class C_Teacher extends CI_Controller
         $count_theory = [];
         $count_pratical = [];
         foreach ($schedule_online as $so) {
-            if ($so['status'] == 2 || $so['status'] == 5 || $so['status'] == 7 || ($so['status'] == 3 && $so['date_update_cancel'] != NULL)) :
+            if ($so['status'] == 2 || ($so['status'] == 3 && $so['date_update_cancel'] != NULL)) :
                 if ($so['jenis'] == 1) {
                     $count_pratical[] = $so['id_schedule_pack'];
                 }
@@ -2010,7 +2010,7 @@ class C_Teacher extends CI_Controller
         $count_theory = [];
         $count_pratical = [];
         foreach ($schedule_online as $so) {
-            if ($so['status'] == 2 || $so['status'] == 5 || $so['status'] == 7 || ($so['status'] == 3 && $so['date_update_cancel'] != NULL)) :
+            if ($so['status'] == 2 || ($so['status'] == 3 && $so['date_update_cancel'] != NULL)) :
                 if ($so['jenis'] == 1) {
                     $count_pratical[] = $so['id_schedule_pack'];
                 }
@@ -2296,7 +2296,7 @@ class C_Teacher extends CI_Controller
         $count_theory = [];
         $count_pratical = [];
         foreach ($schedule_online as $so) {
-            if ($so['status'] == 2 || $so['status'] == 5 || $so['status'] == 7 || ($so['status'] == 3 && $so['date_update_cancel'] != NULL)) :
+            if ($so['status'] == 2 || ($so['status'] == 3 && $so['date_update_cancel'] != NULL)) :
                 if ($so['jenis'] == 1) {
                     $count_pratical[] = $so['id_schedule_pack'];
                 }

@@ -2700,7 +2700,7 @@ class C_Admin extends CI_Controller
             
         }
         foreach ($schedule_pack as $so) {
-            if ($so['status'] == 2 || $so['status'] == 5 || $so['status'] == 7 || ($so['status'] == 3 && $so['date_update_cancel'] != NULL)) {
+            if ($so['status'] == 2 || ($so['status'] == 3 && $so['date_update_cancel'] != NULL)) {
                 if ($so['jenis'] == 1) {
                     $count_pratical[] = $so['id_schedule_pack'];
                 }
@@ -2746,7 +2746,7 @@ class C_Admin extends CI_Controller
                     $color = '#fddb3a';
                 }
                 if ($row['status'] == 3) {
-                    $title = 'Cancel';
+                    $title = 'No Lesson';
                     $color = '#ff4b5c';
                 }
                 if ($row['status'] == 4) {
@@ -2772,7 +2772,7 @@ class C_Admin extends CI_Controller
                     $color = '#5eaaa8';
                 }
                 if ($row['status'] == 3) {
-                    $title = 'Cancel';
+                    $title = 'No Lesson';
                     $color = '#ff4b5c';
                 }
                 if ($row['status'] == 4) {

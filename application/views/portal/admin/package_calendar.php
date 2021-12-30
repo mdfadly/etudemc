@@ -401,7 +401,7 @@
                 alert('Attendance was cancel');
                 console.log('halo 3');
             }
-            if (event.status == 5) {
+            if (event.status == 5 || event.status == 7) {
                 var date_event = event.date;
                 document.getElementById("jenis_active").value = event.jenis;
                 document.getElementById("date_active").value = date_event.slice(0, 10);
@@ -463,6 +463,12 @@
                         document.getElementById("id_schedule_online_active").value = "";
                         $('#calendarModalActive').modal('hide');
                     }
+                } else {
+                    activeData();
+                    document.getElementById("jenis_active").value = "";
+                    document.getElementById("date_active").value = "";
+                    document.getElementById("id_schedule_online_active").value = "";
+                    $('#calendarModalActive').modal('hide');
                 }
             <?php endforeach ?>
         <?php else : ?>
@@ -479,29 +485,39 @@
     });
 
     $('#btn_cancel_attendance').click(function() {
-        <?php $feereport_temp = [] ?>
+        var date_reschedule = $("#date_reschedule").val();
+        if (date_reschedule !== "") {
+            <?php $feereport_temp = [] ?>
 
-        var jenis = $("#jenis_active").val();
-        var id_teacher = "<?= $pack_online[0]['id_teacher_practical'] ?>";
-        <?php $feereport_temp = $feereport_pratical ?>
+            var jenis = $("#jenis_active").val();
+            var id_teacher = "<?= $pack_online[0]['id_teacher_practical'] ?>";
+            <?php $feereport_temp = $feereport_pratical ?>
 
-        if (jenis == 2) {
-            id_teacher = "<?= $pack_online[0]['id_teacher_theory'] ?>";
-            <?php $feereport_temp = $feereport_theory ?>
-        }
+            if (jenis == 2) {
+                id_teacher = "<?= $pack_online[0]['id_teacher_theory'] ?>";
+                <?php $feereport_temp = $feereport_theory ?>
+            }
 
-        var id_list_pack = "<?= $pack_online[0]['id_list_pack'] ?>";
-        var tgl = $("#date_active").val();
+            var id_list_pack = "<?= $pack_online[0]['id_list_pack'] ?>";
+            var tgl = $("#date_active").val();
 
-        var datetemp = tgl.substr(0, 7).replace("-", "");
-        var idtemp = id_teacher.substr(3);
-        var no_sirkulasi = "FER/" + datetemp + "/" + idtemp + "/001";
+            var datetemp = tgl.substr(0, 7).replace("-", "");
+            var idtemp = id_teacher.substr(3);
+            var no_sirkulasi = "FER/" + datetemp + "/" + idtemp + "/001";
 
-        <?php if (count($feereport_temp) > 0) : ?>
-            <?php foreach ($feereport_temp as $f) : ?>
-                if (no_sirkulasi === '<?= $f['no_sirkulasi_feereport'] ?>') {
-                    if ('<?= $f['status_approved'] ?>' === '1') {
-                        alert("Can't add, fee report has been approved!");
+            <?php if (count($feereport_temp) > 0) : ?>
+                <?php foreach ($feereport_temp as $f) : ?>
+                    if (no_sirkulasi === '<?= $f['no_sirkulasi_feereport'] ?>') {
+                        if ('<?= $f['status_approved'] ?>' === '1') {
+                            alert("Can't add, fee report has been approved!");
+                        } else {
+                            cancelAttendance();
+                            rescheduleAttendance();
+                            document.getElementById("jenis_active").value = "";
+                            document.getElementById("date_active").value = "";
+                            document.getElementById("id_schedule_online_active").value = "";
+                            $('#calendarModalCancel').modal('hide');
+                        }
                     } else {
                         cancelAttendance();
                         rescheduleAttendance();
@@ -510,16 +526,18 @@
                         document.getElementById("id_schedule_online_active").value = "";
                         $('#calendarModalCancel').modal('hide');
                     }
-                }
-            <?php endforeach ?>
-        <?php else : ?>
-            cancelAttendance();
-            rescheduleAttendance();
-            document.getElementById("jenis_active").value = "";
-            document.getElementById("date_active").value = "";
-            document.getElementById("id_schedule_online_active").value = "";
-            $('#calendarModalCancel').modal('hide');
-        <?php endif ?>
+                <?php endforeach ?>
+            <?php else : ?>
+                cancelAttendance();
+                rescheduleAttendance();
+                document.getElementById("jenis_active").value = "";
+                document.getElementById("date_active").value = "";
+                document.getElementById("id_schedule_online_active").value = "";
+                $('#calendarModalCancel').modal('hide');
+            <?php endif ?>
+        } else {
+            alert("please input date valid!")
+        }
     });
 
     function myFunction(e) {
@@ -683,6 +701,7 @@
         var id_list_pack = "<?= $pack_online[0]['id_list_pack'] ?>";
         var tgl = $("#date_active").val();
         var jenis = $("#jenis_active").val();
+        // console.log("cancel " + jenis)
         $.ajax({
             url: "<?= base_url('portal/C_Teacher/update_schedule_package') ?>",
             type: "POST",
@@ -693,7 +712,7 @@
                 'jenis': jenis,
             },
             success: function(data) {
-                calendar.fullCalendar('refetchEvents');
+                // calendar.fullCalendar('refetchEvents');
                 // alert("Updated Successfully");
                 // location.reload();
             }
@@ -727,6 +746,7 @@
 
         var date_update_cancel = $("#date_reschedule").val();
 
+        // console.log("reschedule " + jenis)
         $.ajax({
             url: "<?= base_url('portal/C_Teacher/reschedule_package') ?>",
             type: "POST",

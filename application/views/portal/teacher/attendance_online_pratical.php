@@ -600,11 +600,11 @@
             },
             success: function(data) {
                 // calendar.fullCalendar('destroy');
-                calendar.fullCalendar('refetchResources');
+                // calendar.fullCalendar('refetchResources');
                 // calendar.fullCalendar('rerenderEvents');
 
-                $("#counter_pack").html(data);
-                cekPackage();
+                // $("#counter_pack").html(data);
+                // cekPackage();
             }
         });
     }
