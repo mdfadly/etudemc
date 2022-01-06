@@ -664,6 +664,9 @@
         if (<?= $pack_online[0]['status_pack_practical'] ?> === 1 && <?= $pack_online[0]['status_pack_theory'] ?> === 1) {
             price = price - 100000;
         }
+        if (jenis === 2) {
+            price = 100000;
+        }
         var paket = "<?= $pack_online[0]['paket'] ?>";
 
         var teacher_percentage = "<?= $pack_online[0]['teacher_percentage'] ?>";
@@ -693,8 +696,8 @@
             },
             success: function(data) {
                 calendar.fullCalendar('refetchEvents');
-                alert("Updated Successfully");
                 location.reload();
+                alert("Updated Successfully");
             }
         });
     }
@@ -738,6 +741,9 @@
         if (<?= $pack_online[0]['status_pack_practical'] ?> === 1 && <?= $pack_online[0]['status_pack_theory'] ?> === 1) {
             price = price - 100000;
         }
+        if (jenis === 2) {
+            price = 100000;
+        }
         var paket = "<?= $pack_online[0]['paket'] ?>";
 
         var teacher_percentage = "<?= $pack_online[0]['teacher_percentage'] ?>";
@@ -769,8 +775,8 @@
             },
             success: function(data) {
                 calendar.fullCalendar('refetchEvents');
-                alert("Updated Successfully");
                 location.reload();
+                alert("Updated Successfully");
             }
         });
     }

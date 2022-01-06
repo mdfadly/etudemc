@@ -555,6 +555,9 @@
         if (<?= $pack_online[0]['status_pack_practical'] ?> === 1 && <?= $pack_online[0]['status_pack_theory'] ?> === 1) {
             price = price - 100000;
         }
+        if (<?= $jenis ?> === 2) {
+            price = 100000;
+        }
         var paket = "<?= $pack_online[0]['paket'] ?>";
         var teacher_percentage = "<?= $pack_online[0]['teacher_percentage'] ?>";
         var rate_dollar = "<?= $pack_online[0]['rate_dollar'] ?>";
@@ -565,6 +568,7 @@
             price = "<?= $pack_online[0]['price_dollar'] ?>";
         }
         // console.log(price)
+        // console.log(<?= $jenis ?>)
         $.ajax({
             url: "<?= base_url('portal/C_Teacher/update_schedule_package') ?>",
             type: "POST",
@@ -582,8 +586,8 @@
             },
             success: function(data) {
                 calendar.fullCalendar('refetchEvents');
-                alert("Updated Successfully");
                 $("#counter_pack").html(data);
+                alert("Updated Successfully");
             }
         });
     }
@@ -626,14 +630,11 @@
                 'jenis': '<?= $jenis ?>',
             },
             success: function(data) {
-                // calendar.fullCalendar('destroy');
                 calendar.fullCalendar('refetchResources');
-                // calendar.fullCalendar('rerenderEvents');
-
                 $("#counter_pack").html(data);
-                alert("Cancel No Lesson Successfully");
                 cekPackage();
                 location.reload();
+                alert("Cancel No Lesson Successfully");
             }
         });
     }
@@ -646,6 +647,9 @@
         var price = "<?= $pack_online[0]['price_idr_paket'] ?>";
         if (<?= $pack_online[0]['status_pack_practical'] ?> === 1 && <?= $pack_online[0]['status_pack_theory'] ?> === 1) {
             price = price - 100000;
+        }
+        if (<?= $jenis ?> === 2) {
+            price = 100000;
         }
         var paket = "<?= $pack_online[0]['paket'] ?>";
         var id_list_pack = "<?= $pack_online[0]['id_list_pack'] ?>";
@@ -676,10 +680,9 @@
             },
             success: function(data) {
                 calendar.fullCalendar('refetchResources');
-                // $("#counter_pack").html(data);
-                alert("Reschedule Successfully");
                 cekPackage();
                 location.reload();
+                alert("Reschedule Successfully");
             }
         });
     }
