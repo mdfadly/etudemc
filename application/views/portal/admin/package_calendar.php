@@ -661,6 +661,9 @@
         var id_student = "<?= $pack_online[0]['id_student'] ?>";
 
         var price = "<?= $pack_online[0]['price_idr'] ?>";
+        if (<?= $pack_online[0]['status_pack_practical'] ?> === 1 && <?= $pack_online[0]['status_pack_theory'] ?> === 1) {
+            price = price - 100000;
+        }
         var paket = "<?= $pack_online[0]['paket'] ?>";
 
         var teacher_percentage = "<?= $pack_online[0]['teacher_percentage'] ?>";
@@ -732,6 +735,9 @@
         var id_student = "<?= $pack_online[0]['id_student'] ?>";
 
         var price = "<?= $pack_online[0]['price_idr'] ?>";
+        if (<?= $pack_online[0]['status_pack_practical'] ?> === 1 && <?= $pack_online[0]['status_pack_theory'] ?> === 1) {
+            price = price - 100000;
+        }
         var paket = "<?= $pack_online[0]['paket'] ?>";
 
         var teacher_percentage = "<?= $pack_online[0]['teacher_percentage'] ?>";

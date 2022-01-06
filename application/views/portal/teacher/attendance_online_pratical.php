@@ -80,7 +80,6 @@
         <h5>
             (<?= $pack_online[0]['name_student'] ?>)
         </h5>
-
         <div class="row pt-3">
             <div class="col-lg-12">
                 <?php $date_created = date_create($pack_online[0]['created_at']); ?>
@@ -143,7 +142,7 @@
                         <div id="modalBody" class="modal-body text-center">
                             <input type="hidden" class="form-control" name="id_schedule_online" id="id_schedule_online_noles" aria-describedby="date_form">
                             <input type="hidden" class="form-control" name="date" id="date_noles" aria-describedby="date_form">
-                            <h5 class="col-lg-12">Apakah murid akan pilih hari atau tidak?</h5>
+                            <!-- <h5 class="col-lg-12">Apakah murid akan pilih hari atau tidak?</h5> -->
                             <button id="btn_cancel" class="btn btn-info  col-lg-5 col-5">Reschedule</button>
                             <button id="btn_nolesson" class="btn btn-danger col-lg-5 col-5">No Lesson</button>
                         </div>
@@ -553,6 +552,9 @@
         var id_student = "<?= $pack_online[0]['id_student'] ?>";
         var tgl = $("#date_update").val();
         var price = "<?= $pack_online[0]['price_idr_paket'] ?>";
+        if (<?= $pack_online[0]['status_pack_practical'] ?> === 1 && <?= $pack_online[0]['status_pack_theory'] ?> === 1) {
+            price = price - 100000;
+        }
         var paket = "<?= $pack_online[0]['paket'] ?>";
         var teacher_percentage = "<?= $pack_online[0]['teacher_percentage'] ?>";
         var rate_dollar = "<?= $pack_online[0]['rate_dollar'] ?>";
@@ -562,6 +564,7 @@
         if (rate_dollar === '2') {
             price = "<?= $pack_online[0]['price_dollar'] ?>";
         }
+        // console.log(price)
         $.ajax({
             url: "<?= base_url('portal/C_Teacher/update_schedule_package') ?>",
             type: "POST",
@@ -641,6 +644,9 @@
         var id_teacher = "<?= $this->session->userdata('id') ?>";
         var id_student = "<?= $pack_online[0]['id_student'] ?>";
         var price = "<?= $pack_online[0]['price_idr_paket'] ?>";
+        if (<?= $pack_online[0]['status_pack_practical'] ?> === 1 && <?= $pack_online[0]['status_pack_theory'] ?> === 1) {
+            price = price - 100000;
+        }
         var paket = "<?= $pack_online[0]['paket'] ?>";
         var id_list_pack = "<?= $pack_online[0]['id_list_pack'] ?>";
         var teacher_percentage = "<?= $pack_online[0]['teacher_percentage'] ?>";
@@ -652,8 +658,8 @@
             price = "<?= $pack_online[0]['price_dollar'] ?>";
         }
 
-        console.log(id_schedule_online);
-        console.log(date_update_cancel);
+        // console.log(id_schedule_online);
+        // console.log(date_update_cancel);
         $.ajax({
             url: "<?= base_url('portal/C_Teacher/reschedule_package') ?>",
             type: "POST",
