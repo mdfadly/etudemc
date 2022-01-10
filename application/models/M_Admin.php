@@ -428,7 +428,7 @@ class M_Admin extends CI_Model
         }
     }
 
-    var $column_order_paket = array('p.name', 'p.description', 'p.detail', null);
+    var $column_order_paket = array(null, 'p.name', 'p.description', 'p.detail', null);
     var $column_search_paket = array('p.name', 'p.description', 'p.detail');
     var $order_paket = array('p.id' => 'asc');
 

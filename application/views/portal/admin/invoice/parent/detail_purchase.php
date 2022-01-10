@@ -476,6 +476,9 @@
                 </div>
                 <div class="notices mt-5">
                     <div>
+                        Please recheck the dates of the lessons to avoid anymistakes from our teacher's report.
+                    </div>
+                    <div>
                         Tuition payment should be made at the latest 5 days after the invoice date
                     </div>
                     <div class="row pt-3">

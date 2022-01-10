@@ -24,6 +24,7 @@
                     <table id="example" class="table table-striped table-white display " style="width:100%">
                         <thead>
                             <tr>
+                                <th>No.</th>
                                 <th>Name of Package</th>
                                 <th>Type of Class</th>
                                 <th>Practical</th>
@@ -56,10 +57,10 @@
                 "type": "POST"
             },
             "columnDefs": [{
-                'targets': [3], // column index (start from 0)
+                'targets': [0,5], // column index (start from 0)
                 'orderable': false, // set orderable false for selected columns
             }, {
-                targets: 3,
+                targets: 5,
                 "className": "text-center",
             }, ],
             "order": []

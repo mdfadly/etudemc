@@ -51,7 +51,7 @@
                     </div>
                 </div>
                 <?php $currency = "Rp" ?>
-                
+
                 <div class="row mb-5">
                     <div class="col-md-6 col-lg-6 col-6 p-4" style="border:1px solid;">
                         <h5 style="font-weight:bold"><?= $ortu[0]['parent_student'] ?></h5>
@@ -211,11 +211,11 @@
                                                             echo "Overdue";
                                                             break;
                                                         case "4":
-                                                                    echo "Discount";
-                                                                    break;
-                                                                case "5":
-                                                                    echo "Others";
-                                                                    break;
+                                                            echo "Discount";
+                                                            break;
+                                                        case "5":
+                                                            echo "Others";
+                                                            break;
                                                     } ?>
                                         </td>
                                         <td class="text-center">
@@ -275,6 +275,9 @@
                     </div>
                 </div>
                 <div class="notices mt-5">
+                    <div>
+                        Please recheck the dates of the lessons to avoid anymistakes from our teacher's report.
+                    </div>
                     <div>
                         Tuition payment should be made at the latest 5 days after the invoice date
                     </div>

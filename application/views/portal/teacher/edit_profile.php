@@ -62,7 +62,7 @@
                         <div class="col-12 col-lg-8">
                             <input type="hidden" id="foto" onchange="previewImg()" value="<?= $teacher[0]['pict_teacher'] ?>" required name="pict" class="form-control-file center-block file-upload picture" style="text-align: center; margin: auto;">
                             <input type="hidden" value="tidak" name="ubah-pict" class="ubah-pict" id="ubah-pict">
-                            <label class="hide custom-file-label text-center" for="foto">Choose file</label>
+                            <label class="hide custom-file-label text-center" for="foto">Choose file (select a JPG or PNG file)</label>
                         </div>
                     </div>
                     <div class="form-group row pt-3">
@@ -263,7 +263,7 @@
         $('.custom-file-label').removeClass('hide');
         $('#btn-change').append(`
             <a href="#" onclick="closePict()" class="btn btn-sm btn-danger btn-change-pict">
-                No Change Profile Picture
+                Cancel change profile picture
             </a>
         `);
         document.getElementById('ubah-pict').value = "ya";

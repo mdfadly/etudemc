@@ -376,16 +376,17 @@
                     if ('<?= $f['status_approved'] ?>' === '1') {
                         alert("Can't add, fee report has been approved!");
                     } else {
-                        // alert("masih bisa")
                         updateData();
                         document.getElementById("id_schedule_online_update").value = "";
                         $('#calendarModalUpdate').modal('hide');
                     }
-                } else {
-                    updateData();
-                    document.getElementById("id_schedule_online_update").value = "";
-                    $('#calendarModalUpdate').modal('hide');
-                }
+                } 
+                // else {
+                //     alert("masih bisa 2")
+                //     // updateData();
+                //     document.getElementById("id_schedule_online_update").value = "";
+                //     $('#calendarModalUpdate').modal('hide');
+                // }
             <?php endforeach ?>
         <?php else : ?>
             updateData();
@@ -422,16 +423,16 @@
                     if ('<?= $f['status_approved'] ?>' === '1') {
                         alert("Can't cancel, fee report has been approved!");
                     } else {
-                        // alert("masih bisa")
                         cancelLesson();
                         document.getElementById("id_schedule_online_update").value = "";
                         $('#calendarModalOption').modal('hide');
                     }
-                } else {
-                    cancelLesson();
-                    document.getElementById("id_schedule_online_update").value = "";
-                    $('#calendarModalOption').modal('hide');
-                }
+                } 
+                // else {
+                //     cancelLesson();
+                //     document.getElementById("id_schedule_online_update").value = "";
+                //     $('#calendarModalOption').modal('hide');
+                // }
             <?php endforeach ?>
         <?php else : ?>
             cancelLesson();
@@ -455,20 +456,20 @@
                         if ('<?= $f['status_approved'] ?>' === '1') {
                             alert("Can't cancel, fee report has been approved!");
                         } else {
-                            // alert("masih bisa")
                             cancelAttendance();
                             rescheduleAttendance();
                             document.getElementById("id_schedule_online_update").value = "";
                             $('#calendarModalUpdate').modal('hide');
                             $('#calendarModalCancel').modal('hide');
                         }
-                    } else {
-                        cancelAttendance();
-                        rescheduleAttendance();
-                        document.getElementById("id_schedule_online_update").value = "";
-                        $('#calendarModalUpdate').modal('hide');
-                        $('#calendarModalCancel').modal('hide');
-                    }
+                    } 
+                    // else {
+                    //     cancelAttendance();
+                    //     rescheduleAttendance();
+                    //     document.getElementById("id_schedule_online_update").value = "";
+                    //     $('#calendarModalUpdate').modal('hide');
+                    //     $('#calendarModalCancel').modal('hide');
+                    // }
                 <?php endforeach ?>
             <?php else : ?>
                 cancelAttendance();

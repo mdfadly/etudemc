@@ -34,7 +34,7 @@
         </div>
 
         <hr>
-        <h2>Edit Data Student</h2>
+        <h2 style="font-weight: bold">Edit Data Student</h2>
         <!--<hr>-->
         <div class="row">
             <?php if ($this->session->flashdata('warning') != null) : ?>

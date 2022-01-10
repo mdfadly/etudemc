@@ -463,13 +463,14 @@
                         document.getElementById("id_schedule_online_active").value = "";
                         $('#calendarModalActive').modal('hide');
                     }
-                } else {
-                    activeData();
-                    document.getElementById("jenis_active").value = "";
-                    document.getElementById("date_active").value = "";
-                    document.getElementById("id_schedule_online_active").value = "";
-                    $('#calendarModalActive').modal('hide');
-                }
+                } 
+                // else {
+                //     activeData();
+                //     document.getElementById("jenis_active").value = "";
+                //     document.getElementById("date_active").value = "";
+                //     document.getElementById("id_schedule_online_active").value = "";
+                //     $('#calendarModalActive').modal('hide');
+                // }
             <?php endforeach ?>
         <?php else : ?>
             activeData();
@@ -518,14 +519,15 @@
                             document.getElementById("id_schedule_online_active").value = "";
                             $('#calendarModalCancel').modal('hide');
                         }
-                    } else {
-                        cancelAttendance();
-                        rescheduleAttendance();
-                        document.getElementById("jenis_active").value = "";
-                        document.getElementById("date_active").value = "";
-                        document.getElementById("id_schedule_online_active").value = "";
-                        $('#calendarModalCancel').modal('hide');
-                    }
+                    } 
+                    // else {
+                    //     cancelAttendance();
+                    //     rescheduleAttendance();
+                    //     document.getElementById("jenis_active").value = "";
+                    //     document.getElementById("date_active").value = "";
+                    //     document.getElementById("id_schedule_online_active").value = "";
+                    //     $('#calendarModalCancel').modal('hide');
+                    // }
                 <?php endforeach ?>
             <?php else : ?>
                 cancelAttendance();
@@ -570,11 +572,11 @@
         if (jenis == 2) {
             id_teacher = "<?= $pack_online[0]['id_teacher_theory'] ?>";
         }
-        console.log(jenis);
-        console.log(id_list_pack);
-        console.log(id_student);
-        console.log(status);
-        console.log(tgl);
+        // console.log(jenis);
+        // console.log(id_list_pack);
+        // console.log(id_student);
+        // console.log(status);
+        // console.log(tgl);
         $.ajax({
             url: "<?= base_url('portal/C_Admin/insert_schedule_package') ?>",
             type: "POST",

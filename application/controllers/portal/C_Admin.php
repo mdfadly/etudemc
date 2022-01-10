@@ -2026,7 +2026,7 @@ class C_Admin extends CI_Controller
         foreach ($list as $item) {
             $no++;
             $row = array();
-            // $row[] = $no;
+            $row[] = $no;
             $row[] = $item->name;
 
             $row[] = $item->description;
@@ -2746,7 +2746,7 @@ class C_Admin extends CI_Controller
                     $color = '#fddb3a';
                 }
                 if ($row['status'] == 3) {
-                    $title = 'No Lesson';
+                    $title = 'Cancel';
                     $color = '#ff4b5c';
                 }
                 if ($row['status'] == 4) {
@@ -2772,7 +2772,7 @@ class C_Admin extends CI_Controller
                     $color = '#5eaaa8';
                 }
                 if ($row['status'] == 3) {
-                    $title = 'No Lesson';
+                    $title = 'Cancel';
                     $color = '#ff4b5c';
                 }
                 if ($row['status'] == 4) {

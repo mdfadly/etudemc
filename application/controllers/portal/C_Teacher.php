@@ -535,7 +535,7 @@ class C_Teacher extends CI_Controller
             $this->upload->initialize($config);
             if (!$this->upload->do_upload('pict')) {
                 $this->session->set_flashdata('warning', $this->upload->display_errors());
-                redirect('portal/user-register');
+                redirect('portal/profile/edit/' . $username);
                 // redirect('dashboard-admin/homepage', $error);
             } else {
                 $upload_data_team = $this->upload->data(); // added this..
