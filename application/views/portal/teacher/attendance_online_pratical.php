@@ -370,25 +370,34 @@
         var datetemp = tgl.substr(0, 7).replace("-", "");
         var idtemp = id_teacher.substr(3);
         var no_sirkulasi = "FER/" + datetemp + "/" + idtemp + "/001";
+
+        var arrayTempNoSirkulasi = [];
+        <?php foreach ($feereport as $f) : ?>
+            arrayTempNoSirkulasi.push('<?= $f['no_sirkulasi_feereport'] ?>')
+        <?php endforeach ?>
+
         <?php if (count($feereport) > 0) : ?>
-            <?php foreach ($feereport as $f) : ?>
-                if (no_sirkulasi === '<?= $f['no_sirkulasi_feereport'] ?>') {
-                    if ('<?= $f['status_approved'] ?>' === '1') {
-                        alert("Can't add, fee report has been approved!");
-                    } else {
-                        updateData();
-                        document.getElementById("id_schedule_online_update").value = "";
-                        $('#calendarModalUpdate').modal('hide');
+            if (arrayTempNoSirkulasi.includes(no_sirkulasi) === true) {
+                <?php foreach ($feereport as $f) : ?>
+                    if (no_sirkulasi === '<?= $f['no_sirkulasi_feereport'] ?>') {
+                        if ('<?= $f['status_approved'] ?>' === '1') {
+                            alert("Can't add, fee report has been approved!");
+                        } else {
+                            // alert("Ada tanggalan");
+                            updateData();
+                            document.getElementById("id_schedule_online_update").value = "";
+                            $('#calendarModalUpdate').modal('hide');
+                        }
                     }
-                } 
-                // else {
-                //     alert("masih bisa 2")
-                //     // updateData();
-                //     document.getElementById("id_schedule_online_update").value = "";
-                //     $('#calendarModalUpdate').modal('hide');
-                // }
-            <?php endforeach ?>
+                <?php endforeach ?>
+            } else {
+                // alert("baru");
+                updateData();
+                document.getElementById("id_schedule_online_update").value = "";
+                $('#calendarModalUpdate').modal('hide');
+            }
         <?php else : ?>
+            // alert("Jika baru");
             updateData();
             document.getElementById("id_schedule_online_update").value = "";
             $('#calendarModalUpdate').modal('hide');
@@ -427,7 +436,7 @@
                         document.getElementById("id_schedule_online_update").value = "";
                         $('#calendarModalOption').modal('hide');
                     }
-                } 
+                }
                 // else {
                 //     cancelLesson();
                 //     document.getElementById("id_schedule_online_update").value = "";
@@ -450,27 +459,33 @@
             var idtemp = id_teacher.substr(3);
             var no_sirkulasi = "FER/" + datetemp + "/" + idtemp + "/001";
 
+            var arrayTempNoSirkulasi = [];
+            <?php foreach ($feereport as $f) : ?>
+                arrayTempNoSirkulasi.push('<?= $f['no_sirkulasi_feereport'] ?>')
+            <?php endforeach ?>
+
             <?php if (count($feereport) > 0) : ?>
-                <?php foreach ($feereport as $f) : ?>
-                    if (no_sirkulasi === '<?= $f['no_sirkulasi_feereport'] ?>') {
-                        if ('<?= $f['status_approved'] ?>' === '1') {
-                            alert("Can't cancel, fee report has been approved!");
-                        } else {
-                            cancelAttendance();
-                            rescheduleAttendance();
-                            document.getElementById("id_schedule_online_update").value = "";
-                            $('#calendarModalUpdate').modal('hide');
-                            $('#calendarModalCancel').modal('hide');
+                if (arrayTempNoSirkulasi.includes(no_sirkulasi) === true) {
+                    <?php foreach ($feereport as $f) : ?>
+                        if (no_sirkulasi === '<?= $f['no_sirkulasi_feereport'] ?>') {
+                            if ('<?= $f['status_approved'] ?>' === '1') {
+                                alert("Can't cancel, fee report has been approved!");
+                            } else {
+                                cancelAttendance();
+                                rescheduleAttendance();
+                                document.getElementById("id_schedule_online_update").value = "";
+                                $('#calendarModalUpdate').modal('hide');
+                                $('#calendarModalCancel').modal('hide');
+                            }
                         }
-                    } 
-                    // else {
-                    //     cancelAttendance();
-                    //     rescheduleAttendance();
-                    //     document.getElementById("id_schedule_online_update").value = "";
-                    //     $('#calendarModalUpdate').modal('hide');
-                    //     $('#calendarModalCancel').modal('hide');
-                    // }
-                <?php endforeach ?>
+                    <?php endforeach ?>
+                } else {
+                    cancelAttendance();
+                    rescheduleAttendance();
+                    document.getElementById("id_schedule_online_update").value = "";
+                    $('#calendarModalUpdate').modal('hide');
+                    $('#calendarModalCancel').modal('hide');
+                }
             <?php else : ?>
                 cancelAttendance();
                 rescheduleAttendance();
