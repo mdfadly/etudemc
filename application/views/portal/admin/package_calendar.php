@@ -453,7 +453,7 @@
         var no_sirkulasi = "FER/" + datetemp + "/" + idtemp + "/001";
 
         var arrayTempNoSirkulasi = [];
-        <?php foreach ($feereport as $f) : ?>
+        <?php foreach ($feereport_temp as $f) : ?>
             arrayTempNoSirkulasi.push('<?= $f['no_sirkulasi_feereport'] ?>')
         <?php endforeach ?>
 
@@ -514,7 +514,7 @@
             var no_sirkulasi = "FER/" + datetemp + "/" + idtemp + "/001";
 
             var arrayTempNoSirkulasi = [];
-            <?php foreach ($feereport as $f) : ?>
+            <?php foreach ($feereport_temp as $f) : ?>
                 arrayTempNoSirkulasi.push('<?= $f['no_sirkulasi_feereport'] ?>')
             <?php endforeach ?>
 
