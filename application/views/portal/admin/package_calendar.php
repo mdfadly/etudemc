@@ -187,6 +187,22 @@
                         </div>
                     </div>
                 </div>
+                <div id="calendarModalOption" class="modal fade" id="staticBackdrop" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span> <span class="sr-only">close</span></button>
+                            </div>
+                            <div id="modalBody" class="modal-body text-center">
+                                <input type="hidden" class="form-control" name="id_schedule_online" id="id_schedule_online_noles" aria-describedby="date_form">
+                                <input type="hidden" class="form-control" name="date" id="date_noles" aria-describedby="date_form">
+                                <!-- <h5 class="col-lg-12">Apakah murid akan pilih hari atau tidak?</h5> -->
+                                <button id="btn_reactivate" class="btn btn-info  col-lg-5 col-5">Reactivate</button>
+                                <button id="btn_nolesson" class="btn btn-danger col-lg-5 col-5">No Lesson</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <div id="calendarModalActive" class="modal fade" id="staticBackdrop" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
                     <div class="modal-dialog modal-dialog-centered">
                         <div class="modal-content">
@@ -406,7 +422,11 @@
                 document.getElementById("jenis_active").value = event.jenis;
                 document.getElementById("date_active").value = date_event.slice(0, 10);
                 document.getElementById("id_schedule_online_active").value = event.id;
-                $('#calendarModalActive').modal();
+                if (event.status == 5) {
+                    $('#calendarModalOption').modal();
+                } else {
+                    $('#calendarModalActive').modal();
+                }
             }
         },
     });
@@ -433,6 +453,59 @@
         document.getElementById("date_update").value = "";
         document.getElementById("id_schedule_online_update").value = "";
         $('#calendarModalUpdate').modal('hide');
+    });
+
+    $('#btn_reactivate').click(function() {
+        $('#calendarModalOption').modal('hide');
+        $('#calendarModalActive').modal();
+    });
+
+    $('#btn_nolesson').click(function() {
+        <?php $feereport_temp = [] ?>
+
+        var jenis = $("#jenis_active").val();
+        var id_teacher = "<?= $pack_online[0]['id_teacher_practical'] ?>";
+        <?php $feereport_temp = $feereport_pratical ?>
+        if (jenis == 2) {
+            id_teacher = "<?= $pack_online[0]['id_teacher_theory'] ?>";
+            <?php $feereport_temp = $feereport_theory ?>
+        }
+
+        var id_list_pack = "<?= $pack_online[0]['id_list_pack'] ?>";
+        var tgl = $("#date_update").val();
+
+        var datetemp = tgl.substr(0, 7).replace("-", "");
+        var idtemp = id_teacher.substr(3);
+        var no_sirkulasi = "FER/" + datetemp + "/" + idtemp + "/001";
+
+        var arrayTempNoSirkulasi = [];
+        <?php foreach ($feereport_temp as $f) : ?>
+            arrayTempNoSirkulasi.push('<?= $f['no_sirkulasi_feereport'] ?>')
+        <?php endforeach ?>
+
+        <?php if (count($feereport_temp) > 0) : ?>
+            if (arrayTempNoSirkulasi.includes(no_sirkulasi) === true) {
+                <?php foreach ($feereport_temp as $f) : ?>
+                    if (no_sirkulasi === '<?= $f['no_sirkulasi_feereport'] ?>') {
+                        if ('<?= $f['status_approved'] ?>' === '1') {
+                            alert("Can't cancel, fee report has been approved!");
+                        } else {
+                            cancelLesson();
+                            document.getElementById("id_schedule_online_update").value = "";
+                            $('#calendarModalOption').modal('hide');
+                        }
+                    }
+                <?php endforeach ?>
+            } else {
+                cancelLesson();
+                document.getElementById("id_schedule_online_update").value = "";
+                $('#calendarModalOption').modal('hide');
+            }
+        <?php else : ?>
+            cancelLesson();
+            document.getElementById("id_schedule_online_update").value = "";
+            $('#calendarModalOption').modal('hide');
+        <?php endif ?>
     });
 
     $('#btn_active').click(function() {
@@ -660,6 +733,30 @@
                 $("#counter_pack").html(data);
                 $('.fc-day[data-date=' + tgl + ']').css('background-color', '#FFFFFF');
                 location.reload();
+            }
+        });
+    }
+
+    function cancelLesson() {
+        var id_schedule_online = $("#id_schedule_online_active").val();
+        var id_list_pack = "<?= $pack_online[0]['id_list_pack'] ?>";
+        var jenis = $("#jenis_active").val();
+        
+        $.ajax({
+            url: "<?= base_url('portal/C_Teacher/update_schedule_package') ?>",
+            type: "POST",
+            data: {
+                'id_schedule_online': id_schedule_online,
+                'id_list_pack': id_list_pack,
+                'status': '7',
+                'jenis': jenis,
+            },
+            success: function(data) {
+                calendar.fullCalendar('refetchResources');
+                $("#counter_pack").html(data);
+                cekPackage();
+                location.reload();
+                alert("Cancel No Lesson Successfully");
             }
         });
     }

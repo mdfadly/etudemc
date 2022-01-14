@@ -50,57 +50,64 @@
                 var tgl = date.format();
                 var fee = "<?= $offline_lesson[0]['rate'] ?>";
                 var paket = "<?= $offline_lesson[0]['id_paket'] ?>";
-                console.log(tgl)
+
                 var datetemp = tgl.substr(0, 7).replace("-", "");
                 var idtemp = id_teacher.substr(3);
                 var no_sirkulasi = "FER/" + datetemp + "/" + idtemp + "/001";
-                console.log(no_sirkulasi)
+
+                var arrayTempNoSirkulasi = [];
+                <?php foreach ($feereport as $f) : ?>
+                    arrayTempNoSirkulasi.push('<?= $f['no_sirkulasi_feereport'] ?>')
+                <?php endforeach ?>
+
                 <?php if (count($feereport) > 0) : ?>
-                    <?php foreach ($feereport as $f) : ?>
-                        if (no_sirkulasi === '<?= $f['no_sirkulasi_feereport'] ?>') {
-                            if ('<?= $f['status_approved'] ?>' === '1') {
-                                alert("Can't add, fee report has been approved!");
-                            } else {
-                                $.ajax({
-                                    url: "<?= base_url('portal/C_Teacher/insert_schedule') ?>",
-                                    type: "POST",
-                                    data: {
-                                        id_teacher: id_teacher,
-                                        id_student: id_student,
-                                        nama_course: nama_course,
-                                        id_course: id_offline_lesson,
-                                        instrument: instrument,
-                                        tgl: tgl,
-                                        fee: fee,
-                                        paket: paket,
-                                    },
-                                    success: function(data) {
-                                        calendar.fullCalendar('refetchEvents');
-                                        alert("Added Successfully");
-                                    }
-                                })
-                            }
-                        } else {
-                            $.ajax({
-                                url: "<?= base_url('portal/C_Teacher/insert_schedule') ?>",
-                                type: "POST",
-                                data: {
-                                    id_teacher: id_teacher,
-                                    id_student: id_student,
-                                    nama_course: nama_course,
-                                    id_course: id_offline_lesson,
-                                    instrument: instrument,
-                                    tgl: tgl,
-                                    fee: fee,
-                                    paket: paket,
-                                },
-                                success: function(data) {
-                                    calendar.fullCalendar('refetchEvents');
-                                    alert("Added Successfully");
+                    if (arrayTempNoSirkulasi.includes(no_sirkulasi) === true) {
+                        <?php foreach ($feereport as $f) : ?>
+                            if (no_sirkulasi === '<?= $f['no_sirkulasi_feereport'] ?>') {
+                                if ('<?= $f['status_approved'] ?>' === '1') {
+                                    alert("Can't add, fee report has been approved!");
+                                } else {
+                                    $.ajax({
+                                        url: "<?= base_url('portal/C_Teacher/insert_schedule') ?>",
+                                        type: "POST",
+                                        data: {
+                                            id_teacher: id_teacher,
+                                            id_student: id_student,
+                                            nama_course: nama_course,
+                                            id_course: id_offline_lesson,
+                                            instrument: instrument,
+                                            tgl: tgl,
+                                            fee: fee,
+                                            paket: paket,
+                                        },
+                                        success: function(data) {
+                                            calendar.fullCalendar('refetchEvents');
+                                            alert("Added Successfully");
+                                        }
+                                    })
                                 }
-                            })
-                        }
-                    <?php endforeach ?>
+                            }
+                        <?php endforeach ?>
+                    } else {
+                        $.ajax({
+                            url: "<?= base_url('portal/C_Teacher/insert_schedule') ?>",
+                            type: "POST",
+                            data: {
+                                id_teacher: id_teacher,
+                                id_student: id_student,
+                                nama_course: nama_course,
+                                id_course: id_offline_lesson,
+                                instrument: instrument,
+                                tgl: tgl,
+                                fee: fee,
+                                paket: paket,
+                            },
+                            success: function(data) {
+                                calendar.fullCalendar('refetchEvents');
+                                alert("Added Successfully");
+                            }
+                        })
+                    }
                 <?php else : ?>
                     $.ajax({
                         url: "<?= base_url('portal/C_Teacher/insert_schedule') ?>",
@@ -131,36 +138,59 @@
                 var tgl = event.date;
                 var fee = event.fee;
                 var id_course = event.id_course;
-                console.log(tgl)
                 var datetemp = tgl.substr(0, 7).replace("-", "");
                 var idtemp = id_teacher.substr(3);
                 var no_sirkulasi = "FER/" + datetemp + "/" + idtemp + "/001";
-                console.log(no_sirkulasi)
+
+                var arrayTempNoSirkulasi = [];
+                <?php foreach ($feereport as $f) : ?>
+                    arrayTempNoSirkulasi.push('<?= $f['no_sirkulasi_feereport'] ?>')
+                <?php endforeach ?>
+
                 <?php if (count($feereport) > 0) : ?>
-                    <?php foreach ($feereport as $f) : ?>
-                        if (no_sirkulasi === '<?= $f['no_sirkulasi_feereport'] ?>') {
-                            if ('<?= $f['status_approved'] ?>' === '1') {
-                                alert("Can't delete, fee report has been approved!");
-                            } else {
-                                $.ajax({
-                                    url: "<?= base_url('portal/C_Teacher/delete_schedule') ?>",
-                                    type: "POST",
-                                    data: {
-                                        id_teacher: id_teacher,
-                                        id_student: id_student,
-                                        id_schedule: id,
-                                        tgl: tgl,
-                                        fee: fee,
-                                        id_course: id_course,
-                                    },
-                                    success: function(data) {
-                                        calendar.fullCalendar('refetchEvents');
-                                        alert("Deleted Successfully");
-                                    }
-                                })
+                    if (arrayTempNoSirkulasi.includes(no_sirkulasi) === true) {
+                        <?php foreach ($feereport as $f) : ?>
+                            if (no_sirkulasi === '<?= $f['no_sirkulasi_feereport'] ?>') {
+                                if ('<?= $f['status_approved'] ?>' === '1') {
+                                    alert("Can't delete, fee report has been approved!");
+                                } else {
+                                    $.ajax({
+                                        url: "<?= base_url('portal/C_Teacher/delete_schedule') ?>",
+                                        type: "POST",
+                                        data: {
+                                            id_teacher: id_teacher,
+                                            id_student: id_student,
+                                            id_schedule: id,
+                                            tgl: tgl,
+                                            fee: fee,
+                                            id_course: id_course,
+                                        },
+                                        success: function(data) {
+                                            calendar.fullCalendar('refetchEvents');
+                                            alert("Deleted Successfully");
+                                        }
+                                    })
+                                }
                             }
-                        }
-                    <?php endforeach ?>
+                        <?php endforeach ?>
+                    } else {
+                        $.ajax({
+                            url: "<?= base_url('portal/C_Teacher/delete_schedule') ?>",
+                            type: "POST",
+                            data: {
+                                id_teacher: id_teacher,
+                                id_student: id_student,
+                                id_schedule: id,
+                                tgl: tgl,
+                                fee: fee,
+                                id_course: id_course,
+                            },
+                            success: function(data) {
+                                calendar.fullCalendar('refetchEvents');
+                                alert("Deleted Successfully");
+                            }
+                        })
+                    }
                 <?php else : ?>
                     $.ajax({
                         url: "<?= base_url('portal/C_Teacher/delete_schedule') ?>",

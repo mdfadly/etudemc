@@ -426,23 +426,29 @@
         var idtemp = id_teacher.substr(3);
         var no_sirkulasi = "FER/" + datetemp + "/" + idtemp + "/001";
 
+        var arrayTempNoSirkulasi = [];
+        <?php foreach ($feereport as $f) : ?>
+            arrayTempNoSirkulasi.push('<?= $f['no_sirkulasi_feereport'] ?>')
+        <?php endforeach ?>
+
         <?php if (count($feereport) > 0) : ?>
-            <?php foreach ($feereport as $f) : ?>
-                if (no_sirkulasi === '<?= $f['no_sirkulasi_feereport'] ?>') {
-                    if ('<?= $f['status_approved'] ?>' === '1') {
-                        alert("Can't cancel, fee report has been approved!");
-                    } else {
-                        cancelLesson();
-                        document.getElementById("id_schedule_online_update").value = "";
-                        $('#calendarModalOption').modal('hide');
+            if (arrayTempNoSirkulasi.includes(no_sirkulasi) === true) {
+                <?php foreach ($feereport as $f) : ?>
+                    if (no_sirkulasi === '<?= $f['no_sirkulasi_feereport'] ?>') {
+                        if ('<?= $f['status_approved'] ?>' === '1') {
+                            alert("Can't cancel, fee report has been approved!");
+                        } else {
+                            cancelLesson();
+                            document.getElementById("id_schedule_online_update").value = "";
+                            $('#calendarModalOption').modal('hide');
+                        }
                     }
-                }
-                // else {
-                //     cancelLesson();
-                //     document.getElementById("id_schedule_online_update").value = "";
-                //     $('#calendarModalOption').modal('hide');
-                // }
-            <?php endforeach ?>
+                <?php endforeach ?>
+            } else {
+                cancelLesson();
+                document.getElementById("id_schedule_online_update").value = "";
+                $('#calendarModalOption').modal('hide');
+            }
         <?php else : ?>
             cancelLesson();
             document.getElementById("id_schedule_online_update").value = "";
