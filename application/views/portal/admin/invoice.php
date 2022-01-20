@@ -590,6 +590,12 @@
                                                 PT Cahaya Edukasi Kencana
                                             </td>
                                         </tr>
+                                        <tr>
+                                            <td style="width: 40%;">Description:</td>
+                                            <td style="width: 60%;">
+                                                Student name_month of invoice
+                                            </td>
+                                        </tr>
                                     </tbody>
                                 </table>
                             </div>

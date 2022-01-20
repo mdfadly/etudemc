@@ -2685,6 +2685,8 @@ class C_Admin extends CI_Controller
         $schedule_pack = $this->M_Admin->getData_schedule_package(null, $id_package, 0);
         $count_theory = [];
         $count_pratical = [];
+        $count_theory_pick = [];
+        $count_pratical_pick = [];
 
         $feereport_pratical = [];
         $feereport_theory = [];
@@ -2709,24 +2711,19 @@ class C_Admin extends CI_Controller
                 }
             }
         }
-
-        // $feereport = $this->M_Teacher->getData_sirkulasi_feereport(null, null, null, $schedule_pack[0]['id_teacher']);
-        // echo "<br>";
-        // echo "<br>";
-        // echo var_dump($pack_online);
-        // echo "<br>";echo "<br>";
-        // echo var_dump($feereport_pratical);
-        // echo "<br>";echo "<br>";
-        // echo var_dump($feereport_theory);
-        // echo "<br>";
-        // echo "<br>";
-        // echo var_dump($feereport);
-        // echo $schedule_pack[0]['id_teacher'];
+        foreach ($schedule_pack as $so) {
+            if ($so['jenis'] == 1) {
+                $count_pratical_pick[] = $so['id_schedule_pack'];
+            }
+            if ($so['jenis'] == 2) {
+                $count_theory_pick[] = $so['id_schedule_pack'];
+            }
+        }
 
         $title = "Data Online Lesson | Portal Etude";
         $description = "Welcome to Portal Etude";
         $this->load->view('portal/reuse/header', array('title' => $title, 'description' => $description));
-        $this->load->view('portal/admin/package_calendar', array('pack_online' => $pack_online, 'schedule_pack' => $schedule_pack, 'count_theory' => $count_theory, 'count_pratical' => $count_pratical, 'feereport_pratical' => $feereport_pratical, 'feereport_theory' => $feereport_theory));
+        $this->load->view('portal/admin/package_calendar', array('pack_online' => $pack_online, 'schedule_pack' => $schedule_pack, 'count_theory' => $count_theory, 'count_pratical' => $count_pratical, 'count_theory_pick' => $count_theory_pick, 'count_pratical_pick' => $count_pratical_pick, 'feereport_pratical' => $feereport_pratical, 'feereport_theory' => $feereport_theory));
         $this->load->view('portal/reuse/footer');
     }
 

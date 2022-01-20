@@ -511,7 +511,7 @@
 
                 <div class="row p-3" style="background-color:#a8dadc">
                     <div class="col-lg-9 col-9 text-center">
-                        <h5 class="font-weight:bold">Grand Total</h5>
+                        <h5 style="font-weight:bold">Grand Total</h5>
                     </div>
                     <div class="col-lg-3 col-3 text-lg-right text-center">
                         <div id="tot_other_invoice" style="display:none">
@@ -529,7 +529,7 @@
                     </div>
                 </div>
                 <div class="notices mt-5">
-                    <div>
+                    <div style="font-weight:bold">
                         Please recheck the dates of the lessons to avoid anymistakes from our teacher's report.
                     </div>
                     <div>
@@ -556,6 +556,12 @@
                                         <td style="width: 40%;">Beneficiary:</td>
                                         <td style="width: 60%;">
                                             PT Cahaya Edukasi Kencana
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="width: 40%;">Description:</td>
+                                        <td style="width: 60%;">
+                                            Student name_month of invoice
                                         </td>
                                     </tr>
                                 </tbody>

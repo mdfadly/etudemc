@@ -89,8 +89,12 @@
                         <?= date_format($date_created, "j F Y"); ?> - <?= date_format($date_end, "j F Y"); ?>
                     </div>
                     <p class="pt-2" id="counter_pack">
-                        Total Practical Meeting = <span id="total_practical_meet" class="badge badge-primary"> <?= intval($pack_online[0]['total_pack_practical']) - intval(count($count_pratical)) ?> lesson</span> <br>
-                        Total Theory Meeting = <span id="total_theory_meet" class="badge badge-primary"> <?= intval($pack_online[0]['total_pack_theory']) - intval(count($count_theory)) ?> lesson<span>
+                        Total Practical Meeting = <span class="badge badge-primary"> <?= intval($pack_online[0]['total_pack_practical']) - intval(count($count_pratical)) ?> lesson</span> <br>
+                        Total Theory Meeting = <span class="badge badge-primary"> <?= intval($pack_online[0]['total_pack_theory']) - intval(count($count_theory)) ?> lesson<span>
+                    </p>
+                    <p>
+                        <span id="total_practical_meet" class="badge badge-primary" style="display:none"> <?= intval($pack_online[0]['total_pack_practical']) - intval(count($count_pratical_pick)) ?> lesson</span>
+                        <span id="total_theory_meet" class="badge badge-primary" style="display:none"> <?= intval($pack_online[0]['total_pack_theory']) - intval(count($count_theory_pick)) ?> lesson<span>
                     </p>
                 </div>
             </div>
@@ -122,10 +126,10 @@
                                 <div class="form-group">
                                     <label for="jenis">Type of Class</label>
                                     <select class="form-control" id="jenis_select" name="jenis_select" onchange="myFunction(event)" required>
-                                        <?php if (count($count_pratical) != $pack_online[0]['total_pack_practical']) : ?>
+                                        <?php if (count($count_pratical_pick) != $pack_online[0]['total_pack_practical']) : ?>
                                             <option value="1">Practical</option>
                                         <?php endif; ?>
-                                        <?php if (count($count_theory) != $pack_online[0]['total_pack_theory']) : ?>
+                                        <?php if (count($count_theory_pick) != $pack_online[0]['total_pack_theory']) : ?>
                                             <option value="2">Theory</option>
                                         <?php endif; ?>
                                     </select>
@@ -367,9 +371,10 @@
             var today = new Date();
             let prac_meet = document.getElementById("total_practical_meet").innerHTML;
             let theory_meet = document.getElementById("total_theory_meet").innerHTML;
-            console.log(prac_meet)
-            console.log(prac_meet.replace(/\D/g, ""))
-            console.log(theory_meet.replace(/\D/g, ""))
+
+            prac_meet.replace(/\D/g, "") > 0 ? console.log(prac_meet.replace(/\D/g, "")) : null;
+            theory_meet.replace(/\D/g, "") > 0 ? console.log(theory_meet.replace(/\D/g, "")) : null;
+
             if (prac_meet.replace(/\D/g, "") > 0 || theory_meet.replace(/\D/g, "") > 0) {
                 $('#modalTitle').html(date.format("MMM, DD Y"));
                 document.getElementById("date").value = date.format();
@@ -741,7 +746,7 @@
         var id_schedule_online = $("#id_schedule_online_active").val();
         var id_list_pack = "<?= $pack_online[0]['id_list_pack'] ?>";
         var jenis = $("#jenis_active").val();
-        
+
         $.ajax({
             url: "<?= base_url('portal/C_Teacher/update_schedule_package') ?>",
             type: "POST",
