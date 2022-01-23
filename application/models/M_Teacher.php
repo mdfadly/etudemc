@@ -808,9 +808,9 @@ class M_Teacher extends CI_Model
     public function getData_pack_online($id_list_pack = null, $jenis = null)
     {
         if ($jenis == 1 || $jenis == 2) {
-            $this->db->select('op.*, s.name_student,  t.name_teacher, s.teacher_percentage, p.name as name_paket, p.price_idr as price_idr_paket, p.price_euro, p.price_dollar');
+            $this->db->select('op.*, s.name_student,  t.name_teacher, s.teacher_percentage, p.name as name_paket, p.price_idr as price_idr_paket, p.price_euro, p.price_dollar, s.is_new');
         } else {
-            $this->db->select('op.*, s.name_student,  t.name_teacher, t2.name_teacher as name_teacher2, s.teacher_percentage, p.name as name_paket, p.price_idr as price_idr_paket, p.price_euro, p.price_dollar');
+            $this->db->select('op.*, s.name_student,  t.name_teacher, t2.name_teacher as name_teacher2, s.teacher_percentage, p.name as name_paket, p.price_idr as price_idr_paket, p.price_euro, p.price_dollar, s.is_new');
         }
         $this->db->from('list_package as op');
         $this->db->join('paket as p', 'op.paket = p.id', 'left');

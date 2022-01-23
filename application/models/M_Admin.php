@@ -1275,7 +1275,7 @@ class M_Admin extends CI_Model
 
     public function getData_list_pack($id_list_pack = null, $id_parent = null, $periode = null, $periode_end = null)
     {
-        $this->db->select('op.*, s.name_student, s.id_parent, s.parent_student, t.name_teacher, t2.name_teacher as name_teacher2, p.price_idr, p.price_dollar, p.price_euro, p.name, s.teacher_percentage');
+        $this->db->select('op.*, s.name_student, s.id_parent, s.parent_student, t.name_teacher, t2.name_teacher as name_teacher2, p.price_idr, p.price_dollar, p.price_euro, p.name, s.teacher_percentage, s.is_new');
         $this->db->from('list_package as op');
         $this->db->join('paket as p', 'op.paket = p.id', 'left');
         $this->db->join('student as s', 'op.id_student = s.id_student', 'left');
@@ -3544,11 +3544,11 @@ class M_Admin extends CI_Model
     public function getData_sirkulasi_lesson_detail($id_sirkulasi_lesson_detail = null, $no_sirkulasi_lesson = null, $id_teacher = null, $id_student = null, $tipe = null, $periode = null, $rate = null, $id_list_pack = null, $id_offline_lesson = null)
     {
         if ($id_list_pack != null) {
-            $this->db->select('sl.*, t.name_teacher, s.name_student, p.name as name_paket,  s.teacher_percentage, lp.rate_dollar');
+            $this->db->select('sl.*, t.name_teacher, s.name_student, p.name as name_paket,  s.teacher_percentage, s.is_new, lp.rate_dollar');
             $this->db->join('list_package as lp', 'sl.id_list_pack = lp.id_list_pack', 'left');
             $this->db->where('sl.id_list_pack', $id_list_pack);
         }else{
-            $this->db->select('sl.*, t.name_teacher, s.name_student, p.name as name_paket,  s.teacher_percentage');
+            $this->db->select('sl.*, t.name_teacher, s.name_student, p.name as name_paket,  s.teacher_percentage, s.is_new');
         }
 
 

@@ -589,8 +589,8 @@
         if (rate_dollar === '2') {
             price = "<?= $pack_online[0]['price_dollar'] ?>";
         }
-        // console.log(price)
-        // console.log(<?= $jenis ?>)
+        var is_new = "<?= $pack_online[0]['is_new'] ?>";
+        
         $.ajax({
             url: "<?= base_url('portal/C_Teacher/update_schedule_package') ?>",
             type: "POST",
@@ -605,6 +605,7 @@
                 'price': price,
                 'paket': paket,
                 'teacher_percentage': teacher_percentage,
+                'is_new': is_new,
             },
             success: function(data) {
                 calendar.fullCalendar('refetchEvents');
@@ -683,9 +684,8 @@
         if (rate_dollar === '2') {
             price = "<?= $pack_online[0]['price_dollar'] ?>";
         }
+        var is_new = "<?= $pack_online[0]['is_new'] ?>";
 
-        // console.log(id_schedule_online);
-        // console.log(date_update_cancel);
         $.ajax({
             url: "<?= base_url('portal/C_Teacher/reschedule_package') ?>",
             type: "POST",
@@ -699,6 +699,7 @@
                 'paket': paket,
                 'id_list_pack': id_list_pack,
                 'teacher_percentage': teacher_percentage,
+                'is_new': is_new,
             },
             success: function(data) {
                 calendar.fullCalendar('refetchResources');

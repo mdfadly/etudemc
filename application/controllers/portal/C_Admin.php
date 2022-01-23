@@ -267,7 +267,7 @@ class C_Admin extends CI_Controller
                 foreach ($data_schedule as $ds) {
                     if($ds['jenis'] == '1'){
                         $count_praktek += 1;
-                        if ($ds['status'] == '1' || ($ds['status'] == '3' && $ds['date_update_cancel'] == null)) {
+                        if ($ds['status'] == '1' || ($ds['status'] == '3' && $ds['date_update_cancel'] == null) || $ds['status'] == '7' || $ds['status'] == '5'){
                             $count_ongoing += 1;
                         } else if ($ds['status'] == '2' || ($ds['status'] == '3' && $ds['date_update_cancel'] != null)) {
                             $count_done += 1;
@@ -493,11 +493,11 @@ class C_Admin extends CI_Controller
                 $count_ongoing = 0;
                 $data_schedule = $this->M_Teacher->getData_schedule_package(null, $item->id_list_pack);
                 foreach ($data_schedule as $ds) {
-                    if ($ds['status'] == '1' || ($ds['status'] == '3' && $ds['date_update_cancel'] == null)) {
+                    if ($ds['status'] == '1' || ($ds['status'] == '3' && $ds['date_update_cancel'] == null) || $ds['status'] == '7' || $ds['status'] == '5') {
                         $count_ongoing += 1;
                     } else if ($ds['status'] == '2' || ($ds['status'] == '3' && $ds['date_update_cancel'] != null)) {
                         $count_done += 1;
-                    } else if ($ds['status'] == '3' && $ds['date_update_cancel'] == null) {
+                    } else if (($ds['status'] == '3' && $ds['date_update_cancel'] == null)) {
                         $count_cancel += 1;
                     }
                 }
@@ -717,7 +717,7 @@ class C_Admin extends CI_Controller
                 $count_ongoing = 0;
                 $data_schedule = $this->M_Teacher->getData_schedule_package(null, $item->id_list_pack);
                 foreach ($data_schedule as $ds) {
-                    if ($ds['status'] == '1' || ($ds['status'] == '3' && $ds['date_update_cancel'] == null)) {
+                    if ($ds['status'] == '1' || ($ds['status'] == '3' && $ds['date_update_cancel'] == null) || $ds['status'] == '7' || $ds['status'] == '5') {
                         $count_ongoing += 1;
                     } else if ($ds['status'] == '2' || ($ds['status'] == '3' && $ds['date_update_cancel'] != null)) {
                         $count_done += 1;
@@ -6338,13 +6338,13 @@ class C_Admin extends CI_Controller
                 }
             }else{
                 if ($n['tipe'] == 1) {
-                    $id_student_paket_pratical[] = $n['id_student'] . "&" . $n['name_student']  . "&" . $n['name_paket'] . "&" . $n['price'] . "&" . $n['rate'] . "&1&" . $n['id_list_pack'] . "&" . $n['no_sirkulasi_lesson'];
+                    $id_student_paket_pratical[] = $n['id_student'] . "&" . $n['name_student']  . "&" . $n['name_paket'] . "&" . $n['price'] . "&" . $n['rate'] . "&1&" . $n['id_list_pack'] . "&" . $n['no_sirkulasi_lesson'] . "&" . $n['is_new'];
                 }
                 if ($n['tipe'] == 2) {
-                    $id_student_paket_teory[] = $n['id_student'] . "&" . $n['name_student']  . "&" . $n['name_paket'] . "&" . $n['price'] . "&" . $n['rate'] . "&2&" . $n['id_list_pack'] . "&" . $n['no_sirkulasi_lesson'];
+                    $id_student_paket_teory[] = $n['id_student'] . "&" . $n['name_student']  . "&" . $n['name_paket'] . "&" . $n['price'] . "&" . $n['rate'] . "&2&" . $n['id_list_pack'] . "&" . $n['no_sirkulasi_lesson'] . "&" . $n['is_new'];
                 }
                 if ($n['tipe'] == 3) {
-                    $id_student_offline_lesson[] = $n['id_student'] . "&" . $n['name_student']  . "&" . $n['name_paket'] . "&" . $n['price'] . "&" . $n['rate'] . "&3&" . $n['id_offline_lesson'] . "&" . $n['no_sirkulasi_lesson'];
+                    $id_student_offline_lesson[] = $n['id_student'] . "&" . $n['name_student']  . "&" . $n['name_paket'] . "&" . $n['price'] . "&" . $n['rate'] . "&3&" . $n['id_offline_lesson'] . "&" . $n['no_sirkulasi_lesson'] . "&" . $n['is_new'];
                 }
             }
         }
@@ -6440,16 +6440,6 @@ class C_Admin extends CI_Controller
         sort($id_student_paket_pratical_temp);
         sort($id_student_paket_teory_temp);
         sort($id_student_offline_lesson_temp);
-
-        // echo var_dump($id_student_nadia_paket_pratical_temp);
-        // echo "<br>";
-        // echo "<br>";
-        // echo var_dump($id_student_nadia_paket_teory_temp);
-        // echo "<br>";
-        // echo "<br>";
-        // echo var_dump($id_student_nadia_offline_lesson_temp);
-        // echo "<br>";
-        // echo "<br>";
 
         $date_temp_for_teory = null;
         $index_teory = [];

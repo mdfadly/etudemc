@@ -78,7 +78,6 @@
         <h5>
             <?= $pack_online[0]['name_student'] ?>
         </h5>
-
         <div class="row pt-3">
             <div class="col-lg-12">
                 <?php $date_created = date_create($pack_online[0]['created_at']); ?>
@@ -700,6 +699,8 @@
         }
         var id_student = "<?= $pack_online[0]['id_student'] ?>";
         var id_list_pack = "<?= $pack_online[0]['id_list_pack'] ?>";
+        var is_new = "<?= $pack_online[0]['is_new'] ?>";
+
         $.ajax({
             url: "<?= base_url('portal/C_Admin/update_schedule_package') ?>",
             type: "POST",
@@ -796,6 +797,7 @@
         if (rate_dollar === '2') {
             price = "<?= $pack_online[0]['price_dollar'] ?>";
         }
+        var is_new = "<?= $pack_online[0]['is_new'] ?>";
 
         $.ajax({
             url: "<?= base_url('portal/C_Teacher/update_schedule_package') ?>",
@@ -811,6 +813,7 @@
                 'price': price,
                 'paket': paket,
                 'teacher_percentage': teacher_percentage,
+                'is_new': is_new,
             },
             success: function(data) {
                 calendar.fullCalendar('refetchEvents');
@@ -875,8 +878,8 @@
         }
 
         var date_update_cancel = $("#date_reschedule").val();
+        var is_new = "<?= $pack_online[0]['is_new'] ?>";
 
-        // console.log("reschedule " + jenis)
         $.ajax({
             url: "<?= base_url('portal/C_Teacher/reschedule_package') ?>",
             type: "POST",
@@ -890,6 +893,7 @@
                 'paket': paket,
                 'id_list_pack': id_list_pack,
                 'teacher_percentage': teacher_percentage,
+                'is_new': is_new,
             },
             success: function(data) {
                 calendar.fullCalendar('refetchEvents');

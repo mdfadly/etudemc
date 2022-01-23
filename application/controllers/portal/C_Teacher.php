@@ -80,7 +80,7 @@ class C_Teacher extends CI_Controller
             $count_ongoing = 0;
             $data_schedule = $this->M_Teacher->getData_schedule_package(null, $item->id_list_pack, null, null, $jenis);
             foreach ($data_schedule as $ds) {
-                if ($ds['status'] == '1' || ($ds['status'] == '3' && $ds['date_update_cancel'] == null)) {
+                if ($ds['status'] == '1' || ($ds['status'] == '3' && $ds['date_update_cancel'] == null) || $ds['status'] == '7' || $ds['status'] == '5') {
                     $count_ongoing += 1;
                 } else if ($ds['status'] == '2' || ($ds['status'] == '3' && $ds['date_update_cancel'] != null)) {
                     $count_done += 1;
@@ -633,14 +633,6 @@ class C_Teacher extends CI_Controller
         }
         $feereport = $this->M_Teacher->getData_sirkulasi_feereport(null, null, null, $schedule_online[0]['id_teacher']);
 
-        // var_dump($schedule_online);
-        // echo "<br>";
-        // echo "<br>";
-        // echo $jenis;
-        // echo "<br>";
-        // echo "<br>";
-        // var_dump($feereport);
-        // die();
         $title = "Attendance Offline Lesson | Portal Etude";
         $description = "Welcome to Portal Etude";
         $this->load->view('portal/reuse/header', array('title' => $title, 'description' => $description, 'teacher' => $teacher));
@@ -1793,6 +1785,7 @@ class C_Teacher extends CI_Controller
         $status = $this->input->post('status');
         $id_list_pack = $this->input->post('id_list_pack');
         $jenis = $this->input->post('jenis');
+        $is_new = $this->input->post('is_new');
 
         if ($status == 2) {
             $teacher_percentage = $this->input->post('teacher_percentage');
@@ -1850,7 +1843,11 @@ class C_Teacher extends CI_Controller
                             'total_50' => $total_50 + 1,
                             'total' => $total + 1
                         );
-                        $tipe_rate = 50;
+                        if($is_new == 2){
+                            $tipe_rate = $teacher_percentage;
+                        }else{
+                            $tipe_rate = 50;
+                        }
                     }
                 }
                 if ($tipe == 2) {
@@ -1876,7 +1873,11 @@ class C_Teacher extends CI_Controller
                             'total_50' => $total_50 + 1,
                             'total' => $total + 1
                         );
-                        $tipe_rate = 50;
+                        if ($is_new == 2) {
+                            $tipe_rate = $teacher_percentage;
+                        } else {
+                            $tipe_rate = 50;
+                        }
                     }
                 }
                 $this->M_Teacher->updateDataSirkulasiLesson($data_update_sirkulasi, $no_sirkulasi_lesson);
@@ -2080,6 +2081,7 @@ class C_Teacher extends CI_Controller
         $temp_id_teacher = substr($id_teacher, 3);
         $tipe = $jenis;
         $tipe_rate = '';
+        $is_new = $this->input->post('is_new');
 
         //cek total id_student -> <- id_teacher
         //nomor sirkulasi lesson
@@ -2119,7 +2121,11 @@ class C_Teacher extends CI_Controller
                         'total_50' => $total_50 + 1,
                         'total' => $total + 1
                     );
-                    $tipe_rate = 50;
+                    if ($is_new == 2) {
+                        $tipe_rate = $teacher_percentage;
+                    } else {
+                        $tipe_rate = 50;
+                    }
                 }
             }
             if ($tipe == 2) {
@@ -2145,7 +2151,11 @@ class C_Teacher extends CI_Controller
                         'total_50' => $total_50 + 1,
                         'total' => $total + 1
                     );
-                    $tipe_rate = 50;
+                    if ($is_new == 2) {
+                        $tipe_rate = $teacher_percentage;
+                    } else {
+                        $tipe_rate = 50;
+                    }
                 }
             }
             $this->M_Teacher->updateDataSirkulasiLesson($data_update_sirkulasi, $no_sirkulasi_lesson);
@@ -2164,7 +2174,11 @@ class C_Teacher extends CI_Controller
                 'last_updated_50' => $created_at,
             );
             $this->M_Teacher->addDataSirkulasiLesson($data_sirkulasi);
-            $tipe_rate = 50;
+            if ($is_new == 2) {
+                $tipe_rate = $teacher_percentage;
+            } else {
+                $tipe_rate = 50;
+            }
         }
         $data_sirkulasi_lesson_detail = array(
             'no_sirkulasi_lesson' => $no_sirkulasi_lesson,
