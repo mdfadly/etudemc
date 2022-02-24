@@ -166,6 +166,46 @@
                     </div>
                 </div>
             </div>
+            <div id="calendarModalActive" class="modal fade" id="staticBackdrop" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h4>Reactivate Teacher Attendance</h4>
+                            <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span> <span class="sr-only">close</span></button>
+                        </div>
+                        <div id="modalBody" class="modal-body">
+                            <!-- <form action="#" method="POST"> -->
+                            <!-- <h5 class="col-lg-12">Apakah sudah berjalan lesson pada tanggal ini?</h5> -->
+                            <div class="form-group">
+                                <input type="hidden" class="form-control" name="jenis" id="jenis_active" aria-describedby="jenis_form">
+                                <input type="hidden" class="form-control" name="date" id="date_active" aria-describedby="date_form">
+                                <input type="hidden" class="form-control" name="id_schedule_online" id="id_schedule_online_active" aria-describedby="date_form">
+                            </div>
+                            <div class="row text-center ml-2 mr-2">
+                                <button id="btn_cancel_reschedule" class="btn btn-warning btn-block col-lg-12">Reschedule</button>
+                            </div>
+                            <!-- </form> -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="calendarModalReschedule" class="modal fade" id="staticBackdrop" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span> <span class="sr-only">close</span></button>
+                        </div>
+                        <div id="modalBody" class="modal-body text-center">
+                            <input type="hidden" class="form-control" name="id_schedule_online" id="id_schedule_online_back" aria-describedby="date_form">
+                            <input type="hidden" class="form-control" name="date" id="date_back" aria-describedby="date_form">
+                            <h5 class="col-lg-12">Please input date to change the schedule </h5>
+                            <input type="date" class="form-control" name="date_reschedule" id="date_reschedule_nolesson" value="" aria-describedby="date_form" required>
+                            <br>
+                            <button id="btn_cancel_nolesson" class="btn btn-warning text-white col-lg-5 col-5">Submit</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </main>
@@ -304,6 +344,12 @@
             if (event.status == 5) {
                 alert('Attendance was late, please contact our support team for fix it');
             }
+            if (event.status == 7) {
+                var date_event = event.date;
+                document.getElementById("date_active").value = date_event.slice(0, 10);
+                document.getElementById("id_schedule_online_active").value = event.id;
+                $('#calendarModalActive').modal();
+            }
         },
         dayClick: function(date, jsEvent, view) {
             const cancelCount = document.getElementById("countCancel").value;
@@ -414,6 +460,11 @@
         $('#calendarModalCancel').modal('show');
     });
 
+    $('#btn_cancel_reschedule').click(function() {
+        $('#calendarModalActive').modal('hide');
+        $('#calendarModalReschedule').modal('show');
+    });
+
     $('#btn_back').click(function() {
         $('#calendarModalCancel').modal('hide');
         $('#calendarModalUpdate').modal('show');
@@ -498,6 +549,51 @@
                 document.getElementById("id_schedule_online_update").value = "";
                 $('#calendarModalUpdate').modal('hide');
                 $('#calendarModalCancel').modal('hide');
+            <?php endif ?>
+        } else {
+            alert("please input date valid!")
+        }
+
+    });
+    $('#btn_cancel_nolesson').click(function() {
+        var date_reschedule = $("#date_reschedule_nolesson").val();
+        if (date_reschedule !== "") {
+            var id_teacher = "<?= $this->session->userdata('id') ?>";
+            var tgl = $("#date_active").val();
+            var datetemp = tgl.substr(0, 7).replace("-", "");
+            var idtemp = id_teacher.substr(3);
+            var no_sirkulasi = "FER/" + datetemp + "/" + idtemp + "/001";
+
+            var arrayTempNoSirkulasi = [];
+            <?php foreach ($feereport as $f) : ?>
+                arrayTempNoSirkulasi.push('<?= $f['no_sirkulasi_feereport'] ?>')
+            <?php endforeach ?>
+
+            <?php if (count($feereport) > 0) : ?>
+                if (arrayTempNoSirkulasi.includes(no_sirkulasi) === true) {
+                    <?php foreach ($feereport as $f) : ?>
+                        if (no_sirkulasi === '<?= $f['no_sirkulasi_feereport'] ?>') {
+                            if ('<?= $f['status_approved'] ?>' === '1') {
+                                alert("Can't cancel, fee report has been approved!");
+                            } else {
+                                cancelAttendanceNolesson();
+                                rescheduleAttendanceNolesson();
+                                document.getElementById("id_schedule_online_update").value = "";
+                                $('#calendarModalReschedule').modal('hide');
+                            }
+                        }
+                    <?php endforeach ?>
+                } else {
+                    cancelAttendanceNolesson();
+                    rescheduleAttendanceNolesson();
+                    document.getElementById("id_schedule_online_update").value = "";
+                    $('#calendarModalReschedule').modal('hide');
+                }
+            <?php else : ?>
+                cancelAttendanceNolesson();
+                rescheduleAttendanceNolesson();
+                document.getElementById("id_schedule_online_update").value = "";
+                $('#calendarModalReschedule').modal('hide');
             <?php endif ?>
         } else {
             alert("please input date valid!")
@@ -590,7 +686,7 @@
             price = "<?= $pack_online[0]['price_dollar'] ?>";
         }
         var is_new = "<?= $pack_online[0]['is_new'] ?>";
-        
+
         $.ajax({
             url: "<?= base_url('portal/C_Teacher/update_schedule_package') ?>",
             type: "POST",
@@ -639,6 +735,30 @@
         });
     }
 
+    function cancelAttendanceNolesson() {
+        var id_schedule_online = $("#id_schedule_online_active").val();
+        var id_list_pack = "<?= $pack_online[0]['id_list_pack'] ?>";
+        var tgl = $("#date_active").val();
+        $.ajax({
+            url: "<?= base_url('portal/C_Teacher/update_schedule_package') ?>",
+            type: "POST",
+            data: {
+                'id_schedule_online': id_schedule_online,
+                'id_list_pack': id_list_pack,
+                'status': '3',
+                'jenis': '<?= $jenis ?>',
+            },
+            success: function(data) {
+                // calendar.fullCalendar('destroy');
+                // calendar.fullCalendar('refetchResources');
+                // calendar.fullCalendar('rerenderEvents');
+
+                // $("#counter_pack").html(data);
+                // cekPackage();
+            }
+        });
+    }
+
     function cancelLesson() {
         var id_schedule_online = $("#id_schedule_online_update").val();
         var id_list_pack = "<?= $pack_online[0]['id_list_pack'] ?>";
@@ -665,6 +785,54 @@
     function rescheduleAttendance() {
         var id_schedule_online = $("#id_schedule_online_update").val();
         var date_update_cancel = $("#date_reschedule").val();
+        var id_teacher = "<?= $this->session->userdata('id') ?>";
+        var id_student = "<?= $pack_online[0]['id_student'] ?>";
+        var price = "<?= $pack_online[0]['price_idr_paket'] ?>";
+        if (<?= $pack_online[0]['status_pack_practical'] ?> === 1 && <?= $pack_online[0]['status_pack_theory'] ?> === 1) {
+            price = price - 100000;
+        }
+        if (<?= $jenis ?> === 2) {
+            price = 100000;
+        }
+        var paket = "<?= $pack_online[0]['paket'] ?>";
+        var id_list_pack = "<?= $pack_online[0]['id_list_pack'] ?>";
+        var teacher_percentage = "<?= $pack_online[0]['teacher_percentage'] ?>";
+        var rate_dollar = "<?= $pack_online[0]['rate_dollar'] ?>";
+        if (rate_dollar === '3') {
+            price = "<?= $pack_online[0]['price_euro'] ?>";
+        }
+        if (rate_dollar === '2') {
+            price = "<?= $pack_online[0]['price_dollar'] ?>";
+        }
+        var is_new = "<?= $pack_online[0]['is_new'] ?>";
+
+        $.ajax({
+            url: "<?= base_url('portal/C_Teacher/reschedule_package') ?>",
+            type: "POST",
+            data: {
+                'id_schedule_pack': id_schedule_online,
+                'date_update_cancel': date_update_cancel,
+                'jenis': '<?= $jenis ?>',
+                'id_teacher': id_teacher,
+                'id_student': id_student,
+                'price': price,
+                'paket': paket,
+                'id_list_pack': id_list_pack,
+                'teacher_percentage': teacher_percentage,
+                'is_new': is_new,
+            },
+            success: function(data) {
+                calendar.fullCalendar('refetchResources');
+                cekPackage();
+                location.reload();
+                alert("Reschedule Successfully");
+            }
+        });
+    }
+
+    function rescheduleAttendanceNolesson() {
+        var id_schedule_online = $("#id_schedule_online_active").val();
+        var date_update_cancel = $("#date_reschedule_nolesson").val();
         var id_teacher = "<?= $this->session->userdata('id') ?>";
         var id_student = "<?= $pack_online[0]['id_student'] ?>";
         var price = "<?= $pack_online[0]['price_idr_paket'] ?>";
