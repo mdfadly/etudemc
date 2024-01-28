@@ -23,12 +23,12 @@
                 <?php endif; ?>
             </div>
             <div class="col-lg-12 pt-3">
-                <a href="<?= site_url() ?>portal/invoice" class="btn ml-1 mr-1 pl-4 pr-4" style="background-color:#f1f3f8; font-size:12px">
+                <!-- <a href="<?= site_url() ?>portal/invoice" class="btn ml-1 mr-1 pl-4 pr-4" style="background-color:#f1f3f8; font-size:12px">
                     Offline Invoice
                 </a>
-                |
+                | -->
                 <a href="<?= site_url() ?>portal/C_Admin/data_invoice_purchase" class="btn ml-1 mr-1 pl-4 pr-4" style="background-color:#f1f3f8; font-size:12px">
-                    Online Invoice
+                    Invoice
                 </a>
                 |
                 <span class="mr-1 pb-2" style="border-bottom:2px solid #62A8D6">
@@ -42,8 +42,8 @@
                             <tr>
                                 <th>No.</th>
                                 <th>Periode</th>
-                                <th>Offline Invoice</th>
-                                <th>Online Invoice</th>
+                                <!-- <th>Offline Invoice</th> -->
+                                <th>Invoice</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -58,7 +58,7 @@
                                             echo date_format($date, "F - Y");
                                             ?>
                                     </td>
-                                    <td>
+                                    <!-- <td>
                                         <?php for ($j = 0; $j < count($summ_off); $j++) : ?>
                                             <?php if ($summ_off[$j] == $invoice_periode[$i]) : ?>
                                                 <a href="<?= site_url(); ?>portal/C_Admin/detail_summary_offline_invoice/<?= $invoice_periode[$i] ?>" class="btn btn-info" target="_blank">
@@ -66,7 +66,7 @@
                                                 </a>
                                             <?php endif ?>
                                         <?php endfor; ?>
-                                    </td>
+                                    </td> -->
                                     <td>
                                         <?php for ($j = 0; $j < count($summ_on); $j++) : ?>
                                             <?php if ($summ_on[$j] == $invoice_periode[$i]) : ?>
@@ -95,13 +95,10 @@
                 [5, 10, 25, 50, "All"]
             ],
             'columnDefs': [{
-                'targets': [0, 2, 3], // column index (start from 0)
+                'targets': [0, 2], // column index (start from 0)
                 'orderable': false, // set orderable false for selected columns
             }, {
                 targets: 2,
-                "className": "text-center",
-            }, {
-                targets: 3,
                 "className": "text-center",
             }],
         });

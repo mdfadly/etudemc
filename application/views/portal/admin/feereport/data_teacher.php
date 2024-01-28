@@ -48,6 +48,7 @@
                                 <th>No.</th>
                                 <th>Teacher Name</th>
                                 <th>Detail</th>
+                                <th>Action</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -62,6 +63,11 @@
                                     <td>
                                         <a target="_blank" href="<?= site_url(); ?>portal/feereport/view/<?= $this->uri->segment(4) ?>/<?= substr($feereport_temp[$i], 0, 6) ?>" class="btn btn-info">
                                             <i class="fa fa-info"></i>
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <a href="<?= site_url() ?>portal/C_Admin/delete_data_feereport/FER-<?= date("Ym", $enddate2) ?>-<?= substr($feereport_temp[$i], 3, 3) ?>-001/<?= date("Y-m", $enddate2) ?>" class="btn btn-danger" title="Hapus Data Ini" onclick='return confirm("are you sure want to delete?")'>
+                                            <i class="fa fa-trash icon-white"></i>
                                         </a>
                                     </td>
                                 </tr>
@@ -84,7 +90,7 @@
                 [5, 10, 25, 50, "All"]
             ],
             'columnDefs': [{
-                'targets': [0, 1, 2], // column index (start from 0)
+                'targets': [0, 1, 2, 3], // column index (start from 0)
                 'orderable': false, // set orderable false for selected columns
             }, {
                 targets: 2,

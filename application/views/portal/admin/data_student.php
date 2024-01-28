@@ -1,6 +1,6 @@
 <main class="page-content">
     <div class="container-fluid">
-        <h2 style="font-weight:bold">Data Student</h2>
+        <h2 style="font-weight:bold">Data Client</h2>
         <hr>
         <div class="row">
             <?php if ($this->session->flashdata('success') != null) : ?>
@@ -10,8 +10,17 @@
                     </div>
                 </div>
             <?php endif; ?>
+            <div class="col-lg-12 pb-3">
+                <a href="<?= site_url() ?>portal/data_parent" class="btn ml-1 mr-1 pl-4 pr-4" style="background-color:#f1f3f8; font-size:12px">
+                    Data Person in Charge
+                </a>
+                |
+                <span class="mr-1 pb-2" style="border-bottom:2px solid #62A8D6">
+                    Data Student
+                </span>
+            </div>
             <div class="col-lg-12 text-right ">
-                <a href="<?= site_url() ?>portal/C_Admin/add_new_student" class="btn btn-primary mr-3">
+                <a href="<?= site_url() ?>portal/data_student/add/student" class="btn btn-primary mr-3">
                     <i class="fa fa-plus mr-2"></i>
                     Add Data
                 </a>
@@ -40,6 +49,7 @@
                     </div>
                 </div>
             </div>
+
             <div class="col-lg-12 col-12">
                 <div class="mr-3 ml-3 mt-3">
                     <table id="example" class="table table-striped table-white display" style="width:100%">
@@ -48,15 +58,10 @@
                                 <th>No.</th>
                                 <th>ID Student</th>
                                 <th>Student Name</th>
-                                <th>Instrument</th>
+                                <th>Parent Name</th>
+                                <!-- <th>Name Package</th> -->
+                                <th>Status Registration</th>
                                 <th>Detail</th>
-                                <!-- <th>ID Parent</th> -->
-                                <!-- <th>Parent</th> -->
-                                <!-- <th>Address</th> -->
-                                <!-- <th>HP1</th> -->
-                                <!-- <th>HP2</th> -->
-                                <!-- <th>School</th> -->
-                                <!-- <th>Action</th> -->
                             </tr>
                         </thead>
                         <tbody>
@@ -90,7 +95,7 @@
             }, {
                 targets: 4,
                 "className": "text-center",
-            },],
+            }, ],
             // 'dom': 'Bfrtip',
             // 'buttons': [
             //     'copy', 'csv', 'excel', 'pdf', 'print'

@@ -17,7 +17,7 @@
             <div id="tataletak" class="col-lg-12 border p-3" style="">
                 <div class="row">
                     <div class="col-lg-3 col-6">
-                        <span class="mr-4" style="color:#FF7F7F">
+                        <span class="mr-4" style="color:#DE7CD9">
                             <i class="fa fa-square"></i>
                             Offline Lesson
                         </span>
@@ -29,22 +29,18 @@
                         </span>
                     </div>
                     <div class="col-lg-3 col-6">
-                        <span class="mr-4" style="color:#378006">
+                        <span class="mr-4" style="color:#67E543">
                             <i class="fa fa-square"></i>
                             Online Lesson
                         </span>
                     </div>
                     <div class="col-lg-3 col-6">
-                        <span class="mr-4" style="color:#0776BD">
+                        <span class="mr-4" style="color:#0676BD">
                             <i class="fa fa-square"></i>
                             Theory Lesson
                         </span>
                     </div>
                 </div>
-
-
-
-
             </div>
         </div>
         <div class="row pt-lg-5 pt-4">

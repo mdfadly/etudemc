@@ -23,7 +23,7 @@ class C_Teacher extends CI_Controller
     {
         $this->cekLogin();
         $id_teacher = $_POST['id_teacher'];
-        $this->get_ajax_offline_lesson($id_teacher);
+        $this->get_ajax_offline_lesson2($id_teacher);
     }
 
     function get_ajax_offline_lesson($id_teacher)
@@ -41,6 +41,89 @@ class C_Teacher extends CI_Controller
             $row[] = $item->name_student;
             // add html for action
             $row[] = '<div class="btn-group"><a href="' . site_url('portal/offline_lesson/attendance/' . $item->id_offline_lesson) . '" class="btn btn-primary mr-2" title="Edit Data ini"> <i class="fa fa-info"></i> </a></div>';
+            $data[] = $row;
+        }
+        $output = array(
+            "draw" => @$_POST['draw'],
+            "recordsTotal" => $this->M_Teacher->count_all($dbTable, $id_teacher),
+            "recordsFiltered" => $this->M_Teacher->count_filtered($dbTable, $id_teacher),
+            "data" => $data,
+        );
+        // output to json format
+        echo json_encode($output);
+    }
+
+    function get_ajax_offline_lesson2($id_teacher)
+    {
+        $this->cekLogin();
+        $dbTable = "list_package_offline";
+        $list = $this->M_Teacher->get_datatables($dbTable, $id_teacher);
+
+        $data = array();
+        $no = @$_POST['start'];
+        foreach ($list as $item) {
+            $no++;
+            $row = array();
+
+            $count_done = 0;
+            $count_cancel = 0;
+            $count_ongoing = 0;
+            $data_schedule = $this->M_Teacher->getData_schedule_package_offline(null, $item->id_list_package_offline);
+            foreach ($data_schedule as $ds) {
+                if ($ds['status'] == '1' || ($ds['status'] == '3' && $ds['date_update_cancel'] == null) || $ds['status'] == '7' || $ds['status'] == '5') {
+                    $count_ongoing += 1;
+                } else if ($ds['status'] == '2' || ($ds['status'] == '3' && $ds['date_update_cancel'] != null)) {
+                    $count_done += 1;
+                } else if ($ds['status'] == '3' && $ds['date_update_cancel'] == null) {
+                    $count_cancel += 1;
+                }
+            }
+
+            $row[] = $item->name_student;
+
+            $startdate = date_create(substr($item->created_at, 0, 10));
+            $tgl_awal = date_format($startdate, "d/m/Y");
+
+            $enddate = date_create(substr($item->end_at, 0, 10));
+            $tgl_akhir = date_format($enddate, "d/m/Y");
+
+            $today = date("Y-m-d");
+
+            $row[] = $tgl_awal . " - " . $tgl_akhir;
+
+            $status_pack = "";
+            if ($count_ongoing == 0 && $count_done == 0 && $count_cancel == 0) {
+                $status_pack = '<span class="badge badge-danger text-white">Out of Progress</span>';
+            } else {
+                if (count($data_schedule) == $count_done) {
+                    $status_pack = '<span class="badge badge-danger">Out of Progress</span>';
+                } else if (($count_ongoing == 2) && $count_done > 0) {
+                    $status_pack = '<span class="badge badge-warning text-white">2 pack more!</span>';
+                } else if (($count_ongoing == 1) && $count_done > 0) {
+                    $status_pack = '<span class="badge badge-warning text-white">1 pack more!</span>';
+                } else {
+                    $status_pack = '<span class="badge text-white" style="background-color:#00B050">In Progress</span>';
+                }
+            }
+            $row[] = $status_pack;
+            // $row[] = $status_pack ." - ". $count_ongoing ." - " . $count_done ." - " . $count_cancel;
+            // add html for action
+            if ($count_ongoing == 0 && $count_done == 0 && $count_cancel == 0) {
+                $row[] = '';
+            } else {
+                if (count($data_schedule) == $count_done) {
+                    $row[] = '<a class="text-danger" href="' . site_url('portal/offline_lesson/attendance/' . $item->id_list_package_offline) . '" style="font-size:23px;"> <i class="fa fa-calendar"></i> </a><br>';
+                } else if (($count_ongoing == 2 || $count_ongoing == 1) && $count_done > 0) {
+                    $row[] = '<a class="text-warning" href="' . site_url('portal/offline_lesson/attendance/' . $item->id_list_package_offline) . '" style="font-size:23px;"> <i class="fa fa-calendar"></i> </a><br>';
+                } else {
+                    $row[] = '<a href="' . site_url('portal/offline_lesson/attendance/' . $item->id_list_package_offline) . '" style="font-size:23px; color:#00B050"> <i class="fa fa-calendar"></i> </a><br>';
+                }
+            }
+            // if ($count_ongoing == 0 && $count_done == 0 && $count_cancel == 0) {
+            //     $row[] = '';
+            // }else{
+            //     $row[] = '<div class="btn-group"><a href="' . site_url('portal/offline_lesson/attendance/' . $item->id_list_package_offline) . '" class="btn btn-primary mr-2" title="Edit Data ini"> <i class="fa fa-info"></i> </a></div>';
+            // }
             $data[] = $row;
         }
         $output = array(
@@ -103,16 +186,16 @@ class C_Teacher extends CI_Controller
 
             $status_pack = "";
             if ($count_ongoing == 0 && $count_done == 0 && $count_cancel == 0) {
-                $status_pack = '<span class="badge badge-primary text-white">Choose The Date !</span>';
+                $status_pack = '<span class="badge badge-danger text-white">Out of Progress</span>';
             } else {
                 if (count($data_schedule) == $count_done) {
-                    $status_pack = '<span class="badge badge-danger">Done</span>';
+                    $status_pack = '<span class="badge badge-danger">Out of Progress</span>';
                 } else if (($count_ongoing == 3 || $count_ongoing == 4) && $count_done > 0) {
                     $status_pack = '<span class="badge badge-warning text-white">2 pack more!</span>';
                 } else if (($count_ongoing == 2 || $count_ongoing == 1) && $count_done > 0) {
                     $status_pack = '<span class="badge badge-warning text-white">1 pack more!</span>';
                 } else {
-                    $status_pack = '<span class="badge text-white" style="background-color:#00B050">On Going</span>';
+                    $status_pack = '<span class="badge text-white" style="background-color:#00B050">In Progress</span>';
                 }
             }
             $row[] = $status_pack;
@@ -209,16 +292,16 @@ class C_Teacher extends CI_Controller
 
             $status_pack = "";
             if ($count_ongoing == 0 && $count_done == 0 && $count_cancel == 0) {
-                $status_pack = '<span class="badge badge-primary text-white">Choose The Date !</span>';
+                $status_pack = '<span class="badge badge-danger text-white">Out of Progress</span>';
             } else {
                 if (count($data_schedule) == $count_done) {
-                    $status_pack = '<span class="badge badge-danger">Done</span>';
+                    $status_pack = '<span class="badge badge-danger">Out of Progress</span>';
                 } else if ($count_ongoing == 2 && $count_done > 0) {
                     $status_pack = '<span class="badge badge-warning text-white">2 pack more!</span>';
                 } else if (($count_ongoing == 1) && $count_done > 0) {
                     $status_pack = '<span class="badge badge-warning text-white">1 pack more!</span>';
                 } else {
-                    $status_pack = '<span class="badge text-white" style="background-color:#00B050">On Going</span>';
+                    $status_pack = '<span class="badge text-white" style="background-color:#00B050">In Progress</span>';
                 }
             }
             $row[] = $status_pack;
@@ -340,7 +423,7 @@ class C_Teacher extends CI_Controller
                                         No Transaksi
                                     </label>
                                     <div class="col-lg-1 pt-2">
-                                        =
+                                       :
                                     </div>
                                     <div class="col-lg-4 pt-2">
                                     ' . $item->no_transaksi_event . '
@@ -351,7 +434,7 @@ class C_Teacher extends CI_Controller
                                         Registration Date
                                     </label>
                                     <div class="col-lg-1 pt-2">
-                                        =
+                                       :
                                     </div>
                                     <div class="col-lg-4 pt-2">
                                     ' . date_format($date2, "d/m/Y") . '
@@ -362,7 +445,7 @@ class C_Teacher extends CI_Controller
                                         Teacher Name
                                     </label>
                                     <div class="col-lg-1 pt-2">
-                                        =
+                                       :
                                     </div>
                                     <div class="col-lg-4 pt-2">
                                     ' . $item->name_teacher . '
@@ -373,7 +456,7 @@ class C_Teacher extends CI_Controller
                                         Event Name
                                     </label>
                                     <div class="col-lg-1 pt-2">
-                                        =
+                                       :
                                     </div>
                                     <div class="col-lg-4 pt-2">
                                     ' . $temp_event[0]['event_name'] . '
@@ -384,7 +467,7 @@ class C_Teacher extends CI_Controller
                                         Event Date
                                     </label>
                                     <div class="col-lg-1 pt-2">
-                                        =
+                                       :
                                     </div>
                                     <div class="col-lg-4 pt-2">
                                     ' . implode("<br>", $date_event) . '
@@ -395,7 +478,7 @@ class C_Teacher extends CI_Controller
                                         Event Price
                                     </label>
                                     <div class="col-lg-1 pt-2">
-                                        =
+                                       :
                                     </div>
                                     <div class="col-lg-4 pt-2">
                                     ' . implode("<br>", $price_event) . '
@@ -406,7 +489,7 @@ class C_Teacher extends CI_Controller
                                         Price
                                     </label>
                                     <div class="col-lg-1 pt-2">
-                                        =
+                                       :
                                     </div>
                                     <div class="col-lg-4 pt-2">
                                     ' . $price . '
@@ -417,7 +500,7 @@ class C_Teacher extends CI_Controller
                                         Discount
                                     </label>
                                     <div class="col-lg-1 pt-2">
-                                        =
+                                       :
                                     </div>
                                     <div class="col-lg-4 pt-2">
                                     ' . $discount . '
@@ -428,7 +511,7 @@ class C_Teacher extends CI_Controller
                                         Total Price
                                     </label>
                                     <div class="col-lg-1 pt-2">
-                                        =
+                                       :
                                     </div>
                                     <div class="col-lg-4 pt-2">
                                     ' . $total_price . '
@@ -463,18 +546,26 @@ class C_Teacher extends CI_Controller
     public function profile($username)
     {
         $this->cekLogin();
-        $teacher = $this->M_Portal->get_teacher(" where username = '$username'");
+        if (substr($this->session->userdata('id'), 0, 1) == 1) {
+            $teacher = $this->M_Teacher->getData_teacher($this->session->userdata('id'));
+        } else {
+            $teacher = $this->M_Teacher->getData_teacher(null, $username);
+        }
+
+        $cek_teacher = $this->M_Teacher->getData_teacher(null, $username);
+        $bank_account_teacher = $this->M_Teacher->getData_bank_account_teacher(null, $cek_teacher[0]['id_teacher']);
+
         $title = "Profile | Portal Etude";
         $description = "Welcome to Portal Etude";
         $this->load->view('portal/reuse/header', array('title' => $title, 'description' => $description, 'teacher' => $teacher));
-        $this->load->view('portal/teacher/profile', $teacher);
+        $this->load->view('portal/teacher/profile', array('teacher' => $teacher, 'bank_account_teacher' => $bank_account_teacher));
         $this->load->view('portal/reuse/footer');
     }
 
     public function edit_profile($username)
     {
         $this->cekLogin();
-        $teacher = $this->M_Portal->get_teacher(" where username = '$username'");
+        $teacher = $this->M_Teacher->getData_teacher($this->session->userdata('id'));
         $title = "Edit Profile | Portal Etude";
         $description = "Welcome to Portal Etude";
         $this->load->view('portal/reuse/header', array('title' => $title, 'description' => $description, 'teacher' => $teacher));
@@ -487,9 +578,13 @@ class C_Teacher extends CI_Controller
         $this->cekLogin();
         $id_teacher = $_POST['id'];
         $name_teacher = $_POST['name'];
-        $dob_teacher = $_POST['dob'];
+        $dob_teacher = $_POST['tempat_dob_teacher'] . ", " . $_POST['tanggal_dob_teacher'];
         $address_teacher = $_POST['address'] . "~" . $_POST['kelurahan'] . "~" . $_POST['kecamatan'] . "~" . $_POST['kota'] . "~" . $_POST['provinsi'] . "~" . $_POST['zip'] . "~" . $_POST['negara'];
-        $instrument = $_POST['instrument'];
+        $instrument = $this->input->post('instrument');
+        if ($instrument == "Others") {
+            $instrument = "Others|" . $this->input->post('others');
+        }
+        $linkedin = $_POST['linkedin'];
         $credentials_teacher = $_POST['credentials'];
         $phone_teacher = $_POST['phone'];
         $email_teacher = $_POST['email'];
@@ -502,25 +597,10 @@ class C_Teacher extends CI_Controller
         $password = $_POST['password'];
         $kat = $_POST['kat'];
 
-        //upload KTP
-        // $ktp_teacher = "";
-
-        // $config['upload_path'] = './assets/img/ktp_guru';
-        // $config['allowed_types'] = 'pdf|PDF|jpg|JPG|jpeg|JPEG|png|PNG';
-        // $new_name = "ktp_" . $name_teacher;
-        // $config['file_name'] = $new_name;
-
-        // $this->upload->initialize($config);
-        // if (!$this->upload->do_upload('ktp')) {
-        //     $this->session->set_flashdata('warning', $this->upload->display_errors());
-        //     redirect('portal/user-register');
-        //     // redirect('dashboard-admin/homepage', $error);
-        // } else {
-
-        //     $upload_data_team = $this->upload->data(); // added this..
-        //     //get the uploaded file name
-        //     $ktp_teacher = $upload_data_team['file_name']; // changed this..
-        // }
+        $name_pict = explode(".", $this->input->post('pict_lama'));
+        $temp_name = substr($name_pict[0], 0, -1);
+        $counter = substr($name_pict[0], -1);
+        $name_picture = $temp_name . "" . (intval($counter) + 1);
 
         //upload Picture
         $ubah = $_POST['ubah-pict'];
@@ -530,20 +610,23 @@ class C_Teacher extends CI_Controller
             $config['upload_path'] = './assets/img/pict_guru';
             $config['allowed_types'] = 'pdf|PDF|jpg|JPG|jpeg|JPEG|png|PNG';
             $new_name = "pict_" . $name_teacher;
-            $config['file_name'] = $new_name;
+            $config['file_name'] = $name_picture;
+
+            $filename = './assets/img/pict_guru/' . $_POST['pict_lama'];
+            if (file_exists($filename)) {
+                unlink($filename);
+            }
 
             $this->upload->initialize($config);
             if (!$this->upload->do_upload('pict')) {
                 $this->session->set_flashdata('warning', $this->upload->display_errors());
                 redirect('portal/profile/edit/' . $username);
-                // redirect('dashboard-admin/homepage', $error);
             } else {
                 $upload_data_team = $this->upload->data(); // added this..
-                //get the uploaded file name
                 $pict_teacher = $upload_data_team['file_name']; // changed this..
             }
         } else {
-            $pict_teacher = $_POST['pict'];
+            $pict_teacher = $_POST['pict_lama'];
         }
 
         $data = array(
@@ -552,6 +635,7 @@ class C_Teacher extends CI_Controller
             'address_teacher' => $address_teacher,
             'credentials_teacher' => $credentials_teacher,
             'instrument' => $instrument,
+            'linkedin' => $linkedin,
             'phone_teacher' => $phone_teacher,
             'email_teacher' => $email_teacher,
             'bank_teacher' => $bank_teacher,
@@ -571,7 +655,7 @@ class C_Teacher extends CI_Controller
         $res = $this->M_Portal->updateData('teacher', $data, $where);
 
         if ($res >= 1) {
-            $this->session->set_flashdata('success', 'Personal information successfully changed');
+            $this->session->set_flashdata('success', 'Profile successfully changed');
             redirect('portal/profile/' . $username);
         } else {
             $this->session->set_flashdata('warning', 'Failed change information');
@@ -582,7 +666,7 @@ class C_Teacher extends CI_Controller
     public function offline_lesson()
     {
         $this->cekLogin();
-        $teacher = $this->M_Teacher->getData_teacher();
+        $teacher = $this->M_Teacher->getData_teacher($this->session->userdata('id'));
         $title = "Offline Lesson | Portal Etude";
         $description = "Welcome to Portal Etude";
         $this->load->view('portal/reuse/header', array('title' => $title, 'description' => $description, 'teacher' => $teacher));
@@ -593,7 +677,7 @@ class C_Teacher extends CI_Controller
     public function attendance_offline_lesson($id_course)
     {
         $this->cekLogin();
-        $teacher = $this->M_Teacher->getData_teacher();
+        $teacher = $this->M_Teacher->getData_teacher($this->session->userdata('id'));
         $offline_lesson = $this->M_Teacher->getData_offline_lesson($id_course);
         $feereport = $this->M_Teacher->getData_sirkulasi_feereport(null, null, null, $offline_lesson[0]['id_teacher']);
         $title = "Attendance Offline Lesson | Portal Etude";
@@ -603,10 +687,32 @@ class C_Teacher extends CI_Controller
         $this->load->view('portal/reuse/footer');
     }
 
+    public function attendance_offline_lesson_package($id_package)
+    {
+        $this->cekLogin();
+        $teacher = $this->M_Teacher->getData_teacher($this->session->userdata('id'));
+        $pack_online = $this->M_Teacher->getData_pack_offline($id_package);
+        $schedule_online = $this->M_Teacher->getData_schedule_package_offline(null, $id_package);
+        $count_package = [];
+        foreach ($schedule_online as $so) {
+            $count_package[] = $so['id_schedule_package_offline'];
+        }
+        $feereport = $this->M_Teacher->getData_sirkulasi_feereport(null, null, null, $schedule_online[0]['id_teacher']);
+
+        // echo var_dump($feereport);
+        // echo "<br/>";
+        // echo var_dump($pack_online);
+        $title = "Attendance Offline Lesson | Portal Etude";
+        $description = "Welcome to Portal Etude";
+        $this->load->view('portal/reuse/header', array('title' => $title, 'description' => $description, 'teacher' => $teacher));
+        $this->load->view('portal/teacher/attendance_offline_lesson_package', array('pack_online' => $pack_online, 'count_package' => $count_package, 'feereport' => $feereport));
+        $this->load->view('portal/reuse/footer');
+    }
+
     public function online_pratical()
     {
         $this->cekLogin();
-        $teacher = $this->M_Teacher->getData_teacher();
+        $teacher = $this->M_Teacher->getData_teacher($this->session->userdata('id'));
         $title = "Online Pratical | Portal Etude";
         $description = "Welcome to Portal Etude";
         $this->load->view('portal/reuse/header', array('title' => $title, 'description' => $description, 'teacher' => $teacher));
@@ -617,8 +723,7 @@ class C_Teacher extends CI_Controller
     public function attendance_online_pratical($id_package, $jenis)
     {
         $this->cekLogin();
-        $teacher = $this->M_Teacher->getData_teacher();
-        // $online_pratical = $this->M_Teacher->getData_online_pratical($id_course);
+        $teacher = $this->M_Teacher->getData_teacher($this->session->userdata('id'));
         $pack_online = $this->M_Teacher->getData_pack_online($id_package, 1);
         $schedule_online = $this->M_Teacher->getData_schedule_package(null, $id_package, null, null, $jenis);
         $count_theory = [];
@@ -643,7 +748,7 @@ class C_Teacher extends CI_Controller
     public function online_theory()
     {
         $this->cekLogin();
-        $teacher = $this->M_Teacher->getData_teacher();
+        $teacher = $this->M_Teacher->getData_teacher($this->session->userdata('id'));
         $title = "Online Theory | Portal Etude";
         $description = "Welcome to Portal Etude";
         $this->load->view('portal/reuse/header', array('title' => $title, 'description' => $description, 'teacher' => $teacher));
@@ -654,7 +759,7 @@ class C_Teacher extends CI_Controller
     public function attendance_online_theory($id_course)
     {
         $this->cekLogin();
-        $teacher = $this->M_Teacher->getData_teacher();
+        $teacher = $this->M_Teacher->getData_teacher($this->session->userdata('id'));
         $online_theory = $this->M_Teacher->getData_online_theory($id_course);
 
         $feereport = $this->M_Teacher->getData_sirkulasi_feereport(null, null, null, $online_theory[0]['id_teacher']);
@@ -695,7 +800,8 @@ class C_Teacher extends CI_Controller
                 'date' => $row['date'],
                 'instrument' => $row['instrument'],
                 'fee' => $row['fee'],
-                'id_course' => $row['id_course']
+                'id_course' => $row['id_course'],
+                'color' => "#0776BD",
             );
         }
         echo json_encode($data);
@@ -731,7 +837,7 @@ class C_Teacher extends CI_Controller
             $total_50 = $cek_sirkulasi[0]['total_50'];
             $total_rate = $cek_sirkulasi[0]['total_rate'];
 
-            if ($total_50 >= 4) {
+            if ($total_50 >= 10) {
                 if ($cek_sirkulasi[0]['rate_created_at'] == NULL) {
                     $data_update_sirkulasi = array(
                         'rate_created_at' => $created_at,
@@ -1027,7 +1133,7 @@ class C_Teacher extends CI_Controller
     public function note($id_course)
     {
         $this->cekLogin();
-        $teacher = $this->M_Teacher->getData_teacher();
+        $teacher = $this->M_Teacher->getData_teacher($this->session->userdata('id'));
         $offline_lesson = $this->M_Teacher->getData_offline_lesson($id_course);
         $online_theory = $this->M_Teacher->getData_online_theory($id_course);
         $online_pratical = $this->M_Teacher->getData_online_pratical($id_course);
@@ -1041,7 +1147,7 @@ class C_Teacher extends CI_Controller
     public function addnote($id_course)
     {
         $this->cekLogin();
-        $teacher = $this->M_Portal->get_teacher();
+        $teacher = $this->M_Teacher->getData_teacher($this->session->userdata('id'));
         $offline_lesson = $this->M_Teacher->getData_offline_lesson($id_course);
         $online_theory = $this->M_Teacher->getData_online_theory($id_course);
         $online_pratical = $this->M_Teacher->getData_online_pratical($id_course);
@@ -1115,7 +1221,7 @@ class C_Teacher extends CI_Controller
     public function offline_trial()
     {
         $this->cekLogin();
-        $teacher = $this->M_Teacher->getData_teacher();
+        $teacher = $this->M_Teacher->getData_teacher($this->session->userdata('id'));
 
         $feereport = $this->M_Teacher->getData_sirkulasi_feereport(null, null, null, $this->session->userdata('id'));
 
@@ -1134,6 +1240,7 @@ class C_Teacher extends CI_Controller
                 'id' => $row['id_offline_trial'],
                 'title' => $row['name_student'],
                 'date' => $row['date'],
+                'color' => "#ffd32a",
                 // 'end' => $row['end_event']
             );
         }
@@ -1301,7 +1408,7 @@ class C_Teacher extends CI_Controller
     public function attendance_summary()
     {
         $this->cekLogin();
-        $teacher = $this->M_Teacher->getData_teacher();
+        $teacher = $this->M_Teacher->getData_teacher($this->session->userdata('id'));
         $title = "Attendance Summary | Portal Etude";
         $description = "Welcome to Portal Etude";
         $this->load->view('portal/reuse/header', array('title' => $title, 'description' => $description, 'teacher' => $teacher));
@@ -1312,28 +1419,29 @@ class C_Teacher extends CI_Controller
     function load_summary($id_teacher)
     {
         $data = [];
-        $event_data = $this->M_Teacher->fetch_summary_schedule($id_teacher);
+        $event_data = $this->M_Teacher->fetch_summary_schedule_package_offline($id_teacher);
         $offline_trial = $this->M_Teacher->fetch_summary_offline_trial($id_teacher);
         $schedule_online_pratical = $this->M_Teacher->fetch_summary_schedule_package($id_teacher, 1);
         $schedule_online_theory = $this->M_Teacher->fetch_summary_schedule_package($id_teacher, 2);
         $schedule_theory = $this->M_Teacher->fetch_summary_schedule_theory($id_teacher);
         foreach ($event_data->result_array() as $row) {
-            $color = "";
-            if ($row['nama_course'] == "offline_lesson") {
-                $color = "#FF7F7F";
+            $color = "#DE7CD9";
+            if ($row['status'] == 2 || $row['status'] == 4) {
+                $data[] = array(
+                    'id' => "offline_lesson-" . $row['id_schedule_package_offline'],
+                    'title' => $row['name_student'],
+                    'color' => $color,
+                    'date' => $row['date_schedule'],
+                );
             }
-            if ($row['nama_course'] == "online_pratical") {
-                $color = "#378006";
+            if ($row['status'] == 3 && $row['date_update_cancel'] != NULL) {
+                $data[] = array(
+                    'id' => "offline_lesson-" . $row['id_schedule_package_offline'],
+                    'title' => $row['name_student'],
+                    'color' => $color,
+                    'date' => $row['date_update_cancel'],
+                );
             }
-            if ($row['nama_course'] == "online_theory") {
-                $color = "#0776BD";
-            }
-            $data[] = array(
-                'id' => "offline_lesson-" . $row['id_schedule'],
-                'title' => $row['name_student'],
-                'color' => $color,
-                'date' => $row['date'],
-            );
         }
         foreach ($offline_trial->result_array() as $row) {
             $color = "#ffd32a";
@@ -1345,7 +1453,7 @@ class C_Teacher extends CI_Controller
             );
         }
         foreach ($schedule_online_pratical->result_array() as $row) {
-            $color = "#378006";
+            $color = "#43E514";
             if ($row['status'] == 2 || $row['status'] == 4) {
                 $data[] = array(
                     'id' => "pratical_lesson-" . $row['id_schedule_pack'],
@@ -1364,7 +1472,7 @@ class C_Teacher extends CI_Controller
             }
         }
         foreach ($schedule_online_theory->result_array() as $row) {
-            $color = "#0776BD";
+            $color = "#0676BD";
             if ($row['status'] == 2 || $row['status'] == 4) {
                 $data[] = array(
                     'id' => "theory_lesson-" . $row['id_schedule_pack'],
@@ -1383,7 +1491,7 @@ class C_Teacher extends CI_Controller
             }
         }
         foreach ($schedule_theory->result_array() as $row) {
-            $color = "#0776BD";
+            $color = "#0676BD";
             $data[] = array(
                 'id' => "schedule_theory-" . $row['id_schedule_theory'],
                 'title' => $row['name_student'],
@@ -1452,7 +1560,7 @@ class C_Teacher extends CI_Controller
         $feereport_temp = array_unique($feereport_temp);
         rsort($feereport_temp);
         // echo var_dump($feereport_temp);
-        $teacher = $this->M_Teacher->getData_teacher();
+        $teacher = $this->M_Teacher->getData_teacher($this->session->userdata('id'));
         $title = "Fee Report | Portal Etude";
         $description = "Welcome to Portal Etude";
         $this->load->view('portal/reuse/header', array('title' => $title, 'description' => $description, 'teacher' => $teacher));
@@ -1463,7 +1571,7 @@ class C_Teacher extends CI_Controller
     public function event()
     {
         $this->cekLogin();
-        $teacher = $this->M_Teacher->getData_teacher();
+        $teacher = $this->M_Teacher->getData_teacher($this->session->userdata('id'));
         $title = "Fee Report | Portal Etude";
         $description = "Welcome to Portal Etude";
         $this->load->view('portal/reuse/header', array('title' => $title, 'description' => $description, 'teacher' => $teacher));
@@ -1475,7 +1583,7 @@ class C_Teacher extends CI_Controller
     {
         $this->cekLogin();
         $today = date("Y-m-d");
-        $teacher = $this->M_Teacher->getData_teacher();
+        $teacher = $this->M_Teacher->getData_teacher($this->session->userdata('id'));
         $title = "Data add_event | Portal Etude";
         $description = "Welcome to Portal Etude";
         $event = $this->M_Teacher->getData_event(null, $id_teacher, $today);
@@ -1516,6 +1624,69 @@ class C_Teacher extends CI_Controller
         }
     }
 
+    public function load_package_offline($id_list_package_offline)
+    {
+        $event_data = $this->M_Teacher->fetch_all_package_offline($id_list_package_offline, $this->session->userdata('id'));
+        $z = 1;
+        $x = 1;
+        foreach ($event_data->result_array() as $row) {
+            $title = '';
+            $color = '';
+            $temp_date = '';
+            if ($row['status'] != 3) {
+                if ($row['status'] == 1) {
+                    $title = 'Undone';
+                    $color = '#EB1AE0';
+                }
+                if ($row['status'] == 2) {
+                    $title = 'Paket ' . $x++;
+                    $color = '#DE7CD9';
+                }
+                if ($row['status'] == 3) {
+                    // $title = 'Cancel';
+                    $color = '#ffffff';
+                }
+                if ($row['status'] == 4) {
+                    $title = 'New Schedule';
+                    $color = '#54a0ff';
+                }
+                if ($row['status'] == 5) {
+                    $title = 'Late';
+                    $color = '#FF5C58';
+                }
+                if ($row['status'] == 7) {
+                    $title = 'No Lesson';
+                    $color = '#D0CAB2';
+                }
+                $temp_date = $row['date_schedule'];
+            }
+            if ($row['status'] == 3 && $row['date_update_cancel'] != NULL) {
+                $title = 'Reschedule';
+                $title = 'Re - Lesson ' . $x++;
+                $color = '#DE7CD9';
+                $temp_date = $row['date_update_cancel'];
+            }
+            if ($row['status'] == 3 && $row['date_update_cancel'] == NULL) {
+                $title = 'Cancel';
+                $color = '#DE7CD9';
+                $temp_date = $row['date_schedule'];
+            }
+            $data[] = array(
+                'id' => $row['id_schedule_package_offline'],
+                'allDay' => true,
+                'stick' => true,
+                'start' => $temp_date,
+                'end' => $temp_date,
+                'title' => $title,
+                'date' => $temp_date,
+                'id_list_package_offline' => $row['id_list_package_offline'],
+                'color' => $color,
+                'status' => $row['status']
+            );
+        }
+        echo json_encode($data);
+    }
+
     public function load_package($id_list_pack)
     {
         $event_data = $this->M_Teacher->fetch_all_package($id_list_pack, $this->session->userdata('id'));
@@ -1533,15 +1704,15 @@ class C_Teacher extends CI_Controller
                 if ($row['jenis'] == 1) {
                     if ($row['status'] == 1) {
                         $title = 'Undone';
-                        $color = '#f0a500';
+                        $color = '#43E514';
                     }
                     if ($row['status'] == 2) {
                         if (fmod($z++, 2) == 1) {
-                            $title = 'Lesson ' . $x . ' a';
+                            $title = 'Paket ' . $x . ' a';
                         } else {
-                            $title = 'Lesson ' . $x++ . ' b';
+                            $title = 'Paket ' . $x++ . ' b';
                         }
-                        $color = '#fddb3a';
+                        $color = '#67E543';
                     }
                     if ($row['status'] == 3) {
                         // $title = 'Cancel';
@@ -1563,15 +1734,15 @@ class C_Teacher extends CI_Controller
                 if ($row['jenis'] == 2) {
                     if ($row['status'] == 1) {
                         $title = 'Undone';
-                        $color = '#056676';
+                        $color = '#0676BD';
                     }
                     if ($row['status'] == 2) {
                         if (fmod($z++, 2) == 1) {
-                            $title = 'Lesson ' . $x . ' a';
+                            $title = 'Paket ' . $x . ' a';
                         } else {
-                            $title = 'Lesson ' . $x++ . ' b';
+                            $title = 'Paket ' . $x++ . ' b';
                         }
-                        $color = '#5eaaa8';
+                        $color = '#0D99FF';
                     }
                     if ($row['status'] == 3) {
                         // $title = 'Cancel';
@@ -1594,17 +1765,28 @@ class C_Teacher extends CI_Controller
             }
             if ($row['status'] == 3 && $row['date_update_cancel'] != NULL) {
                 $title = 'Reschedule';
+
                 if (fmod($z++, 2) == 1) {
                     $title = 'Re - Lesson ' . $x . ' a';
                 } else {
                     $title = 'Re - Lesson ' . $x++ . ' b';
                 }
-                $color = '#10ac84';
+                if ($row['jenis'] == 1) {
+                    $color = '#67E543';
+                }
+                if ($row['jenis'] == 2) {
+                    $color = '#0D99FF';
+                }
                 $temp_date = $row['date_update_cancel'];
             }
             if ($row['status'] == 3 && $row['date_update_cancel'] == NULL) {
                 $title = 'Cancel';
-                $color = '#10ac84';
+                if ($row['jenis'] == 1) {
+                    $color = '#67E543';
+                }
+                if ($row['jenis'] == 2) {
+                    $color = '#0D99FF';
+                }
                 $temp_date = $row['date_schedule'];
             }
             $data[] = array(
@@ -1680,6 +1862,737 @@ class C_Teacher extends CI_Controller
         echo var_dump($tempDay);
     }
 
+    public function cek_package_offline($id_pack)
+    {
+        $this->cekLogin();
+        $today = date("Y-m-d");
+        $tempDay = '';
+
+        if ((date('N', strtotime($today)) == 1)) {
+            $tempDay = $today;
+        }
+        if ((date('N', strtotime($today)) == 2)) {
+            $tempDay = date('Y-m-d', strtotime('-1 days'));
+        }
+        if ((date('N', strtotime($today)) == 3)) {
+            $tempDay = date('Y-m-d', strtotime('-2 days'));
+        }
+        if ((date('N', strtotime($today)) == 4)) {
+            $tempDay = date('Y-m-d', strtotime('-3 days'));
+        }
+        if ((date('N', strtotime($today)) == 5)) {
+            $tempDay = date('Y-m-d', strtotime('-4 days'));
+        }
+        if ((date('N', strtotime($today)) == 6)) {
+            $tempDay = date('Y-m-d', strtotime('-5 days'));
+        }
+        if ((date('N', strtotime($today)) == 7)) {
+            $tempDay = date('Y-m-d', strtotime('-6 days'));
+        }
+        $schedule_online2 = $this->M_Teacher->getData_schedule_package_offline(null, $id_pack, 1, $tempDay);
+        $temp_schedule = [];
+        foreach ($schedule_online2 as $so) {
+            $temp_schedule[] = $so['id_schedule_package_offline'];
+        }
+        for ($i = 0; $i < count($temp_schedule); $i++) {
+            $data = array(
+                'status' => 5,
+            );
+            $this->M_Teacher->update_event_schedule_package_offline($data, $temp_schedule[$i]);
+        }
+
+        $pack_online = $this->M_Teacher->getData_pack_offline($id_pack, 1);
+        $schedule_online = $this->M_Teacher->getData_schedule_package_offline(null, $id_pack);
+        $schedule_cancel = $this->M_Teacher->getData_schedule_package_offline(null, $id_pack, 3);
+        $schedule_new = $this->M_Teacher->getData_schedule_package_offline(null, $id_pack, 4);
+        $count_package = [];
+        foreach ($schedule_online as $so) {
+            if ($so['status'] == 2 || ($so['status'] == 3 && $so['date_update_cancel'] != NULL)) :
+                $count_package[] = $so['id_schedule_package_offline'];
+            endif;
+        }
+
+        $pack_package = $pack_online[0]['total_package'];
+        $count1 = intval($pack_package) - intval(count($count_package));
+        $count3 = 0;
+        foreach ($schedule_cancel as $sc) {
+            if ($sc['date_update_cancel'] == NULL) {
+                $count3++;
+            }
+        }
+        $temp_event[] = " Lesson Package : ";
+        $temp_event[] = '<span class="badge badge-primary">' . $count1 . ' package (' . $count1 . ' meeting)</span> ';
+        $temp_event[] = '<input type="hidden" id="countPackage" name="countPackage" value="' . $count1 . '">';
+
+        if ($count3 > 0) {
+            $temp_event[] = "<br>";
+            $temp_event[] = "Lesson Cancel = ";
+            $temp_event[] = '<span class="badge badge-danger">' . $count3 . ' lesson</span>, Please change date!';
+            $z = 1;
+            foreach ($schedule_cancel as $so) {
+                if ($so['date_update_cancel'] == NULL) {
+                    $temp_event[] = '<input type="hidden" id="id_schedule_package_offline' . $z++ . '" value="' . $so['id_schedule_package_offline'] . '">';
+                }
+            }
+        }
+        $temp_event[] = '<input type="hidden" id="countCancel" name="countCancel" value="' . $count3 . '">';
+
+        $event_join = implode(" ", $temp_event);
+        echo $event_join;
+    }
+
+    function update_schedule_package_offline()
+    {
+        $this->cekLogin();
+        $status = $this->input->post('status');
+        $id_list_package_offline = $this->input->post('id_list_package_offline');
+        $is_new = $this->input->post('is_new');
+
+        if ($status == 2) {
+            $teacher_percentage = $this->input->post('teacher_percentage');
+            $paket = $this->input->post('paket');
+            $price = $this->input->post('price');
+            $created_at = $this->input->post('tgl');
+            $id_teacher = $this->input->post('id_teacher');
+            $id_student = $this->input->post('id_student');
+            $temp_id_student = substr($id_student, 3);
+            $temp_id_teacher = substr($id_teacher, 3);
+            $tipe = 3;
+            $tipe_rate = '';
+            $potongan = $this->input->post('potongan');
+            $price_paket = $this->input->post('price_paket');
+            //nomor sirkulasi lesson
+            //LESS/002/015/3 => tipe offline lesson
+
+            $no_sirkulasi_lesson = 'LESS/' .  $temp_id_teacher . "/" . $temp_id_student . "/" . $tipe . "/" . $id_list_package_offline;
+            $cek_sirkulasi = $this->M_Teacher->getData_sirkulasi_lesson(null, $no_sirkulasi_lesson, $id_teacher, $id_student, $tipe);
+
+            $periode_now = substr($created_at, 0, 7);
+            $effectiveDate = date($periode_now);
+            $effectiveDate = date('Y-m', strtotime("+1 months", strtotime($effectiveDate)));
+            $temp_period = $effectiveDate . "-01";
+            //cek next periode
+            $get_data_50_next_periode = $this->M_Teacher->getData_sirkulasi_lesson_detail(null, null, $id_teacher, $id_student, $tipe, null, 50, $temp_period);
+            //cek before periode
+            $get_data_before_periode = $this->M_Teacher->getData_sirkulasi_lesson_detail_before($id_teacher, $id_student, $tipe, $created_at);
+            $get_data_after_periode = $this->M_Teacher->getData_sirkulasi_lesson_detail_after($id_teacher, $id_student, $tipe, $created_at);
+            if (count($get_data_50_next_periode) > 0) {
+                $cek_sirkulasi_next_periode = $this->M_Teacher->getData_sirkulasi_lesson(null, $get_data_50_next_periode[0]['no_sirkulasi_lesson'], $id_teacher, $id_student, $tipe);
+            }
+            if ((count($get_data_before_periode) + count($get_data_after_periode)) >= $potongan) {
+                if (count($cek_sirkulasi) > 0) {
+                    $data_update_sirkulasi = null;
+                    $total = $cek_sirkulasi[0]['total'];
+                    $total_rate = $cek_sirkulasi[0]['total_rate'];
+                    $total_50 = $cek_sirkulasi[0]['total_50'];
+
+                    if (count($get_data_50_next_periode) > 0) {
+                        $data = array(
+                            'total_50' => $cek_sirkulasi_next_periode[0]['total_50'] - 1,
+                            'total_rate' => $cek_sirkulasi_next_periode[0]['total_rate'] + 1,
+                        );
+                        $this->M_Teacher->updateDataSirkulasiLesson($data, $cek_sirkulasi_next_periode[0]['no_sirkulasi_lesson']);
+                        if ($cek_sirkulasi[0]['created_at'] == NULL) {
+                            $data_update_sirkulasi = array(
+                                'created_at' => $created_at,
+                                'last_updated_50' => $created_at,
+                                'total_50' => $total_50 + 1,
+                                'total' => $total + 1
+                            );
+                        } else {
+                            $data_update_sirkulasi = array(
+                                'last_updated_50' => $created_at,
+                                'total_50' => $total_50 + 1,
+                                'total' => $total + 1
+                            );
+                        }
+                    } else {
+                        if ($cek_sirkulasi[0]['rate_created_at'] == NULL) {
+                            $data_update_sirkulasi = array(
+                                'rate_created_at' => $created_at,
+                                'last_updated_rate' => $created_at,
+                                'total_rate' => $total_rate + 1,
+                                'total' => $total + 1
+                            );
+                        } else {
+                            $data_update_sirkulasi = array(
+                                'last_updated_rate' => $created_at,
+                                'total_rate' => $total_rate + 1,
+                                'total' => $total + 1
+                            );
+                        }
+                    }
+                    $this->M_Teacher->updateDataSirkulasiLesson($data_update_sirkulasi, $no_sirkulasi_lesson);
+                } else {
+                    if (count($get_data_50_next_periode) > 0) {
+                        $data = array(
+                            'total_50' => intval($cek_sirkulasi_next_periode[0]['total_50']) - 1,
+                            'total_rate' => intval($cek_sirkulasi_next_periode[0]['total_rate']) + 1,
+                            'rate_created_at' => $created_at,
+                            'last_updated_rate' => $created_at,
+                        );
+                        $this->M_Teacher->updateDataSirkulasiLesson($data, $cek_sirkulasi_next_periode[0]['no_sirkulasi_lesson']);
+                        $data_sirkulasi = array(
+                            'no_sirkulasi_lesson' => $no_sirkulasi_lesson,
+                            'id_teacher' => $id_teacher,
+                            'id_student' => $id_student,
+                            'tipe' => $tipe,
+                            'id_list_package_offline' => $id_list_package_offline,
+                            'rate' => $teacher_percentage,
+                            'total_50' => 1,
+                            'total_rate' => 0,
+                            'total' => 1,
+                            'created_at' => $created_at,
+                            'last_updated_50' => $created_at,
+                            'rate_created_at' => NULL,
+                            'last_updated_rate' => NULL,
+                        );
+                    } else {
+                        $data_sirkulasi = array(
+                            'no_sirkulasi_lesson' => $no_sirkulasi_lesson,
+                            'id_teacher' => $id_teacher,
+                            'id_student' => $id_student,
+                            'tipe' => $tipe,
+                            'id_list_package_offline' => $id_list_package_offline,
+                            'rate' => $teacher_percentage,
+                            'total_50' => 0,
+                            'total_rate' => 1,
+                            'total' => 1,
+                            'created_at' => NULL,
+                            'last_updated_50' => NULL,
+                            'rate_created_at' => $created_at,
+                            'last_updated_rate' => $created_at,
+                        );
+                    }
+                    $this->M_Teacher->addDataSirkulasiLesson($data_sirkulasi);
+                }
+                $tipe_rate = $teacher_percentage;
+            } else {
+                if (count($cek_sirkulasi) > 0) {
+                    $data_update_sirkulasi = null;
+
+                    $total = $cek_sirkulasi[0]['total'];
+                    $total_50 = $cek_sirkulasi[0]['total_50'];
+                    $total_rate = $cek_sirkulasi[0]['total_rate'];
+
+                    if ($total_50 >= $potongan) {
+                        if ($cek_sirkulasi[0]['rate_created_at'] == NULL) {
+                            $data_update_sirkulasi = array(
+                                'rate_created_at' => $created_at,
+                                'last_updated_rate' => $created_at,
+                                'total_rate' => $total_rate + 1,
+                                'total' => $total + 1
+                            );
+                        } else {
+                            $data_update_sirkulasi = array(
+                                'last_updated_rate' => $created_at,
+                                'total_rate' => $total_rate + 1,
+                                'total' => $total + 1
+                            );
+                        }
+                        $tipe_rate = $teacher_percentage;
+                    } else {
+                        $data_update_sirkulasi = array(
+                            'last_updated_50' => $created_at,
+                            'total_50' => $total_50 + 1,
+                            'total' => $total + 1
+                        );
+                        if ($is_new == 2) {
+                            $tipe_rate = $teacher_percentage;
+                        } else {
+                            $tipe_rate = 50;
+                        }
+                    }
+                    $this->M_Teacher->updateDataSirkulasiLesson($data_update_sirkulasi, $no_sirkulasi_lesson);
+                } else {
+                    $data_sirkulasi = array(
+                        'no_sirkulasi_lesson' => $no_sirkulasi_lesson,
+                        'id_teacher' => $id_teacher,
+                        'id_student' => $id_student,
+                        'tipe' => $tipe,
+                        'id_list_package_offline' => $id_list_package_offline,
+                        'rate' => $teacher_percentage,
+                        'total_50' => 1,
+                        'total_rate' => 0,
+                        'total' => 1,
+                        'created_at' => $created_at,
+                        'last_updated_50' => $created_at,
+                    );
+                    $this->M_Teacher->addDataSirkulasiLesson($data_sirkulasi);
+                    $tipe_rate = 50;
+                }
+            }
+
+            if ($tipe_rate != 50) {
+                if (count($get_data_50_next_periode) > 0) {
+                    $tipe_rate = 50;
+                    $data = array(
+                        'rate' => $teacher_percentage,
+                        'price' => $price_paket * $teacher_percentage / 100,
+                        // 'price' => $price * $teacher_percentage / 100,
+                    );
+                    $this->M_Teacher->updateDataSirkulasiLessonDetail($data, $get_data_50_next_periode[0]['id_sirkulasi_lesson_detail']);
+                } else {
+                    $tipe_rate = $teacher_percentage;
+                }
+            }
+
+            $data_sirkulasi_lesson_detail = array(
+                'no_sirkulasi_lesson' => $no_sirkulasi_lesson,
+                'id_teacher' => $id_teacher,
+                'id_student' => $id_student,
+                'lesson_date' => $created_at,
+                'id_list_package_offline' => $id_list_package_offline,
+                'tipe' => $tipe,
+                'rate' => $tipe_rate,
+                'price' => $price_paket * $tipe_rate / 100,
+                'paket' => $paket,
+            );
+            $this->M_Teacher->addDataSirkulasiLessonDetail($data_sirkulasi_lesson_detail);
+
+            //nomor feereport 
+            //FER/210629/004
+            $startdate = strtotime($created_at);
+            $temp_date_sirkulasi =  date("Ym", $startdate);
+            $no_sirkulasi_feereport = "FER/" . $temp_date_sirkulasi . "/" . $temp_id_teacher . "/001";
+            $data_sirkulasi_feereport = $this->M_Teacher->getData_sirkulasi_feereport(null, $no_sirkulasi_feereport);
+            $data_sirkulasi_feereport_detail = $this->M_Teacher->getData_sirkulasi_feereport_detail(null, $no_sirkulasi_feereport, $tipe, $no_sirkulasi_lesson);
+
+            $data_sirkulasi_feereport_next_periode = $this->M_Teacher->getData_sirkulasi_feereport(null, null, 0, $id_teacher, $effectiveDate);
+
+            if ((count($get_data_before_periode) + count($get_data_after_periode)) >= $potongan) {
+                if (count($get_data_50_next_periode) > 0) {
+                    $sirkulasi_detail_after = $this->M_Teacher->getData_sirkulasi_feereport_detail(null, $data_sirkulasi_feereport_next_periode[0]["no_sirkulasi_feereport"], $tipe, $cek_sirkulasi_next_periode[0]['no_sirkulasi_lesson']);
+                    $data = array(
+                        'price' => $sirkulasi_detail_after[0]['price'] - ($price_paket * 50 / 100) + ($price_paket * $teacher_percentage / 100),
+                    );
+                    $this->db->update('sirkulasi_feereport_detail', $data, ['id' => $sirkulasi_detail_after[0]['id']]);
+
+                    $discount = (intval($data_sirkulasi_feereport_next_periode[0]['price']) - ($price_paket * 50 / 100) + ($price_paket * $teacher_percentage / 100)) * intval($data_sirkulasi_feereport_next_periode[0]['discount']) / 100;
+                    $price_temp_feereport = intval($data_sirkulasi_feereport_next_periode[0]['price']) - ($price_paket * 50 / 100) + ($price_paket * $teacher_percentage / 100);
+                    $data2 =  [
+                        'price' => $price_temp_feereport,
+                        'total_price' => $price_temp_feereport - $discount,
+                        'updated_at' => $created_at,
+                    ];
+                    $this->db->update('sirkulasi_feereport', $data2, ['id_sirkulasi_feereport' => $data_sirkulasi_feereport_next_periode[0]['id_sirkulasi_feereport']]);
+                }
+            }
+
+            $data2 = [];
+            $data3 = [];
+            $price = $price_paket * $tipe_rate / 100;
+            if (count($data_sirkulasi_feereport) == 0) {
+                $data2 =  [
+                    'no_sirkulasi_feereport' => $no_sirkulasi_feereport,
+                    'id_teacher' => $this->input->post('id_teacher'),
+                    'created_at' => $created_at,
+                    'updated_at' => $created_at,
+                    'price' => $price,
+                    'total_price' => $price,
+                ];
+                $data3 = [
+                    'no_sirkulasi_feereport' => $no_sirkulasi_feereport,
+                    'id_barang' => $no_sirkulasi_lesson,
+                    'id_teacher' => $this->input->post('id_teacher'),
+                    'tipe' => $tipe,
+                    'price' => $price,
+                ];
+                $this->db->insert('sirkulasi_feereport', $data2);
+                $this->db->insert('sirkulasi_feereport_detail', $data3);
+            } else {
+                if ($data_sirkulasi_feereport[0]['status_approved'] == 0) {
+                    $discount = (intval($data_sirkulasi_feereport[0]['price']) + intval($price)) * intval($data_sirkulasi_feereport[0]['discount']) / 100;
+                    $data2 =  [
+                        'price' => intval($data_sirkulasi_feereport[0]['price']) + intval($price),
+                        'total_price' => intval($data_sirkulasi_feereport[0]['price']) + intval($price) - $discount,
+                        'updated_at' => $created_at,
+                    ];
+                    $this->db->update('sirkulasi_feereport', $data2, ['id_sirkulasi_feereport' => $data_sirkulasi_feereport[0]['id_sirkulasi_feereport']]);
+
+                    if (count($data_sirkulasi_feereport_detail) == 0) {
+                        $data3 = [
+                            'no_sirkulasi_feereport' => $data_sirkulasi_feereport[0]['no_sirkulasi_feereport'],
+                            'id_teacher' => $this->input->post('id_teacher'),
+                            'id_barang' => $no_sirkulasi_lesson,
+                            'tipe' => $tipe,
+                            'price' => $price,
+                        ];
+                        $this->db->insert('sirkulasi_feereport_detail', $data3);
+                    } else {
+                        $data3 = [
+                            'price' => intval($data_sirkulasi_feereport_detail[0]['price']) + intval($price),
+                        ];
+                        $this->db->update('sirkulasi_feereport_detail', $data3, ['id' => $data_sirkulasi_feereport_detail[0]['id']]);
+                    }
+                }
+            }
+        }
+
+        $data = array(
+            'status' => $this->input->post('status'),
+        );
+        $data2 = $this->M_Teacher->update_event_schedule_package_offline($data, $this->input->post('id_schedule_online'));
+
+        $pack_online = $this->M_Teacher->getData_pack_offline($id_list_package_offline);
+        $schedule_online = $this->M_Teacher->getData_schedule_package_offline(null, $id_list_package_offline);
+        $schedule_cancel = $this->M_Teacher->getData_schedule_package_offline(null, $id_list_package_offline, 3);
+        $schedule_new = $this->M_Teacher->getData_schedule_package_offline(null, $id_list_package_offline, 4);
+        $count_package = [];
+        foreach ($schedule_online as $so) {
+            if ($so['status'] == 2 || ($so['status'] == 3 && $so['date_update_cancel'] != NULL)) :
+                $count_package[] = $so['id_schedule_package_offline'];
+            endif;
+        }
+
+        $pack_package = $pack_online[0]['total_package'];
+        $count1 = intval($pack_package) - intval(count($count_package));
+        $count3 = 0;
+        foreach ($schedule_cancel as $sc) {
+            if ($sc['date_update_cancel'] == NULL) {
+                $count3++;
+            }
+        }
+        $temp_event[] = " Lesson Package :";
+        $temp_event[] = '<span class="badge badge-primary">' . $count1 . ' package (' . $count1 . ' meeting)</span> ';
+        $temp_event[] = '<input type="hidden" id="countPackage" name="countPackage" value="' . $count1 . '">';
+        if ($count3 > 0) {
+            $temp_event[] = "<br>";
+            $temp_event[] = "Lesson Cancel = ";
+            $temp_event[] = '<span class="badge badge-danger">' . $count3 . ' lesson</span>, Please change date!';
+        }
+        $temp_event[] = '<input type="hidden" id="countCancel" name="countCancel" value="' . $count3 . '">';
+
+        $event_join = implode(" ", $temp_event);
+        echo $event_join;
+    }
+
+    function reschedule_package_offline()
+    {
+        $this->cekLogin();
+
+        $id_list_package_offline = $this->input->post('id_list_package_offline');
+        $is_new = $this->input->post('is_new');
+
+        $teacher_percentage = $this->input->post('teacher_percentage');
+        $paket = $this->input->post('paket');
+        $price = $this->input->post('price');
+        $created_at = $this->input->post('date_update_cancel');
+        $id_student = $this->input->post('id_student');
+        $id_teacher = $this->input->post('id_teacher');
+        $temp_id_student = substr($id_student, 3);
+        $temp_id_teacher = substr($id_teacher, 3);
+        $tipe = 3;
+        $tipe_rate = '';
+        $potongan = $this->input->post('potongan');
+        $price_paket = $this->input->post('price_paket');
+
+        //nomor sirkulasi lesson
+        //LESS/002/015/1 => tipe online lesson
+
+        $no_sirkulasi_lesson = 'LESS/' .  $temp_id_teacher . "/" . $temp_id_student . "/" . $tipe . "/" . $id_list_package_offline;
+        $cek_sirkulasi = $this->M_Teacher->getData_sirkulasi_lesson(null, $no_sirkulasi_lesson, $id_teacher, $id_student, $tipe);
+
+        $periode_now = substr($created_at, 0, 7);
+        $effectiveDate = date($periode_now);
+        $effectiveDate = date('Y-m', strtotime("+1 months", strtotime($effectiveDate)));
+        $temp_period = $effectiveDate . "-01";
+        //cek next periode
+        $get_data_50_next_periode = $this->M_Teacher->getData_sirkulasi_lesson_detail(null, null, $id_teacher, $id_student, $tipe, null, 50, $temp_period);
+        //cek before periode
+        $get_data_before_periode = $this->M_Teacher->getData_sirkulasi_lesson_detail_before($id_teacher, $id_student, $tipe, $created_at);
+        $get_data_after_periode = $this->M_Teacher->getData_sirkulasi_lesson_detail_after($id_teacher, $id_student, $tipe, $created_at);
+        if (count($get_data_50_next_periode) > 0) {
+            $cek_sirkulasi_next_periode = $this->M_Teacher->getData_sirkulasi_lesson(null, $get_data_50_next_periode[0]['no_sirkulasi_lesson'], $id_teacher, $id_student, $tipe);
+        }
+
+        if ((count($get_data_before_periode) + count($get_data_after_periode)) >= $potongan) {
+            if (count($cek_sirkulasi) > 0) {
+                $data_update_sirkulasi = null;
+                $total = $cek_sirkulasi[0]['total'];
+                $total_rate = $cek_sirkulasi[0]['total_rate'];
+                $total_50 = $cek_sirkulasi[0]['total_50'];
+
+                if (count($get_data_50_next_periode) > 0) {
+                    $data = array(
+                        'total_50' => $cek_sirkulasi_next_periode[0]['total_50'] - 1,
+                        'total_rate' => $cek_sirkulasi_next_periode[0]['total_rate'] + 1,
+                    );
+                    $this->M_Teacher->updateDataSirkulasiLesson($data, $cek_sirkulasi_next_periode[0]['no_sirkulasi_lesson']);
+                    if ($cek_sirkulasi[0]['created_at'] == NULL) {
+                        $data_update_sirkulasi = array(
+                            'created_at' => $created_at,
+                            'last_updated_50' => $created_at,
+                            'total_50' => $total_50 + 1,
+                            'total' => $total + 1
+                        );
+                    } else {
+                        $data_update_sirkulasi = array(
+                            'last_updated_50' => $created_at,
+                            'total_50' => $total_50 + 1,
+                            'total' => $total + 1
+                        );
+                    }
+                } else {
+                    if ($cek_sirkulasi[0]['rate_created_at'] == NULL) {
+                        $data_update_sirkulasi = array(
+                            'rate_created_at' => $created_at,
+                            'last_updated_rate' => $created_at,
+                            'total_rate' => $total_rate + 1,
+                            'total' => $total + 1
+                        );
+                    } else {
+                        $data_update_sirkulasi = array(
+                            'last_updated_rate' => $created_at,
+                            'total_rate' => $total_rate + 1,
+                            'total' => $total + 1
+                        );
+                    }
+                }
+                $this->M_Teacher->updateDataSirkulasiLesson($data_update_sirkulasi, $no_sirkulasi_lesson);
+            } else {
+                if (count($get_data_50_next_periode) > 0) {
+                    $data = array(
+                        'total_50' => intval($cek_sirkulasi_next_periode[0]['total_50']) - 1,
+                        'total_rate' => intval($cek_sirkulasi_next_periode[0]['total_rate']) + 1,
+                        'rate_created_at' => $created_at,
+                        'last_updated_rate' => $created_at,
+                    );
+                    $this->M_Teacher->updateDataSirkulasiLesson($data, $cek_sirkulasi_next_periode[0]['no_sirkulasi_lesson']);
+                    $data_sirkulasi = array(
+                        'no_sirkulasi_lesson' => $no_sirkulasi_lesson,
+                        'id_teacher' => $id_teacher,
+                        'id_student' => $id_student,
+                        'tipe' => $tipe,
+                        'id_list_package_offline' => $id_list_package_offline,
+                        'rate' => $teacher_percentage,
+                        'total_50' => 1,
+                        'total_rate' => 0,
+                        'total' => 1,
+                        'created_at' => $created_at,
+                        'last_updated_50' => $created_at,
+                        'rate_created_at' => NULL,
+                        'last_updated_rate' => NULL,
+                    );
+                } else {
+                    $data_sirkulasi = array(
+                        'no_sirkulasi_lesson' => $no_sirkulasi_lesson,
+                        'id_teacher' => $id_teacher,
+                        'id_student' => $id_student,
+                        'tipe' => $tipe,
+                        'id_list_package_offline' => $id_list_package_offline,
+                        'rate' => $teacher_percentage,
+                        'total_50' => 0,
+                        'total_rate' => 1,
+                        'total' => 1,
+                        'created_at' => NULL,
+                        'last_updated_50' => NULL,
+                        'rate_created_at' => $created_at,
+                        'last_updated_rate' => $created_at,
+                    );
+                }
+                $this->M_Teacher->addDataSirkulasiLesson($data_sirkulasi);
+            }
+            $tipe_rate = $teacher_percentage;
+        } else {
+            if (count($cek_sirkulasi) > 0) {
+                $data_update_sirkulasi = null;
+
+                $total = $cek_sirkulasi[0]['total'];
+                $total_50 = $cek_sirkulasi[0]['total_50'];
+                $total_rate = $cek_sirkulasi[0]['total_rate'];
+
+                if ($total_50 >= $potongan) {
+                    if ($cek_sirkulasi[0]['rate_created_at'] == NULL) {
+                        $data_update_sirkulasi = array(
+                            'rate_created_at' => $created_at,
+                            'last_updated_rate' => $created_at,
+                            'total_rate' => $total_rate + 1,
+                            'total' => $total + 1
+                        );
+                    } else {
+                        $data_update_sirkulasi = array(
+                            'last_updated_rate' => $created_at,
+                            'total_rate' => $total_rate + 1,
+                            'total' => $total + 1
+                        );
+                    }
+                    $tipe_rate = $teacher_percentage;
+                } else {
+                    $data_update_sirkulasi = array(
+                        'last_updated_50' => $created_at,
+                        'total_50' => $total_50 + 1,
+                        'total' => $total + 1
+                    );
+                    if ($is_new == 2) {
+                        $tipe_rate = $teacher_percentage;
+                    } else {
+                        $tipe_rate = 50;
+                    }
+                }
+                $this->M_Teacher->updateDataSirkulasiLesson($data_update_sirkulasi, $no_sirkulasi_lesson);
+            } else {
+                $data_sirkulasi = array(
+                    'no_sirkulasi_lesson' => $no_sirkulasi_lesson,
+                    'id_teacher' => $id_teacher,
+                    'id_student' => $id_student,
+                    'tipe' => $tipe,
+                    'id_list_package_offline' => $id_list_package_offline,
+                    'rate' => $teacher_percentage,
+                    'total_50' => 1,
+                    'total_rate' => 0,
+                    'total' => 1,
+                    'created_at' => $created_at,
+                    'last_updated_50' => $created_at,
+                );
+                $this->M_Teacher->addDataSirkulasiLesson($data_sirkulasi);
+                $tipe_rate = 50;
+            }
+        }
+
+        if ($tipe_rate != 50) {
+            if (count($get_data_50_next_periode) > 0) {
+                $tipe_rate = 50;
+                $data = array(
+                    'rate' => $teacher_percentage,
+                    'price' => $price_paket * $teacher_percentage / 100,
+                    // 'price' => $price * $teacher_percentage / 100,
+                );
+                $this->M_Teacher->updateDataSirkulasiLessonDetail($data, $get_data_50_next_periode[0]['id_sirkulasi_lesson_detail']);
+            } else {
+                $tipe_rate = $teacher_percentage;
+            }
+        }
+
+        $data_sirkulasi_lesson_detail = array(
+            'no_sirkulasi_lesson' => $no_sirkulasi_lesson,
+            'id_student' => $id_student,
+            'id_teacher' => $id_teacher,
+            'id_list_package_offline' => $id_list_package_offline,
+            'lesson_date' => $created_at,
+            'tipe' => $tipe,
+            'rate' => $tipe_rate,
+            'paket' => $paket,
+            'price' => $price_paket,
+        );
+        $this->M_Teacher->addDataSirkulasiLessonDetail($data_sirkulasi_lesson_detail);
+
+        //nomor feereport 
+        //FER/210629/004
+        $startdate = strtotime($created_at);
+        $temp_date_sirkulasi =  date("Ym", $startdate);
+        $no_sirkulasi_feereport = "FER/" . $temp_date_sirkulasi . "/" . $temp_id_teacher . "/001";
+        $data_sirkulasi_feereport = $this->M_Teacher->getData_sirkulasi_feereport(null, $no_sirkulasi_feereport);
+        $data_sirkulasi_feereport_detail = $this->M_Teacher->getData_sirkulasi_feereport_detail(null, $no_sirkulasi_feereport, $tipe, $no_sirkulasi_lesson);
+
+        $data_sirkulasi_feereport_next_periode = $this->M_Teacher->getData_sirkulasi_feereport(null, null, 0, $id_teacher, $effectiveDate);
+
+        if ((count($get_data_before_periode) + count($get_data_after_periode)) >= $potongan) {
+            if (count($get_data_50_next_periode) > 0) {
+                $sirkulasi_detail_after = $this->M_Teacher->getData_sirkulasi_feereport_detail(null, $data_sirkulasi_feereport_next_periode[0]["no_sirkulasi_feereport"], $tipe, $cek_sirkulasi_next_periode[0]['no_sirkulasi_lesson']);
+                $data = array(
+                    'price' => $sirkulasi_detail_after[0]['price'] - ($price_paket * 50 / 100) + ($price_paket * $teacher_percentage / 100),
+                );
+                $this->db->update('sirkulasi_feereport_detail', $data, ['id' => $sirkulasi_detail_after[0]['id']]);
+
+                $discount = (intval($data_sirkulasi_feereport_next_periode[0]['price']) - ($price_paket * 50 / 100) + ($price_paket * $teacher_percentage / 100)) * intval($data_sirkulasi_feereport_next_periode[0]['discount']) / 100;
+                $price_temp_feereport = intval($data_sirkulasi_feereport_next_periode[0]['price']) - ($price_paket * 50 / 100) + ($price_paket * $teacher_percentage / 100);
+                $data2 =  [
+                    'price' => $price_temp_feereport,
+                    'total_price' => $price_temp_feereport - $discount,
+                    'updated_at' => $created_at,
+                ];
+                $this->db->update('sirkulasi_feereport', $data2, ['id_sirkulasi_feereport' => $data_sirkulasi_feereport_next_periode[0]['id_sirkulasi_feereport']]);
+            }
+        }
+
+        $data2 = [];
+        $data3 = [];
+        $price = $price_paket * $tipe_rate / 100;
+        if (count($data_sirkulasi_feereport) == 0) {
+            $data2 =  [
+                'no_sirkulasi_feereport' => $no_sirkulasi_feereport,
+                'id_teacher' => $this->input->post('id_teacher'),
+                'created_at' => $created_at,
+                'updated_at' => $created_at,
+                'price' => $price,
+                'total_price' => $price,
+            ];
+            $data3 = [
+                'no_sirkulasi_feereport' => $no_sirkulasi_feereport,
+                'id_barang' => $no_sirkulasi_lesson,
+                'id_teacher' => $this->input->post('id_teacher'),
+                'tipe' => $tipe,
+                'price' => $price,
+            ];
+            $this->db->insert('sirkulasi_feereport', $data2);
+            $this->db->insert('sirkulasi_feereport_detail', $data3);
+        } else {
+            if ($data_sirkulasi_feereport[0]['status_approved'] == 0) {
+                $discount = (intval($data_sirkulasi_feereport[0]['price']) + intval($price)) * intval($data_sirkulasi_feereport[0]['discount']) / 100;
+                $data2 =  [
+                    'price' => intval($data_sirkulasi_feereport[0]['price']) + intval($price),
+                    'total_price' => intval($data_sirkulasi_feereport[0]['price']) + intval($price) - $discount,
+                    'updated_at' => $created_at,
+                ];
+                $this->db->update('sirkulasi_feereport', $data2, ['id_sirkulasi_feereport' => $data_sirkulasi_feereport[0]['id_sirkulasi_feereport']]);
+
+                if (count($data_sirkulasi_feereport_detail) == 0) {
+                    $data3 = [
+                        'no_sirkulasi_feereport' => $data_sirkulasi_feereport[0]['no_sirkulasi_feereport'],
+                        'id_teacher' => $this->input->post('id_teacher'),
+                        'id_barang' => $no_sirkulasi_lesson,
+                        'tipe' => $tipe,
+                        'price' => $price,
+                    ];
+                    $this->db->insert('sirkulasi_feereport_detail', $data3);
+                } else {
+                    $data3 = [
+                        'price' => intval($data_sirkulasi_feereport_detail[0]['price']) + intval($price),
+                    ];
+                    $this->db->update('sirkulasi_feereport_detail', $data3, ['id' => $data_sirkulasi_feereport_detail[0]['id']]);
+                }
+            }
+        }
+
+        $data = array(
+            'date_update_cancel' => $this->input->post('date_update_cancel'),
+        );
+        $data2 = $this->M_Teacher->update_event_schedule_package_offline($data, $this->input->post('id_schedule_pack'));
+
+        $pack_online = $this->M_Teacher->getData_pack_offline($id_list_package_offline);
+        $schedule_online = $this->M_Teacher->getData_schedule_package_offline(null, $id_list_package_offline);
+        $schedule_cancel = $this->M_Teacher->getData_schedule_package_offline(null, $id_list_package_offline, 3);
+        $schedule_new = $this->M_Teacher->getData_schedule_package_offline(null, $id_list_package_offline, 4);
+        $count_package = [];
+        foreach ($schedule_online as $so) {
+            if ($so['status'] == 2 || ($so['status'] == 3 && $so['date_update_cancel'] != NULL)) :
+                $count_package[] = $so['id_schedule_package_offline'];
+            endif;
+        }
+
+        $pack_package = $pack_online[0]['total_package'];
+        $count1 = intval($pack_package) - intval(count($count_package));
+        $count3 = 0;
+        foreach ($schedule_cancel as $sc) {
+            if ($sc['date_update_cancel'] == NULL) {
+                $count3++;
+            }
+        }
+        $temp_event[] = " Lesson Package :";
+        $temp_event[] = '<span class="badge badge-primary">' . $count1 . ' package (' . $count1 . ' meeting)</span> ';
+        $temp_event[] = '<input type="hidden" id="countPackage" name="countPackage" value="' . $count1 . '">';
+        if ($count3 > 0) {
+            $temp_event[] = "<br>";
+            $temp_event[] = "Lesson Cancel = ";
+            $temp_event[] = '<span class="badge badge-danger">' . $count3 . ' lesson</span>, Please change date!';
+        }
+        $temp_event[] = '<input type="hidden" id="countCancel" name="countCancel" value="' . $count3 . '">';
+
+        $event_join = implode(" ", $temp_event);
+        echo $event_join;
+    }
+
     public function cek_package($id_pack, $jenis = NULL)
     {
         $this->cekLogin();
@@ -1748,12 +2661,12 @@ class C_Teacher extends CI_Controller
             }
         }
         if ($jenis == 1) :
-            $temp_event[] = "Practical lesson =";
-            $temp_event[] = '<span class="badge badge-primary">' . $count1 . ' lesson</span> ';
+            $temp_event[] = "Lesson Package : ";
+            $temp_event[] = '<span class="badge badge-primary">' . round($count1 / 2) . ' package (' . $count1 . ' meeting)</span> ';
             $temp_event[] = '<input type="hidden" id="countPractical" name="countPractical" value="' . $count1 . '">';
         else :
-            $temp_event[] = "Theory lesson = ";
-            $temp_event[] = '<span class="badge badge-primary">' . $count2 . ' lesson</span>';
+            $temp_event[] = "Lesson Package : ";
+            $temp_event[] = '<span class="badge badge-primary">' . $count2 . ' package (' . $count2 . ' meeting)</span> ';
             $temp_event[] = '<input type="hidden" id="countTheory" name="countTheory" value="' . $count2 . '">';
         endif;
         if ($count3 > 0) {
@@ -1779,6 +2692,34 @@ class C_Teacher extends CI_Controller
         echo $event_join;
     }
 
+    function tempDuluCek()
+    {
+        $no_sirkulasi_lesson = 'LESS/002/0011/1/195';
+        $cek_sirkulasi = $this->M_Teacher->getData_sirkulasi_lesson(null, $no_sirkulasi_lesson, "200002", "1000011", 1);
+
+        $get_data_50_next_periode = $this->M_Teacher->getData_sirkulasi_lesson_detail(null, null, "200002", "1000011", 1, null, 50, "2022-05-01");
+        $cek_sirkulasi_next_periode = $this->M_Teacher->getData_sirkulasi_lesson(null, $get_data_50_next_periode[0]['no_sirkulasi_lesson'], "200002", "1000011", 1);
+
+        $get_data_before_periode = $this->M_Teacher->getData_sirkulasi_lesson_detail_before("200002", "1000011", 1, "2022-04-26 00:00:00");
+        $get_data_after_periode = $this->M_Teacher->getData_sirkulasi_lesson_detail_after("200002", "1000011", 1, "2022-04-26 00:00:00");
+
+        echo count($get_data_before_periode);
+        echo count($get_data_after_periode);
+
+        echo (count($get_data_before_periode) + count($get_data_after_periode));
+
+        if (count($cek_sirkulasi) > 0) {
+            echo "wioo";
+        }
+        echo var_dump($cek_sirkulasi);
+        echo "<br>";
+        echo "<br>";
+        echo var_dump($get_data_50_next_periode[0]);
+        echo "<br>";
+        echo "<br>";
+        echo var_dump($cek_sirkulasi_next_periode);
+    }
+
     function update_schedule_package()
     {
         $this->cekLogin();
@@ -1798,106 +2739,358 @@ class C_Teacher extends CI_Controller
             $temp_id_teacher = substr($id_teacher, 3);
             $tipe = $jenis;
             $tipe_rate = '';
+            $potongan = $this->input->post('potongan');
+            $price_paket_theory = $this->input->post('price_paket_theory');
+            $price_paket_pratical = $this->input->post('price_paket_pratical');
 
-            //cek total id_student -> <- id_teacher
             //nomor sirkulasi lesson
             //LESS/002/015/1 => tipe online lesson
+            //LESS/002/015/2 => tipe theory lesson
 
             $no_sirkulasi_lesson = 'LESS/' .  $temp_id_teacher . "/" . $temp_id_student . "/" . $tipe . "/" . $id_list_pack;
+            $cek_sirkulasi = $this->M_Teacher->getData_sirkulasi_lesson(null, $no_sirkulasi_lesson, $id_teacher, $id_student, $tipe);
 
-            $cek_sirkulasi = $this->M_Teacher->getData_sirkulasi_lesson(null, $no_sirkulasi_lesson);
-            // echo var_dump($no_sirkulasi_lesson);
-            // echo "<br>";
-            // echo var_dump($cek_sirkulasi);
-            // echo "<br>";
-            // die();
-
-
-            if (count($cek_sirkulasi) > 0) {
-                $data_update_sirkulasi = null;
-
-                $total = $cek_sirkulasi[0]['total'];
-                $total_50 = $cek_sirkulasi[0]['total_50'];
-                $total_rate = $cek_sirkulasi[0]['total_rate'];
-
-                if ($tipe == 1) {
-                    if ($total_50 >= 8) {
-                        if ($cek_sirkulasi[0]['rate_created_at'] == NULL) {
-                            $data_update_sirkulasi = array(
-                                'rate_created_at' => $created_at,
-                                'last_updated_rate' => $created_at,
-                                'total_rate' => $total_rate + 1,
-                                'total' => $total + 1
-                            );
-                        } else {
-                            $data_update_sirkulasi = array(
-                                'last_updated_rate' => $created_at,
-                                'total_rate' => $total_rate + 1,
-                                'total' => $total + 1
-                            );
-                        }
-                        $tipe_rate = $teacher_percentage;
-                    } else {
-                        $data_update_sirkulasi = array(
-                            'last_updated_50' => $created_at,
-                            'total_50' => $total_50 + 1,
-                            'total' => $total + 1
-                        );
-                        if($is_new == 2){
-                            $tipe_rate = $teacher_percentage;
-                        }else{
-                            $tipe_rate = 50;
-                        }
-                    }
-                }
-                if ($tipe == 2) {
-                    if ($total_50 >= 4) {
-                        if ($cek_sirkulasi[0]['rate_created_at'] == NULL) {
-                            $data_update_sirkulasi = array(
-                                'rate_created_at' => $created_at,
-                                'last_updated_rate' => $created_at,
-                                'total_rate' => $total_rate + 1,
-                                'total' => $total + 1
-                            );
-                        } else {
-                            $data_update_sirkulasi = array(
-                                'last_updated_rate' => $created_at,
-                                'total_rate' => $total_rate + 1,
-                                'total' => $total + 1
-                            );
-                        }
-                        $tipe_rate = $teacher_percentage;
-                    } else {
-                        $data_update_sirkulasi = array(
-                            'last_updated_50' => $created_at,
-                            'total_50' => $total_50 + 1,
-                            'total' => $total + 1
-                        );
-                        if ($is_new == 2) {
-                            $tipe_rate = $teacher_percentage;
-                        } else {
-                            $tipe_rate = 50;
-                        }
-                    }
-                }
-                $this->M_Teacher->updateDataSirkulasiLesson($data_update_sirkulasi, $no_sirkulasi_lesson);
-            } else {
-                $data_sirkulasi = array(
-                    'no_sirkulasi_lesson' => $no_sirkulasi_lesson,
-                    'id_student' => $id_student,
-                    'id_teacher' => $id_teacher,
-                    'id_list_pack' => $id_list_pack,
-                    'tipe' => $tipe,
-                    'rate' => $teacher_percentage,
-                    'total_50' => 1,
-                    'total_rate' => 0,
-                    'total' => 1,
-                    'created_at' => $created_at,
-                    'last_updated_50' => $created_at,
-                );
-                $this->M_Teacher->addDataSirkulasiLesson($data_sirkulasi);
-                $tipe_rate = 50;
+            $periode_now = substr($created_at, 0, 7);
+            $effectiveDate = date($periode_now);
+            $effectiveDate = date('Y-m', strtotime("+1 months", strtotime($effectiveDate)));
+            $temp_period = $effectiveDate . "-01";
+            //cek next periode
+            $get_data_50_next_periode = $this->M_Teacher->getData_sirkulasi_lesson_detail(null, null, $id_teacher, $id_student, $tipe, null, 50, $temp_period);
+            //cek before periode
+            $get_data_before_periode = $this->M_Teacher->getData_sirkulasi_lesson_detail_before($id_teacher, $id_student, $tipe, $created_at);
+            $get_data_after_periode = $this->M_Teacher->getData_sirkulasi_lesson_detail_after($id_teacher, $id_student, $tipe, $created_at);
+            if (count($get_data_50_next_periode) > 0) {
+                $cek_sirkulasi_next_periode = $this->M_Teacher->getData_sirkulasi_lesson(null, $get_data_50_next_periode[0]['no_sirkulasi_lesson'], $id_teacher, $id_student, $tipe);
             }
+
+            if ($tipe == 1) {
+                if ((count($get_data_before_periode) + count($get_data_after_periode)) >= ($potongan * 2)) {
+                    if (count($cek_sirkulasi) > 0) {
+                        $data_update_sirkulasi = null;
+                        $total = $cek_sirkulasi[0]['total'];
+                        $total_50 = $cek_sirkulasi[0]['total_50'];
+                        $total_rate = $cek_sirkulasi[0]['total_rate'];
+
+                        if (count($get_data_50_next_periode) > 0) {
+                            $data = array(
+                                'total_50' => $cek_sirkulasi_next_periode[0]['total_50'] - 1,
+                                'total_rate' => $cek_sirkulasi_next_periode[0]['total_rate'] + 1,
+                            );
+                            $this->M_Teacher->updateDataSirkulasiLesson($data, $cek_sirkulasi_next_periode[0]['no_sirkulasi_lesson']);
+
+                            if ($cek_sirkulasi[0]['created_at'] == NULL) {
+                                $data_update_sirkulasi = array(
+                                    'created_at' => $created_at,
+                                    'last_updated_50' => $created_at,
+                                    'total_50' => $total_50 + 1,
+                                    'total' => $total + 1
+                                );
+                            } else {
+                                $data_update_sirkulasi = array(
+                                    'last_updated_50' => $created_at,
+                                    'total_50' => $total_50 + 1,
+                                    'total' => $total + 1
+                                );
+                            }
+                        } else {
+                            if ($cek_sirkulasi[0]['rate_created_at'] == NULL) {
+                                $data_update_sirkulasi = array(
+                                    'rate_created_at' => $created_at,
+                                    'last_updated_rate' => $created_at,
+                                    'total_rate' => $total_rate + 1,
+                                    'total' => $total + 1
+                                );
+                            } else {
+                                $data_update_sirkulasi = array(
+                                    'last_updated_rate' => $created_at,
+                                    'total_rate' => $total_rate + 1,
+                                    'total' => $total + 1
+                                );
+                            }
+                        }
+                        $this->M_Teacher->updateDataSirkulasiLesson($data_update_sirkulasi, $no_sirkulasi_lesson);
+                    } else {
+                        if (count($get_data_50_next_periode) > 0) {
+                            $data = array(
+                                'total_50' => intval($cek_sirkulasi_next_periode[0]['total_50']) - 1,
+                                'total_rate' => intval($cek_sirkulasi_next_periode[0]['total_rate']) + 1,
+                                'rate_created_at' => $created_at,
+                                'last_updated_rate' => $created_at,
+                            );
+                            $this->M_Teacher->updateDataSirkulasiLesson($data, $cek_sirkulasi_next_periode[0]['no_sirkulasi_lesson']);
+
+                            $data_sirkulasi = array(
+                                'no_sirkulasi_lesson' => $no_sirkulasi_lesson,
+                                'id_student' => $id_student,
+                                'id_teacher' => $id_teacher,
+                                'id_list_pack' => $id_list_pack,
+                                'tipe' => $tipe,
+                                'rate' => $teacher_percentage,
+                                'total_50' => 1,
+                                'total_rate' => 0,
+                                'total' => 1,
+                                'created_at' => $created_at,
+                                'last_updated_50' => $created_at,
+                                'rate_created_at' => NULL,
+                                'last_updated_rate' => NULL,
+                            );
+                        } else {
+                            $data_sirkulasi = array(
+                                'no_sirkulasi_lesson' => $no_sirkulasi_lesson,
+                                'id_student' => $id_student,
+                                'id_teacher' => $id_teacher,
+                                'id_list_pack' => $id_list_pack,
+                                'tipe' => $tipe,
+                                'rate' => $teacher_percentage,
+                                'total_50' => 0,
+                                'total_rate' => 1,
+                                'total' => 1,
+                                'created_at' => NULL,
+                                'last_updated_50' => NULL,
+                                'rate_created_at' => $created_at,
+                                'last_updated_rate' => $created_at,
+                            );
+                        }
+                        $this->M_Teacher->addDataSirkulasiLesson($data_sirkulasi);
+                    }
+                    $tipe_rate = $teacher_percentage;
+                } else {
+                    if (count($cek_sirkulasi) > 0) {
+                        $data_update_sirkulasi = null;
+
+                        $total = $cek_sirkulasi[0]['total'];
+                        $total_50 = $cek_sirkulasi[0]['total_50'];
+                        $total_rate = $cek_sirkulasi[0]['total_rate'];
+
+                        if ($total_50 >= ($potongan * 2)) {
+                            if ($cek_sirkulasi[0]['rate_created_at'] == NULL) {
+                                $data_update_sirkulasi = array(
+                                    'rate_created_at' => $created_at,
+                                    'last_updated_rate' => $created_at,
+                                    'total_rate' => $total_rate + 1,
+                                    'total' => $total + 1
+                                );
+                            } else {
+                                $data_update_sirkulasi = array(
+                                    'last_updated_rate' => $created_at,
+                                    'total_rate' => $total_rate + 1,
+                                    'total' => $total + 1
+                                );
+                            }
+                            $tipe_rate = $teacher_percentage;
+                        } else {
+                            $data_update_sirkulasi = array(
+                                'last_updated_50' => $created_at,
+                                'total_50' => $total_50 + 1,
+                                'total' => $total + 1
+                            );
+                            if ($is_new == 2) {
+                                $tipe_rate = $teacher_percentage;
+                            } else {
+                                $tipe_rate = 50;
+                            }
+                        }
+                        $this->M_Teacher->updateDataSirkulasiLesson($data_update_sirkulasi, $no_sirkulasi_lesson);
+                    } else {
+                        $data_sirkulasi = array(
+                            'no_sirkulasi_lesson' => $no_sirkulasi_lesson,
+                            'id_student' => $id_student,
+                            'id_teacher' => $id_teacher,
+                            'id_list_pack' => $id_list_pack,
+                            'tipe' => $tipe,
+                            'rate' => $teacher_percentage,
+                            'total_50' => 1,
+                            'total_rate' => 0,
+                            'total' => 1,
+                            'created_at' => $created_at,
+                            'last_updated_50' => $created_at,
+                        );
+                        $this->M_Teacher->addDataSirkulasiLesson($data_sirkulasi);
+                        $tipe_rate = 50;
+                    }
+                }
+            }
+
+            if ($tipe == 2) {
+                if ((count($get_data_before_periode) + count($get_data_after_periode)) >= $potongan) {
+                    if (count($cek_sirkulasi) > 0) {
+                        $data_update_sirkulasi = null;
+                        $total = $cek_sirkulasi[0]['total'];
+                        $total_50 = $cek_sirkulasi[0]['total_50'];
+                        $total_rate = $cek_sirkulasi[0]['total_rate'];
+
+                        if (count($get_data_50_next_periode) > 0) {
+                            $data = array(
+                                'total_50' => $cek_sirkulasi_next_periode[0]['total_50'] - 1,
+                                'total_rate' => $cek_sirkulasi_next_periode[0]['total_rate'] + 1,
+                            );
+                            $this->M_Teacher->updateDataSirkulasiLesson($data, $cek_sirkulasi_next_periode[0]['no_sirkulasi_lesson']);
+                            if ($cek_sirkulasi[0]['created_at'] == NULL) {
+                                $data_update_sirkulasi = array(
+                                    'created_at' => $created_at,
+                                    'last_updated_50' => $created_at,
+                                    'total_50' => $total_50 + 1,
+                                    'total' => $total + 1
+                                );
+                            } else {
+                                $data_update_sirkulasi = array(
+                                    'last_updated_50' => $created_at,
+                                    'total_50' => $total_50 + 1,
+                                    'total' => $total + 1
+                                );
+                            }
+                        } else {
+                            if ($cek_sirkulasi[0]['rate_created_at'] == NULL) {
+                                $data_update_sirkulasi = array(
+                                    'rate_created_at' => $created_at,
+                                    'last_updated_rate' => $created_at,
+                                    'total_rate' => $total_rate + 1,
+                                    'total' => $total + 1
+                                );
+                            } else {
+                                $data_update_sirkulasi = array(
+                                    'last_updated_rate' => $created_at,
+                                    'total_rate' => $total_rate + 1,
+                                    'total' => $total + 1
+                                );
+                            }
+                        }
+                        $this->M_Teacher->updateDataSirkulasiLesson($data_update_sirkulasi, $no_sirkulasi_lesson);
+                    } else {
+                        if (count($get_data_50_next_periode) > 0) {
+                            $data = array(
+                                'total_50' => intval($cek_sirkulasi_next_periode[0]['total_50']) - 1,
+                                'total_rate' => intval($cek_sirkulasi_next_periode[0]['total_rate']) + 1,
+                                'rate_created_at' => $created_at,
+                                'last_updated_rate' => $created_at,
+                            );
+                            $this->M_Teacher->updateDataSirkulasiLesson($data, $cek_sirkulasi_next_periode[0]['no_sirkulasi_lesson']);
+                            $data_sirkulasi = array(
+                                'no_sirkulasi_lesson' => $no_sirkulasi_lesson,
+                                'id_student' => $id_student,
+                                'id_teacher' => $id_teacher,
+                                'id_list_pack' => $id_list_pack,
+                                'tipe' => $tipe,
+                                'rate' => $teacher_percentage,
+                                'total_50' => 1,
+                                'total_rate' => 0,
+                                'total' => 1,
+                                'created_at' => $created_at,
+                                'last_updated_50' => $created_at,
+                                'rate_created_at' => NULL,
+                                'last_updated_rate' => NULL,
+                            );
+                        } else {
+                            $data_sirkulasi = array(
+                                'no_sirkulasi_lesson' => $no_sirkulasi_lesson,
+                                'id_student' => $id_student,
+                                'id_teacher' => $id_teacher,
+                                'id_list_pack' => $id_list_pack,
+                                'tipe' => $tipe,
+                                'rate' => $teacher_percentage,
+                                'total_50' => 0,
+                                'total_rate' => 1,
+                                'total' => 1,
+                                'created_at' => NULL,
+                                'last_updated_50' => NULL,
+                                'rate_created_at' => $created_at,
+                                'last_updated_rate' => $created_at,
+                            );
+                        }
+                        $this->M_Teacher->addDataSirkulasiLesson($data_sirkulasi);
+                    }
+                    $tipe_rate = $teacher_percentage;
+                } else {
+                    if (count($cek_sirkulasi) > 0) {
+                        $data_update_sirkulasi = null;
+
+                        $total = $cek_sirkulasi[0]['total'];
+                        $total_50 = $cek_sirkulasi[0]['total_50'];
+                        $total_rate = $cek_sirkulasi[0]['total_rate'];
+
+                        if ($total_50 >= $potongan) {
+                            if ($cek_sirkulasi[0]['rate_created_at'] == NULL) {
+                                $data_update_sirkulasi = array(
+                                    'rate_created_at' => $created_at,
+                                    'last_updated_rate' => $created_at,
+                                    'total_rate' => $total_rate + 1,
+                                    'total' => $total + 1
+                                );
+                            } else {
+                                $data_update_sirkulasi = array(
+                                    'last_updated_rate' => $created_at,
+                                    'total_rate' => $total_rate + 1,
+                                    'total' => $total + 1
+                                );
+                            }
+                            $tipe_rate = $teacher_percentage;
+                        } else {
+                            $data_update_sirkulasi = array(
+                                'last_updated_50' => $created_at,
+                                'total_50' => $total_50 + 1,
+                                'total' => $total + 1
+                            );
+                            if ($is_new == 2) {
+                                $tipe_rate = $teacher_percentage;
+                            } else {
+                                $tipe_rate = 50;
+                            }
+                        }
+                        $this->M_Teacher->updateDataSirkulasiLesson($data_update_sirkulasi, $no_sirkulasi_lesson);
+                    } else {
+                        $data_sirkulasi = array(
+                            'no_sirkulasi_lesson' => $no_sirkulasi_lesson,
+                            'id_student' => $id_student,
+                            'id_teacher' => $id_teacher,
+                            'id_list_pack' => $id_list_pack,
+                            'tipe' => $tipe,
+                            'rate' => $teacher_percentage,
+                            'total_50' => 1,
+                            'total_rate' => 0,
+                            'total' => 1,
+                            'created_at' => $created_at,
+                            'last_updated_50' => $created_at,
+                        );
+                        $this->M_Teacher->addDataSirkulasiLesson($data_sirkulasi);
+                        $tipe_rate = 50;
+                    }
+                }
+            }
+
+            if ($tipe_rate != 50) {
+                if (count($get_data_50_next_periode) > 0) {
+                    $tipe_rate = 50;
+                    $price_next_periode_temp = 0;
+                    if ($tipe == 1) {
+                        $price_next_periode_temp = $price_paket_pratical / 2;
+                        // if ($get_data_50_next_periode[0]['status_pack_theory'] == 1) {
+                        //     $price_next_periode_temp = (($get_data_50_next_periode[0]['price_idr'] - 100000) / 2);
+                        // }
+                    }
+                    if ($tipe == 2) {
+                        $price_next_periode_temp = $price_paket_theory;
+                        // if ($get_data_50_next_periode[0]['status_pack_practical'] == 1) {
+                        //     $price_next_periode_temp = 100000;
+                        // }
+                    }
+                    $data = array(
+                        'rate' => $teacher_percentage,
+                        'price' => $price_next_periode_temp * $teacher_percentage / 100,
+                    );
+                    $this->M_Teacher->updateDataSirkulasiLessonDetail($data, $get_data_50_next_periode[0]['id_sirkulasi_lesson_detail']);
+                } else {
+                    $tipe_rate = $teacher_percentage;
+                }
+            }
+
+            $price_temp_sirkulasi_detail = 0;
+            if ($tipe == 1) {
+                $price_temp_sirkulasi_detail = ($price_paket_pratical / 2) * $tipe_rate / 100;
+            }
+            if ($tipe == 2) {
+                $price_temp_sirkulasi_detail = $price_paket_theory * $tipe_rate / 100;
+            }
+
             $data_sirkulasi_lesson_detail = array(
                 'no_sirkulasi_lesson' => $no_sirkulasi_lesson,
                 'id_student' => $id_student,
@@ -1906,76 +3099,99 @@ class C_Teacher extends CI_Controller
                 'lesson_date' => $created_at,
                 'tipe' => $tipe,
                 'rate' => $tipe_rate,
-                'price' => $price,
+                'price' => $price_temp_sirkulasi_detail,
                 'paket' => $paket,
             );
             $this->M_Teacher->addDataSirkulasiLessonDetail($data_sirkulasi_lesson_detail);
-
-            // echo var_dump($cek_sirkulasi[0]);
-            // die();
 
             //nomor feereport 
             //FER/210629/004
             $startdate = strtotime($created_at);
             $temp_date_sirkulasi =  date("Ym", $startdate);
-            $no_sirkulasi_feereport = "FER/" . $temp_date_sirkulasi . "/" . $temp_id_teacher;
+            $no_sirkulasi_feereport = "FER/" . $temp_date_sirkulasi . "/" . $temp_id_teacher . "/001";
             $data_sirkulasi_feereport = $this->M_Teacher->getData_sirkulasi_feereport(null, $no_sirkulasi_feereport);
-            $data_sirkulasi_feereport_detail = $this->M_Teacher->getData_sirkulasi_feereport_detail(null, $no_sirkulasi_feereport, $tipe);
-            $temp_counter = "FER/" . $temp_date_sirkulasi;
-            $counter = $this->M_Teacher->getData_sirkulasi_feereport(null, $temp_counter);
+            $data_sirkulasi_feereport_detail = $this->M_Teacher->getData_sirkulasi_feereport_detail(null, $no_sirkulasi_feereport, $tipe, $no_sirkulasi_lesson);
+
+            $data_sirkulasi_feereport_next_periode = $this->M_Teacher->getData_sirkulasi_feereport(null, null, 0, $id_teacher, $effectiveDate);
+
+            if ($tipe == 1) {
+                if ((count($get_data_before_periode) + count($get_data_after_periode)) >= ($potongan * 2)) {
+                    if (count($get_data_50_next_periode) > 0) {
+                        $price_next_periode = $price_paket_pratical / 2;
+                        $sirkulasi_detail_after = $this->M_Teacher->getData_sirkulasi_feereport_detail(null, $data_sirkulasi_feereport_next_periode[0]["no_sirkulasi_feereport"], $tipe, $cek_sirkulasi_next_periode[0]['no_sirkulasi_lesson']);
+                        $price_temp_feereport_detail = $sirkulasi_detail_after[0]['price'] / 2;
+                        $data = array(
+                            'price' => $price_temp_feereport_detail - ($price_next_periode * 50 / 100) + ($price_next_periode * $teacher_percentage / 100),
+                        );
+                        $this->db->update('sirkulasi_feereport_detail', $data, ['id' => $sirkulasi_detail_after[0]['id']]);
+
+                        $discount = (intval($data_sirkulasi_feereport_next_periode[0]['price']) - ($price_next_periode * 50 / 100) + ($price_next_periode * $teacher_percentage / 100)) * intval($data_sirkulasi_feereport_next_periode[0]['discount']) / 100;
+                        $price_temp_feereport = intval($data_sirkulasi_feereport_next_periode[0]['price']) - ($price_next_periode * 50 / 100) + ($price_next_periode * $teacher_percentage / 100);
+                        $data2 =  [
+                            'price' => $price_temp_feereport,
+                            'total_price' => $price_temp_feereport - $discount,
+                            'updated_at' => $created_at,
+                        ];
+                        $this->db->update('sirkulasi_feereport', $data2, ['id_sirkulasi_feereport' => $data_sirkulasi_feereport_next_periode[0]['id_sirkulasi_feereport']]);
+                    }
+                }
+            }
+            if ($tipe == 2) {
+                if ((count($get_data_before_periode) + count($get_data_after_periode)) >= $potongan) {
+                    if (count($get_data_50_next_periode) > 0) {
+                        $price_next_periode = $price_paket_theory;
+                        $sirkulasi_detail_after = $this->M_Teacher->getData_sirkulasi_feereport_detail(null, $data_sirkulasi_feereport_next_periode[0]["no_sirkulasi_feereport"], $tipe, $cek_sirkulasi_next_periode[0]['no_sirkulasi_lesson']);
+                        $data = array(
+                            'price' => $sirkulasi_detail_after[0]['price'] - ($price_next_periode * 50 / 100) + ($price_next_periode * $teacher_percentage / 100),
+                        );
+                        $this->db->update('sirkulasi_feereport_detail', $data, ['id' => $sirkulasi_detail_after[0]['id']]);
+
+                        $discount = (intval($data_sirkulasi_feereport_next_periode[0]['price']) - ($price_next_periode * 50 / 100) + ($price_next_periode * $teacher_percentage / 100)) * intval($data_sirkulasi_feereport_next_periode[0]['discount']) / 100;
+                        $price_temp_feereport = intval($data_sirkulasi_feereport_next_periode[0]['price']) - ($price_next_periode * 50 / 100) + ($price_next_periode * $teacher_percentage / 100);
+                        $data2 =  [
+                            'price' => $price_temp_feereport,
+                            'total_price' => $price_temp_feereport - $discount,
+                            'updated_at' => $created_at,
+                        ];
+                        $this->db->update('sirkulasi_feereport', $data2, ['id_sirkulasi_feereport' => $data_sirkulasi_feereport_next_periode[0]['id_sirkulasi_feereport']]);
+                    }
+                }
+            }
 
             $data2 = [];
             $data3 = [];
-            if (count($data_sirkulasi_feereport) == 0) {
+            $price = 0;
+            if ($tipe == 1) {
+                $price = ($price_paket_pratical / 2) * $tipe_rate / 100;
+            }
+            if ($tipe == 2) {
+                $price = $price_paket_theory * $tipe_rate / 100;
+            }
 
-                // if (count($counter) == 0) {
+            if (count($data_sirkulasi_feereport) == 0) {
                 $data2 =  [
-                    'no_sirkulasi_feereport' => $no_sirkulasi_feereport . "/001",
+                    'no_sirkulasi_feereport' => $no_sirkulasi_feereport,
                     'id_teacher' => $this->input->post('id_teacher'),
                     'created_at' => $created_at,
                     'updated_at' => $created_at,
                     'price' => $price,
+                    'total_price' => $price,
                 ];
                 $data3 = [
-                    'no_sirkulasi_feereport' => $no_sirkulasi_feereport . "/001",
+                    'no_sirkulasi_feereport' => $no_sirkulasi_feereport,
                     'id_teacher' => $this->input->post('id_teacher'),
+                    'id_barang' => $no_sirkulasi_lesson,
                     'tipe' => $tipe,
                     'price' => $price,
                 ];
-                // }
-                // else {
-                //     $x = 0;
-                //     if (count($counter) < 10) {
-                //         $x = "00" . count($counter);
-                //     } else if (count($counter) < 100) {
-                //         $x = "0" . count($counter);
-                //     } else {
-                //         $x = count($counter);
-                //     }
-                //     $data2 =  [
-                //         'no_sirkulasi_feereport' => $no_sirkulasi_feereport . "/". $x,
-                //         'id_teacher' => $this->input->post('id_teacher'),
-                //         'created_at' => $created_at,
-                //         'updated_at' => $created_at,
-                //         'price' => $price,
-                //     ];
-                //     $data3 = [
-                //         'no_sirkulasi_feereport' => $no_sirkulasi_feereport . "/". $x,
-                //         'id_teacher' => $this->input->post('id_teacher'),
-                //         'tipe' => $tipe,
-                //         'price' => $price,
-                //     ];
-                // }
                 $this->db->insert('sirkulasi_feereport', $data2);
                 $this->db->insert('sirkulasi_feereport_detail', $data3);
-                // echo "<br>";
-                // echo var_dump($data2);
-                // echo "<br>";
-                // echo var_dump($data3);
             } else {
                 if ($data_sirkulasi_feereport[0]['status_approved'] == 0) {
+                    $discount = (intval($data_sirkulasi_feereport[0]['price']) + intval($price)) * intval($data_sirkulasi_feereport[0]['discount']) / 100;
                     $data2 =  [
                         'price' => intval($data_sirkulasi_feereport[0]['price']) + intval($price),
+                        'total_price' => intval($data_sirkulasi_feereport[0]['price']) + intval($price) - $discount,
                         'updated_at' => $created_at,
                     ];
                     $this->db->update('sirkulasi_feereport', $data2, ['id_sirkulasi_feereport' => $data_sirkulasi_feereport[0]['id_sirkulasi_feereport']]);
@@ -1984,6 +3200,7 @@ class C_Teacher extends CI_Controller
                         $data3 = [
                             'no_sirkulasi_feereport' => $data_sirkulasi_feereport[0]['no_sirkulasi_feereport'],
                             'id_teacher' => $this->input->post('id_teacher'),
+                            'id_barang' => $no_sirkulasi_lesson,
                             'tipe' => $tipe,
                             'price' => $price,
                         ];
@@ -1997,7 +3214,6 @@ class C_Teacher extends CI_Controller
                 }
             }
         }
-
 
         $data = array(
             'status' => $this->input->post('status'),
@@ -2032,32 +3248,18 @@ class C_Teacher extends CI_Controller
             }
         }
         if ($jenis == 1) :
-            $temp_event[] = "Practical lesson =";
-            $temp_event[] = '<span class="badge badge-primary">' . $count1 . ' lesson</span> ';
+            $temp_event[] = "Lesson Package : ";
+            $temp_event[] = '<span class="badge badge-primary">' . round($count1 / 2) . ' package (' . $count1 . ' meeting)</span> ';
             $temp_event[] = '<input type="hidden" id="countPractical" name="countPractical" value="' . $count1 . '">';
         else :
-            $temp_event[] = "Theory lesson = ";
-            $temp_event[] = '<span class="badge badge-primary">' . $count2 . ' lesson</span>';
+            $temp_event[] = "Lesson Package : ";
+            $temp_event[] = '<span class="badge badge-primary">' . $count2 . ' package (' . $count2 . ' meeting)</span> ';
             $temp_event[] = '<input type="hidden" id="countTheory" name="countTheory" value="' . $count2 . '">';
         endif;
         if ($count3 > 0) {
             $temp_event[] = "<br>";
             $temp_event[] = "Lesson Cancel = ";
             $temp_event[] = '<span class="badge badge-danger">' . $count3 . ' lesson</span>, Please change date!';
-            // $z = 1;
-            // $jenis1 = 0;
-            // $jenis2 = 0;
-            // $temp_event[] = "<br>";
-            // foreach ($schedule_cancel as $so) {
-            //     $temp_event[] = '<input type="hidden" id="jenisCancel' . $z++ . '" value="' . $so['jenis'] . '">';
-            //     if ($so['jenis'] == 1) {
-            //         $jenis1++;
-            //     } else {
-            //         $jenis2++;
-            //     }
-            // }
-            // $temp_event[] = '<input type="hidden" id="countJenis1" name="countJenis1" value="' . $jenis1 . '">';
-            // $temp_event[] = '<input type="hidden" id="countJenis2" name="countJenis2" value="' . $jenis2 . '">';
         }
         $temp_event[] = '<input type="hidden" id="countCancel" name="countCancel" value="' . $count3 . '">';
 
@@ -2082,104 +3284,357 @@ class C_Teacher extends CI_Controller
         $tipe = $jenis;
         $tipe_rate = '';
         $is_new = $this->input->post('is_new');
+        $potongan = $this->input->post('potongan');
+        $price_paket_theory = $this->input->post('price_paket_theory');
+        $price_paket_pratical = $this->input->post('price_paket_pratical');
 
         //cek total id_student -> <- id_teacher
         //nomor sirkulasi lesson
         //LESS/002/015/1 => tipe online lesson
+        $no_sirkulasi_lesson = 'LESS/' .  $temp_id_teacher . "/" . $temp_id_student . "/" . $tipe . "/" . $id_list_pack;
+        $cek_sirkulasi = $this->M_Teacher->getData_sirkulasi_lesson(null, $no_sirkulasi_lesson, $id_teacher, $id_student, $tipe);
 
-        $no_sirkulasi_lesson = 'LESS/' .  $temp_id_teacher . "/" . $temp_id_student . "/" . $tipe  . "/" . $id_list_pack;
+        $periode_now = substr($created_at, 0, 7);
+        $effectiveDate = date($periode_now);
+        $effectiveDate = date('Y-m', strtotime("+1 months", strtotime($effectiveDate)));
+        $temp_period = $effectiveDate . "-01";
+        //cek next periode
+        $get_data_50_next_periode = $this->M_Teacher->getData_sirkulasi_lesson_detail(null, null, $id_teacher, $id_student, $tipe, null, 50, $temp_period);
+        //cek before periode
+        $get_data_before_periode = $this->M_Teacher->getData_sirkulasi_lesson_detail_before($id_teacher, $id_student, $tipe, $created_at);
+        $get_data_after_periode = $this->M_Teacher->getData_sirkulasi_lesson_detail_after($id_teacher, $id_student, $tipe, $created_at);
+        if (count($get_data_50_next_periode) > 0) {
+            $cek_sirkulasi_next_periode = $this->M_Teacher->getData_sirkulasi_lesson(null, $get_data_50_next_periode[0]['no_sirkulasi_lesson'], $id_teacher, $id_student, $tipe);
+        }
 
-        $cek_sirkulasi = $this->M_Teacher->getData_sirkulasi_lesson(null, $no_sirkulasi_lesson);
+        if ($tipe == 1) {
+            if ((count($get_data_before_periode) + count($get_data_after_periode)) >= ($potongan * 2)) {
+                if (count($cek_sirkulasi) > 0) {
+                    $data_update_sirkulasi = null;
+                    $total = $cek_sirkulasi[0]['total'];
+                    $total_50 = $cek_sirkulasi[0]['total_50'];
+                    $total_rate = $cek_sirkulasi[0]['total_rate'];
 
-        if (count($cek_sirkulasi) > 0) {
-            $data_update_sirkulasi = null;
+                    if (count($get_data_50_next_periode) > 0) {
+                        $data = array(
+                            'total_50' => $cek_sirkulasi_next_periode[0]['total_50'] - 1,
+                            'total_rate' => $cek_sirkulasi_next_periode[0]['total_rate'] + 1,
+                        );
+                        $this->M_Teacher->updateDataSirkulasiLesson($data, $cek_sirkulasi_next_periode[0]['no_sirkulasi_lesson']);
 
-            $total = $cek_sirkulasi[0]['total'];
-            $total_50 = $cek_sirkulasi[0]['total_50'];
-            $total_rate = $cek_sirkulasi[0]['total_rate'];
-
-            if ($tipe == 1) {
-                if ($total_50 >= 8) {
-                    if ($cek_sirkulasi[0]['rate_created_at'] == NULL) {
-                        $data_update_sirkulasi = array(
+                        if ($cek_sirkulasi[0]['created_at'] == NULL) {
+                            $data_update_sirkulasi = array(
+                                'created_at' => $created_at,
+                                'last_updated_50' => $created_at,
+                                'total_50' => $total_50 + 1,
+                                'total' => $total + 1
+                            );
+                        } else {
+                            $data_update_sirkulasi = array(
+                                'last_updated_50' => $created_at,
+                                'total_50' => $total_50 + 1,
+                                'total' => $total + 1
+                            );
+                        }
+                    } else {
+                        if ($cek_sirkulasi[0]['rate_created_at'] == NULL) {
+                            $data_update_sirkulasi = array(
+                                'rate_created_at' => $created_at,
+                                'last_updated_rate' => $created_at,
+                                'total_rate' => $total_rate + 1,
+                                'total' => $total + 1
+                            );
+                        } else {
+                            $data_update_sirkulasi = array(
+                                'last_updated_rate' => $created_at,
+                                'total_rate' => $total_rate + 1,
+                                'total' => $total + 1
+                            );
+                        }
+                    }
+                    $this->M_Teacher->updateDataSirkulasiLesson($data_update_sirkulasi, $no_sirkulasi_lesson);
+                } else {
+                    if (count($get_data_50_next_periode) > 0) {
+                        $data = array(
+                            'total_50' => intval($cek_sirkulasi_next_periode[0]['total_50']) - 1,
+                            'total_rate' => intval($cek_sirkulasi_next_periode[0]['total_rate']) + 1,
                             'rate_created_at' => $created_at,
                             'last_updated_rate' => $created_at,
-                            'total_rate' => $total_rate + 1,
-                            'total' => $total + 1
+                        );
+                        $this->M_Teacher->updateDataSirkulasiLesson($data, $cek_sirkulasi_next_periode[0]['no_sirkulasi_lesson']);
+
+                        $data_sirkulasi = array(
+                            'no_sirkulasi_lesson' => $no_sirkulasi_lesson,
+                            'id_student' => $id_student,
+                            'id_teacher' => $id_teacher,
+                            'id_list_pack' => $id_list_pack,
+                            'tipe' => $tipe,
+                            'rate' => $teacher_percentage,
+                            'total_50' => 1,
+                            'total_rate' => 0,
+                            'total' => 1,
+                            'created_at' => $created_at,
+                            'last_updated_50' => $created_at,
+                            'rate_created_at' => NULL,
+                            'last_updated_rate' => NULL,
                         );
                     } else {
-                        $data_update_sirkulasi = array(
-                            'last_updated_rate' => $created_at,
-                            'total_rate' => $total_rate + 1,
-                            'total' => $total + 1
-                        );
-                    }
-                    $tipe_rate = $teacher_percentage;
-                } else {
-                    $data_update_sirkulasi = array(
-                        'last_updated_50' => $created_at,
-                        'total_50' => $total_50 + 1,
-                        'total' => $total + 1
-                    );
-                    if ($is_new == 2) {
-                        $tipe_rate = $teacher_percentage;
-                    } else {
-                        $tipe_rate = 50;
-                    }
-                }
-            }
-            if ($tipe == 2) {
-                if ($total_50 >= 4) {
-                    if ($cek_sirkulasi[0]['rate_created_at'] == NULL) {
-                        $data_update_sirkulasi = array(
+                        $data_sirkulasi = array(
+                            'no_sirkulasi_lesson' => $no_sirkulasi_lesson,
+                            'id_student' => $id_student,
+                            'id_teacher' => $id_teacher,
+                            'id_list_pack' => $id_list_pack,
+                            'tipe' => $tipe,
+                            'rate' => $teacher_percentage,
+                            'total_50' => 0,
+                            'total_rate' => 1,
+                            'total' => 1,
+                            'created_at' => NULL,
+                            'last_updated_50' => NULL,
                             'rate_created_at' => $created_at,
                             'last_updated_rate' => $created_at,
-                            'total_rate' => $total_rate + 1,
-                            'total' => $total + 1
-                        );
-                    } else {
-                        $data_update_sirkulasi = array(
-                            'last_updated_rate' => $created_at,
-                            'total_rate' => $total_rate + 1,
-                            'total' => $total + 1
                         );
                     }
-                    $tipe_rate = $teacher_percentage;
-                } else {
-                    $data_update_sirkulasi = array(
-                        'last_updated_50' => $created_at,
-                        'total_50' => $total_50 + 1,
-                        'total' => $total + 1
-                    );
-                    if ($is_new == 2) {
-                        $tipe_rate = $teacher_percentage;
-                    } else {
-                        $tipe_rate = 50;
-                    }
+                    $this->M_Teacher->addDataSirkulasiLesson($data_sirkulasi);
                 }
-            }
-            $this->M_Teacher->updateDataSirkulasiLesson($data_update_sirkulasi, $no_sirkulasi_lesson);
-        } else {
-            $data_sirkulasi = array(
-                'no_sirkulasi_lesson' => $no_sirkulasi_lesson,
-                'id_student' => $id_student,
-                'id_teacher' => $id_teacher,
-                'id_list_pack' => $id_list_pack,
-                'tipe' => $tipe,
-                'rate' => $teacher_percentage,
-                'total_50' => 1,
-                'total_rate' => 0,
-                'total' => 1,
-                'created_at' => $created_at,
-                'last_updated_50' => $created_at,
-            );
-            $this->M_Teacher->addDataSirkulasiLesson($data_sirkulasi);
-            if ($is_new == 2) {
                 $tipe_rate = $teacher_percentage;
             } else {
-                $tipe_rate = 50;
+                if (count($cek_sirkulasi) > 0) {
+                    $data_update_sirkulasi = null;
+
+                    $total = $cek_sirkulasi[0]['total'];
+                    $total_50 = $cek_sirkulasi[0]['total_50'];
+                    $total_rate = $cek_sirkulasi[0]['total_rate'];
+
+                    if ($total_50 >= ($potongan * 2)) {
+                        if ($cek_sirkulasi[0]['rate_created_at'] == NULL) {
+                            $data_update_sirkulasi = array(
+                                'rate_created_at' => $created_at,
+                                'last_updated_rate' => $created_at,
+                                'total_rate' => $total_rate + 1,
+                                'total' => $total + 1
+                            );
+                        } else {
+                            $data_update_sirkulasi = array(
+                                'last_updated_rate' => $created_at,
+                                'total_rate' => $total_rate + 1,
+                                'total' => $total + 1
+                            );
+                        }
+                        $tipe_rate = $teacher_percentage;
+                    } else {
+                        $data_update_sirkulasi = array(
+                            'last_updated_50' => $created_at,
+                            'total_50' => $total_50 + 1,
+                            'total' => $total + 1
+                        );
+                        if ($is_new == 2) {
+                            $tipe_rate = $teacher_percentage;
+                        } else {
+                            $tipe_rate = 50;
+                        }
+                    }
+                    $this->M_Teacher->updateDataSirkulasiLesson($data_update_sirkulasi, $no_sirkulasi_lesson);
+                } else {
+                    $data_sirkulasi = array(
+                        'no_sirkulasi_lesson' => $no_sirkulasi_lesson,
+                        'id_student' => $id_student,
+                        'id_teacher' => $id_teacher,
+                        'id_list_pack' => $id_list_pack,
+                        'tipe' => $tipe,
+                        'rate' => $teacher_percentage,
+                        'total_50' => 1,
+                        'total_rate' => 0,
+                        'total' => 1,
+                        'created_at' => $created_at,
+                        'last_updated_50' => $created_at,
+                    );
+                    $this->M_Teacher->addDataSirkulasiLesson($data_sirkulasi);
+                    $tipe_rate = 50;
+                }
             }
         }
+
+        if ($tipe == 2) {
+            if ((count($get_data_before_periode) + count($get_data_after_periode)) >= $potongan) {
+                if (count($cek_sirkulasi) > 0) {
+                    $data_update_sirkulasi = null;
+                    $total = $cek_sirkulasi[0]['total'];
+                    $total_50 = $cek_sirkulasi[0]['total_50'];
+                    $total_rate = $cek_sirkulasi[0]['total_rate'];
+
+                    if (count($get_data_50_next_periode) > 0) {
+                        $data = array(
+                            'total_50' => $cek_sirkulasi_next_periode[0]['total_50'] - 1,
+                            'total_rate' => $cek_sirkulasi_next_periode[0]['total_rate'] + 1,
+                        );
+                        $this->M_Teacher->updateDataSirkulasiLesson($data, $cek_sirkulasi_next_periode[0]['no_sirkulasi_lesson']);
+                        if ($cek_sirkulasi[0]['created_at'] == NULL) {
+                            $data_update_sirkulasi = array(
+                                'created_at' => $created_at,
+                                'last_updated_50' => $created_at,
+                                'total_50' => $total_50 + 1,
+                                'total' => $total + 1
+                            );
+                        } else {
+                            $data_update_sirkulasi = array(
+                                'last_updated_50' => $created_at,
+                                'total_50' => $total_50 + 1,
+                                'total' => $total + 1
+                            );
+                        }
+                    } else {
+                        if ($cek_sirkulasi[0]['rate_created_at'] == NULL) {
+                            $data_update_sirkulasi = array(
+                                'rate_created_at' => $created_at,
+                                'last_updated_rate' => $created_at,
+                                'total_rate' => $total_rate + 1,
+                                'total' => $total + 1
+                            );
+                        } else {
+                            $data_update_sirkulasi = array(
+                                'last_updated_rate' => $created_at,
+                                'total_rate' => $total_rate + 1,
+                                'total' => $total + 1
+                            );
+                        }
+                    }
+                    $this->M_Teacher->updateDataSirkulasiLesson($data_update_sirkulasi, $no_sirkulasi_lesson);
+                } else {
+                    if (count($get_data_50_next_periode) > 0) {
+                        $data = array(
+                            'total_50' => intval($cek_sirkulasi_next_periode[0]['total_50']) - 1,
+                            'total_rate' => intval($cek_sirkulasi_next_periode[0]['total_rate']) + 1,
+                            'rate_created_at' => $created_at,
+                            'last_updated_rate' => $created_at,
+                        );
+                        $this->M_Teacher->updateDataSirkulasiLesson($data, $cek_sirkulasi_next_periode[0]['no_sirkulasi_lesson']);
+                        $data_sirkulasi = array(
+                            'no_sirkulasi_lesson' => $no_sirkulasi_lesson,
+                            'id_student' => $id_student,
+                            'id_teacher' => $id_teacher,
+                            'id_list_pack' => $id_list_pack,
+                            'tipe' => $tipe,
+                            'rate' => $teacher_percentage,
+                            'total_50' => 1,
+                            'total_rate' => 0,
+                            'total' => 1,
+                            'created_at' => $created_at,
+                            'last_updated_50' => $created_at,
+                            'rate_created_at' => NULL,
+                            'last_updated_rate' => NULL,
+                        );
+                    } else {
+                        $data_sirkulasi = array(
+                            'no_sirkulasi_lesson' => $no_sirkulasi_lesson,
+                            'id_student' => $id_student,
+                            'id_teacher' => $id_teacher,
+                            'id_list_pack' => $id_list_pack,
+                            'tipe' => $tipe,
+                            'rate' => $teacher_percentage,
+                            'total_50' => 0,
+                            'total_rate' => 1,
+                            'total' => 1,
+                            'created_at' => NULL,
+                            'last_updated_50' => NULL,
+                            'rate_created_at' => $created_at,
+                            'last_updated_rate' => $created_at,
+                        );
+                    }
+                    $this->M_Teacher->addDataSirkulasiLesson($data_sirkulasi);
+                }
+                $tipe_rate = $teacher_percentage;
+            } else {
+                if (count($cek_sirkulasi) > 0) {
+                    $data_update_sirkulasi = null;
+
+                    $total = $cek_sirkulasi[0]['total'];
+                    $total_50 = $cek_sirkulasi[0]['total_50'];
+                    $total_rate = $cek_sirkulasi[0]['total_rate'];
+
+                    if ($total_50 >= $potongan) {
+                        if ($cek_sirkulasi[0]['rate_created_at'] == NULL) {
+                            $data_update_sirkulasi = array(
+                                'rate_created_at' => $created_at,
+                                'last_updated_rate' => $created_at,
+                                'total_rate' => $total_rate + 1,
+                                'total' => $total + 1
+                            );
+                        } else {
+                            $data_update_sirkulasi = array(
+                                'last_updated_rate' => $created_at,
+                                'total_rate' => $total_rate + 1,
+                                'total' => $total + 1
+                            );
+                        }
+                        $tipe_rate = $teacher_percentage;
+                    } else {
+                        $data_update_sirkulasi = array(
+                            'last_updated_50' => $created_at,
+                            'total_50' => $total_50 + 1,
+                            'total' => $total + 1
+                        );
+                        if ($is_new == 2) {
+                            $tipe_rate = $teacher_percentage;
+                        } else {
+                            $tipe_rate = 50;
+                        }
+                    }
+                    $this->M_Teacher->updateDataSirkulasiLesson($data_update_sirkulasi, $no_sirkulasi_lesson);
+                } else {
+                    $data_sirkulasi = array(
+                        'no_sirkulasi_lesson' => $no_sirkulasi_lesson,
+                        'id_student' => $id_student,
+                        'id_teacher' => $id_teacher,
+                        'id_list_pack' => $id_list_pack,
+                        'tipe' => $tipe,
+                        'rate' => $teacher_percentage,
+                        'total_50' => 1,
+                        'total_rate' => 0,
+                        'total' => 1,
+                        'created_at' => $created_at,
+                        'last_updated_50' => $created_at,
+                    );
+                    $this->M_Teacher->addDataSirkulasiLesson($data_sirkulasi);
+                    $tipe_rate = 50;
+                }
+            }
+        }
+
+        if ($tipe_rate != 50) {
+            if (count($get_data_50_next_periode) > 0) {
+                $tipe_rate = 50;
+                $price_next_periode_temp = 0;
+                if ($tipe == 1) {
+                    $price_next_periode_temp = $price_paket_pratical / 2;
+                    // if ($get_data_50_next_periode[0]['status_pack_theory'] == 1) {
+                    //     $price_next_periode_temp = (($get_data_50_next_periode[0]['price_idr'] - 100000) / 2);
+                    // }
+                }
+                if ($tipe == 2) {
+                    $price_next_periode_temp = $price_paket_theory;
+                    // if ($get_data_50_next_periode[0]['status_pack_practical'] == 1) {
+                    //     $price_next_periode_temp = 100000;
+                    // }
+                }
+                $data = array(
+                    'rate' => $teacher_percentage,
+                    'price' => $price_next_periode_temp * $teacher_percentage / 100,
+                );
+                $this->M_Teacher->updateDataSirkulasiLessonDetail($data, $get_data_50_next_periode[0]['id_sirkulasi_lesson_detail']);
+            } else {
+                $tipe_rate = $teacher_percentage;
+            }
+        }
+
+        $price_temp_sirkulasi_detail = 0;
+        if ($tipe == 1) {
+            $price_temp_sirkulasi_detail = ($price_paket_pratical / 2) * $tipe_rate / 100;
+        }
+        if ($tipe == 2) {
+            $price_temp_sirkulasi_detail = $price_paket_theory * $tipe_rate / 100;
+        }
+
         $data_sirkulasi_lesson_detail = array(
             'no_sirkulasi_lesson' => $no_sirkulasi_lesson,
             'id_student' => $id_student,
@@ -2188,76 +3643,98 @@ class C_Teacher extends CI_Controller
             'lesson_date' => $created_at,
             'tipe' => $tipe,
             'rate' => $tipe_rate,
+            'price' => $price_temp_sirkulasi_detail,
             'paket' => $paket,
-            'price' => $price,
         );
         $this->M_Teacher->addDataSirkulasiLessonDetail($data_sirkulasi_lesson_detail);
-
-        // echo var_dump($cek_sirkulasi[0]);
-        // die();
 
         //nomor feereport 
         //FER/210629/004
         $startdate = strtotime($created_at);
         $temp_date_sirkulasi =  date("Ym", $startdate);
-        $no_sirkulasi_feereport = "FER/" . $temp_date_sirkulasi . "/" . $temp_id_teacher;
+        $no_sirkulasi_feereport = "FER/" . $temp_date_sirkulasi . "/" . $temp_id_teacher . "/001";
         $data_sirkulasi_feereport = $this->M_Teacher->getData_sirkulasi_feereport(null, $no_sirkulasi_feereport);
-        $data_sirkulasi_feereport_detail = $this->M_Teacher->getData_sirkulasi_feereport_detail(null, $no_sirkulasi_feereport, $tipe);
-        $temp_counter = "FER/" . $temp_date_sirkulasi;
-        $counter = $this->M_Teacher->getData_sirkulasi_feereport(null, $temp_counter);
+        $data_sirkulasi_feereport_detail = $this->M_Teacher->getData_sirkulasi_feereport_detail(null, $no_sirkulasi_feereport, $tipe, $no_sirkulasi_lesson);
+
+        $data_sirkulasi_feereport_next_periode = $this->M_Teacher->getData_sirkulasi_feereport(null, null, 0, $id_teacher, $effectiveDate);
+
+        if ($tipe == 1) {
+            if ((count($get_data_before_periode) + count($get_data_after_periode)) >= ($potongan * 2)) {
+                if (count($get_data_50_next_periode) > 0) {
+                    $price_next_periode = $price_paket_pratical / 2;
+                    $sirkulasi_detail_after = $this->M_Teacher->getData_sirkulasi_feereport_detail(null, $data_sirkulasi_feereport_next_periode[0]["no_sirkulasi_feereport"], $tipe, $cek_sirkulasi_next_periode[0]['no_sirkulasi_lesson']);
+                    $price_temp_feereport_detail = $sirkulasi_detail_after[0]['price'] / 2;
+                    $data = array(
+                        'price' => $price_temp_feereport_detail - ($price_next_periode * 50 / 100) + ($price_next_periode * $teacher_percentage / 100),
+                    );
+                    $this->db->update('sirkulasi_feereport_detail', $data, ['id' => $sirkulasi_detail_after[0]['id']]);
+
+                    $discount = (intval($data_sirkulasi_feereport_next_periode[0]['price']) - ($price_next_periode * 50 / 100) + ($price_next_periode * $teacher_percentage / 100)) * intval($data_sirkulasi_feereport_next_periode[0]['discount']) / 100;
+                    $price_temp_feereport = intval($data_sirkulasi_feereport_next_periode[0]['price']) - ($price_next_periode * 50 / 100) + ($price_next_periode * $teacher_percentage / 100);
+                    $data2 =  [
+                        'price' => $price_temp_feereport,
+                        'total_price' => $price_temp_feereport - $discount,
+                        'updated_at' => $created_at,
+                    ];
+                    $this->db->update('sirkulasi_feereport', $data2, ['id_sirkulasi_feereport' => $data_sirkulasi_feereport_next_periode[0]['id_sirkulasi_feereport']]);
+                }
+            }
+        }
+        if ($tipe == 2) {
+            if ((count($get_data_before_periode) + count($get_data_after_periode)) >= $potongan) {
+                if (count($get_data_50_next_periode) > 0) {
+                    $price_next_periode = $price_paket_theory;
+                    $sirkulasi_detail_after = $this->M_Teacher->getData_sirkulasi_feereport_detail(null, $data_sirkulasi_feereport_next_periode[0]["no_sirkulasi_feereport"], $tipe, $cek_sirkulasi_next_periode[0]['no_sirkulasi_lesson']);
+                    $data = array(
+                        'price' => $sirkulasi_detail_after[0]['price'] - ($price_next_periode * 50 / 100) + ($price_next_periode * $teacher_percentage / 100),
+                    );
+                    $this->db->update('sirkulasi_feereport_detail', $data, ['id' => $sirkulasi_detail_after[0]['id']]);
+
+                    $discount = (intval($data_sirkulasi_feereport_next_periode[0]['price']) - ($price_next_periode * 50 / 100) + ($price_next_periode * $teacher_percentage / 100)) * intval($data_sirkulasi_feereport_next_periode[0]['discount']) / 100;
+                    $price_temp_feereport = intval($data_sirkulasi_feereport_next_periode[0]['price']) - ($price_next_periode * 50 / 100) + ($price_next_periode * $teacher_percentage / 100);
+                    $data2 =  [
+                        'price' => $price_temp_feereport,
+                        'total_price' => $price_temp_feereport - $discount,
+                        'updated_at' => $created_at,
+                    ];
+                    $this->db->update('sirkulasi_feereport', $data2, ['id_sirkulasi_feereport' => $data_sirkulasi_feereport_next_periode[0]['id_sirkulasi_feereport']]);
+                }
+            }
+        }
 
         $data2 = [];
         $data3 = [];
+        $price = 0;
+        if ($tipe == 1) {
+            $price = ($price_paket_pratical / 2) * $tipe_rate / 100;
+        }
+        if ($tipe == 2) {
+            $price = $price_paket_theory * $tipe_rate / 100;
+        }
         if (count($data_sirkulasi_feereport) == 0) {
-
-            // if (count($counter) == 0) {
             $data2 =  [
-                'no_sirkulasi_feereport' => $no_sirkulasi_feereport . "/001",
+                'no_sirkulasi_feereport' => $no_sirkulasi_feereport,
                 'id_teacher' => $this->input->post('id_teacher'),
                 'created_at' => $created_at,
                 'updated_at' => $created_at,
                 'price' => $price,
+                'total_price' => $price,
             ];
             $data3 = [
-                'no_sirkulasi_feereport' => $no_sirkulasi_feereport . "/001",
+                'no_sirkulasi_feereport' => $no_sirkulasi_feereport,
                 'id_teacher' => $this->input->post('id_teacher'),
+                'id_barang' => $no_sirkulasi_lesson,
                 'tipe' => $tipe,
                 'price' => $price,
             ];
-            // } 
-            // else {
-            //     $x = 0;
-            //     if (count($counter) < 10) {
-            //         $x = "00" . count($counter);
-            //     } else if (count($counter) < 100) {
-            //         $x = "0" . count($counter);
-            //     } else {
-            //         $x = count($counter);
-            //     }
-            //     $data2 =  [
-            //         'no_sirkulasi_feereport' => $no_sirkulasi_feereport . "/". $x,
-            //         'id_teacher' => $this->input->post('id_teacher'),
-            //         'created_at' => $created_at,
-            //         'updated_at' => $created_at,
-            //         'price' => $price,
-            //     ];
-            //     $data3 = [
-            //         'no_sirkulasi_feereport' => $no_sirkulasi_feereport . "/". $x,
-            //         'id_teacher' => $this->input->post('id_teacher'),
-            //         'tipe' => $tipe,
-            //         'price' => $price,
-            //     ];
-            // }
             $this->db->insert('sirkulasi_feereport', $data2);
             $this->db->insert('sirkulasi_feereport_detail', $data3);
-            // echo "<br>";
-            // echo var_dump($data2);
-            // echo "<br>";
-            // echo var_dump($data3);
         } else {
             if ($data_sirkulasi_feereport[0]['status_approved'] == 0) {
+                $discount = (intval($data_sirkulasi_feereport[0]['price']) + intval($price)) * intval($data_sirkulasi_feereport[0]['discount']) / 100;
                 $data2 =  [
                     'price' => intval($data_sirkulasi_feereport[0]['price']) + intval($price),
+                    'total_price' => intval($data_sirkulasi_feereport[0]['price']) + intval($price) - $discount,
                     'updated_at' => $created_at,
                 ];
                 $this->db->update('sirkulasi_feereport', $data2, ['id_sirkulasi_feereport' => $data_sirkulasi_feereport[0]['id_sirkulasi_feereport']]);
@@ -2266,6 +3743,7 @@ class C_Teacher extends CI_Controller
                     $data3 = [
                         'no_sirkulasi_feereport' => $data_sirkulasi_feereport[0]['no_sirkulasi_feereport'],
                         'id_teacher' => $this->input->post('id_teacher'),
+                        'id_barang' => $no_sirkulasi_lesson,
                         'tipe' => $tipe,
                         'price' => $price,
                     ];
@@ -2279,14 +3757,57 @@ class C_Teacher extends CI_Controller
             }
         }
 
-        $id_schedule_pack = $this->input->post('id_schedule_pack');
-
         $data = array(
             'date_update_cancel' => $this->input->post('date_update_cancel'),
         );
         $data2 = $this->M_Teacher->update_event_schedule_package($data, $this->input->post('id_schedule_pack'));
-    }
 
+        $pack_online = $this->M_Teacher->getData_pack_online($id_list_pack, 1);
+        $schedule_online = $this->M_Teacher->getData_schedule_package(null, $id_list_pack);
+        $schedule_cancel = $this->M_Teacher->getData_schedule_package(null, $id_list_pack, 3, null, $jenis);
+        $schedule_new = $this->M_Teacher->getData_schedule_package(null, $id_list_pack, 4);
+        $count_theory = [];
+        $count_pratical = [];
+        foreach ($schedule_online as $so) {
+            if ($so['status'] == 2 || ($so['status'] == 3 && $so['date_update_cancel'] != NULL)) :
+                if ($so['jenis'] == 1) {
+                    $count_pratical[] = $so['id_schedule_pack'];
+                }
+                if ($so['jenis'] == 2) {
+                    $count_theory[] = $so['id_schedule_pack'];
+                }
+            endif;
+        }
+
+        $pack_pratical = $pack_online[0]['total_pack_practical'];
+        $pack_theory = $pack_online[0]['total_pack_theory'];
+        $count1 = intval($pack_pratical) - intval(count($count_pratical));
+        $count2 = intval($pack_theory) - intval(count($count_theory));
+        $count3 = 0;
+        foreach ($schedule_cancel as $sc) {
+            if ($sc['date_update_cancel'] == NULL) {
+                $count3++;
+            }
+        }
+        if ($jenis == 1) :
+            $temp_event[] = "Lesson Package : ";
+            $temp_event[] = '<span class="badge badge-primary">' . round($count1 / 2) . ' package (' . $count1 . ' meeting)</span> ';
+            $temp_event[] = '<input type="hidden" id="countPractical" name="countPractical" value="' . $count1 . '">';
+        else :
+            $temp_event[] = "Lesson Package : ";
+            $temp_event[] = '<span class="badge badge-primary">' . $count2 . ' package (' . $count2 . ' meeting)</span> ';
+            $temp_event[] = '<input type="hidden" id="countTheory" name="countTheory" value="' . $count2 . '">';
+        endif;
+        if ($count3 > 0) {
+            $temp_event[] = "<br>";
+            $temp_event[] = "Lesson Cancel = ";
+            $temp_event[] = '<span class="badge badge-danger">' . $count3 . ' lesson</span>, Please change date!';
+        }
+        $temp_event[] = '<input type="hidden" id="countCancel" name="countCancel" value="' . $count3 . '">';
+
+        $event_join = implode(" ", $temp_event);
+        echo $event_join;
+    }
 
     public function insert_schedule_package()
     {
@@ -2331,12 +3852,12 @@ class C_Teacher extends CI_Controller
             }
         }
         if ($jenis == 1) :
-            $temp_event[] = "Practical lesson =";
-            $temp_event[] = '<span class="badge badge-primary">' . $count1 . ' lesson</span> ';
+            $temp_event[] = "Lesson Package : ";
+            $temp_event[] = '<span class="badge badge-primary">' . round($count1 / 2) . ' package (' . $count1 . ' meeting)</span> ';
             $temp_event[] = '<input type="hidden" id="countPractical" name="countPractical" value="' . $count1 . '">';
         else :
-            $temp_event[] = "Theory lesson = ";
-            $temp_event[] = '<span class="badge badge-primary">' . $count2 . ' lesson</span>';
+            $temp_event[] =  "Lesson Package : ";
+            $temp_event[] = '<span class="badge badge-primary">' . $count2 . ' package (' . $count2 . ' meeting)</span> ';
             $temp_event[] = '<input type="hidden" id="countTheory" name="countTheory" value="' . $count2 . '">';
         endif;
         if ($count3 > 0) {

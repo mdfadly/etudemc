@@ -23,14 +23,25 @@ class M_Portal extends CI_Model
 
     public function can_login($user, $username, $password)
     {
-        $this->db->where('username', $username);
-        $this->db->where('password', $password);
+        if ($user == "student") {
+            $this->db->where('username_parent', $username);
+            $this->db->where('password_parent', $password);
+        } else {
+            $this->db->where('username', $username);
+            $this->db->where('password', $password);
+        }
         return $this->db->get($user);
     }
 
     public function get_teacher($where = "")
     {
         $data = $this->db->query('select * from teacher ' . $where);
+        return $data->result_array();
+    }
+
+    public function get_admin($where = "")
+    {
+        $data = $this->db->query('select * from admin ' . $where);
         return $data->result_array();
     }
 

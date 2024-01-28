@@ -38,6 +38,42 @@ class M_Teacher extends CI_Model
         }
     }
 
+    var $column_order_list_package_offline = array('s.name_student', null,  null);
+    var $column_search_list_package_offline = array('s.name_student');
+    var $order_list_package_offline = array('lp.id_list_package_offline' => 'asc');
+
+    private function _get_datatables_query_list_package_offline($id_teacher)
+    {
+        $this->db->select('lp.*, s.name_student');
+        $this->db->from('list_package_offline as lp');
+        $this->db->join('student as s', 'lp.id_student = s.id_student', 'left');
+        $this->db->where('lp.id_teacher', $id_teacher);
+        $this->db->where('lp.status', '1');
+        $this->db->order_by('lp.created_at', 'DESC');
+
+        $i = 0;
+        foreach ($this->column_search_list_package_offline as $item) {
+            if (@$_POST['search']['value']) {
+                if ($i === 0) {
+                    $this->db->group_start();
+                    $this->db->like($item, $_POST['search']['value']);
+                } else {
+                    $this->db->or_like($item, $_POST['search']['value']);
+                }
+                if (count($this->column_search_list_package_offline) - 1 == $i)
+                    $this->db->group_end();
+            }
+            $i++;
+        }
+
+        if (isset($_POST['order'])) {
+            $this->db->order_by($this->column_order_list_package_offline[$_POST['order']['0']['column']], $_POST['order']['0']['dir']);
+        } else if (isset($this->order)) {
+            $order_list_package_offline = $this->order;
+            $this->db->order_by(key($order_list_package_offline), $order_list_package_offline[key($order_list_package_offline)]);
+        }
+    }
+
     var $column_order_online_pratical = array('s.name_student', null,  null);
     var $column_search_online_pratical = array('s.name_student');
     var $order_online_pratical = array('lp.id_list_pack' => 'asc');
@@ -223,6 +259,9 @@ class M_Teacher extends CI_Model
         if ($table == "offline_lesson") {
             $this->_get_datatables_query_offline_lesson($id_teacher);
         }
+        if ($table == "list_package_offline") {
+            $this->_get_datatables_query_list_package_offline($id_teacher);
+        }
         if ($table == "list_package") {
             $this->_get_datatables_query_online_pratical($id_teacher, $jenis);
         }
@@ -252,6 +291,9 @@ class M_Teacher extends CI_Model
         if ($table == "offline_lesson") {
             $this->_get_datatables_query_offline_lesson($id_teacher);
         }
+        if ($table == "list_package_offline") {
+            $this->_get_datatables_query_list_package_offline($id_teacher);
+        }
         if ($table == "list_package") {
             $this->_get_datatables_query_online_pratical($id_teacher, $jenis);
         }
@@ -276,6 +318,9 @@ class M_Teacher extends CI_Model
     function count_all($table, $id_teacher, $id_course = null, $name_course = null, $jenis = null)
     {
         $this->db->from($table);
+        if ($table == "list_package_offline") {
+            $this->db->where('status', '1');
+        }
         if ($table == "list_package") {
             if ($jenis == '1') {
                 $this->db->where('id_teacher_practical', $id_teacher);
@@ -288,7 +333,7 @@ class M_Teacher extends CI_Model
                 $this->db->where('tipe_user', '2');
                 $this->db->where('status', '1');
                 $this->db->where('id_user', $id_teacher);
-            }else{
+            } else {
                 $this->db->where('id_teacher', $id_teacher);
             }
         }
@@ -310,13 +355,29 @@ class M_Teacher extends CI_Model
         return $this->db->get()->result_array();
     }
 
-    public function getData_teacher($id_teacher = null)
+    public function getData_teacher($id_teacher = null, $username = null)
     {
         $this->db->select('t.*');
         $this->db->from('teacher as t');
         $this->db->where('t.status', '1');
         if ($id_teacher != null) {
             $this->db->where('id_teacher', $id_teacher);
+        }
+        if ($username != null) {
+            $this->db->where('username', $username);
+        }
+        return $this->db->get()->result_array();
+    }
+
+    public function getData_bank_account_teacher($id_bank_account = null, $id_teacher = null)
+    {
+        $this->db->select('t.*');
+        $this->db->from('bank_account_teacher as t');
+        if ($id_teacher != null) {
+            $this->db->where('id_teacher', $id_teacher);
+        }
+        if ($id_bank_account != null) {
+            $this->db->where('id_bank_account', $id_bank_account);
         }
         return $this->db->get()->result_array();
     }
@@ -389,6 +450,15 @@ class M_Teacher extends CI_Model
     {
         $this->db->select('sc.*');
         $this->db->from('offline_trial as sc');
+        $this->db->where('sc.id_teacher', $id_teacher);
+        return $this->db->get();
+    }
+
+    function fetch_summary_schedule_package_offline($id_teacher)
+    {
+        $this->db->select('sc.*, s.name_student, s.id_student');
+        $this->db->from('schedule_package_offline as sc');
+        $this->db->join('student as s', 'sc.id_student = s.id_student', 'left');
         $this->db->where('sc.id_teacher', $id_teacher);
         return $this->db->get();
     }
@@ -668,78 +738,78 @@ class M_Teacher extends CI_Model
 
         $data2 = [];
         $data3 = [];
-        if ($data_sirkulasi_feereport[0]['status_approved'] == 0) {
-            if (count($data_sirkulasi_feereport) == 0) {
-                if (count($counter) == 0) {
-                    $data2 =  [
-                        'no_sirkulasi_feereport' => $no_sirkulasi_feereport . "/001",
-                        'id_teacher' => $this->input->post('id_teacher'),
-                        'created_at' => $created_at,
-                        'updated_at' => $created_at,
-                        'price' => $this->input->post('total_price'),
-                    ];
-                    $data3 = [
-                        'no_sirkulasi_feereport' => $no_sirkulasi_feereport . "/001",
-                        'id_teacher' => $this->input->post('id_teacher'),
-                        'tipe' => $tipe,
-                        'price' => $this->input->post('total_price'),
-                        'id_barang' => $no_transaksi_event . "/" . $z,
-                        
-                    ];
-                } else {
-                    $x = 0;
-                    if (count($counter) < 10) {
-                        $x = "00" . count($counter);
-                    } else if (count($counter) < 100) {
-                        $x = "0" . count($counter);
-                    } else {
-                        $x = count($counter);
-                    }
-                    $data2 =  [
-                        'no_sirkulasi_feereport' => $no_sirkulasi_feereport . "/" . $x,
-                        'id_teacher' => $this->input->post('id_teacher'),
-                        'created_at' => $created_at,
-                        'updated_at' => $created_at,
-                        'price' => $this->input->post('total_price'),
-                    ];
-                    $data3 = [
-                        'no_sirkulasi_feereport' => $no_sirkulasi_feereport . "/" . $x,
-                        'id_teacher' => $this->input->post('id_teacher'),
-                        'tipe' => $tipe,
-                        'price' => $this->input->post('total_price'),
-                        'id_barang' => $no_transaksi_event . "/" . $z,
-                    ];
-                }
-                $this->db->insert('sirkulasi_feereport', $data2);
-                $this->db->insert('sirkulasi_feereport_detail', $data3);
-                // echo "<br>";
-                // echo var_dump($data2);
-                // echo "<br>";
-                // echo var_dump($data3);
-            } else {
+        // if ($data_sirkulasi_feereport[0]['status_approved'] == 0) {
+        if (count($data_sirkulasi_feereport) == 0) {
+            if (count($counter) == 0) {
                 $data2 =  [
-                    'price' => intval($data_sirkulasi_feereport[0]['price']) + intval($this->input->post('total_price')),
+                    'no_sirkulasi_feereport' => $no_sirkulasi_feereport . "/001",
+                    'id_teacher' => $this->input->post('id_teacher'),
+                    'created_at' => $created_at,
                     'updated_at' => $created_at,
+                    'price' => $this->input->post('total_price'),
                 ];
-                $this->db->update('sirkulasi_feereport', $data2, ['id_sirkulasi_feereport' => $data_sirkulasi_feereport[0]['id_sirkulasi_feereport']]);
+                $data3 = [
+                    'no_sirkulasi_feereport' => $no_sirkulasi_feereport . "/001",
+                    'id_teacher' => $this->input->post('id_teacher'),
+                    'tipe' => $tipe,
+                    'price' => $this->input->post('total_price'),
+                    'id_barang' => $no_transaksi_event . "/" . $z,
 
-                if (count($data_sirkulasi_feereport_detail) == 0) {
-                    $data3 = [
-                        'no_sirkulasi_feereport' => $data_sirkulasi_feereport[0]['no_sirkulasi_feereport'],
-                        'id_teacher' => $this->input->post('id_teacher'),
-                        'tipe' => $tipe,
-                        'price' => $this->input->post('total_price'),
-                        'id_barang' => $no_transaksi_event . "/" . $z,
-                    ];
-                    $this->db->insert('sirkulasi_feereport_detail', $data3);
+                ];
+            } else {
+                $x = 0;
+                if (count($counter) < 10) {
+                    $x = "00" . count($counter);
+                } else if (count($counter) < 100) {
+                    $x = "0" . count($counter);
                 } else {
-                    $data3 = [
-                        'price' => intval($data_sirkulasi_feereport_detail[0]['price']) + intval($this->input->post('total_price')),
-                    ];
-                    $this->db->update('sirkulasi_feereport_detail', $data3, ['id' => $data_sirkulasi_feereport_detail[0]['id']]);
+                    $x = count($counter);
                 }
+                $data2 =  [
+                    'no_sirkulasi_feereport' => $no_sirkulasi_feereport . "/" . $x,
+                    'id_teacher' => $this->input->post('id_teacher'),
+                    'created_at' => $created_at,
+                    'updated_at' => $created_at,
+                    'price' => $this->input->post('total_price'),
+                ];
+                $data3 = [
+                    'no_sirkulasi_feereport' => $no_sirkulasi_feereport . "/" . $x,
+                    'id_teacher' => $this->input->post('id_teacher'),
+                    'tipe' => $tipe,
+                    'price' => $this->input->post('total_price'),
+                    'id_barang' => $no_transaksi_event . "/" . $z,
+                ];
+            }
+            $this->db->insert('sirkulasi_feereport', $data2);
+            $this->db->insert('sirkulasi_feereport_detail', $data3);
+            // echo "<br>";
+            // echo var_dump($data2);
+            // echo "<br>";
+            // echo var_dump($data3);
+        } else {
+            $data2 =  [
+                'price' => intval($data_sirkulasi_feereport[0]['price']) + intval($this->input->post('total_price')),
+                'updated_at' => $created_at,
+            ];
+            $this->db->update('sirkulasi_feereport', $data2, ['id_sirkulasi_feereport' => $data_sirkulasi_feereport[0]['id_sirkulasi_feereport']]);
+
+            if (count($data_sirkulasi_feereport_detail) == 0) {
+                $data3 = [
+                    'no_sirkulasi_feereport' => $data_sirkulasi_feereport[0]['no_sirkulasi_feereport'],
+                    'id_teacher' => $this->input->post('id_teacher'),
+                    'tipe' => $tipe,
+                    'price' => $this->input->post('total_price'),
+                    'id_barang' => $no_transaksi_event . "/" . $z,
+                ];
+                $this->db->insert('sirkulasi_feereport_detail', $data3);
+            } else {
+                $data3 = [
+                    'price' => intval($data_sirkulasi_feereport_detail[0]['price']) + intval($this->input->post('total_price')),
+                ];
+                $this->db->update('sirkulasi_feereport_detail', $data3, ['id' => $data_sirkulasi_feereport_detail[0]['id']]);
             }
         }
+        // }
 
         // $counter = $this->input->post('total_event');
         // for ($i = 1; $i <= $counter; $i++) {
@@ -804,13 +874,13 @@ class M_Teacher extends CI_Model
     //     }
     //     return $this->db->get()->result_array();
     // }
-    
+
     public function getData_pack_online($id_list_pack = null, $jenis = null)
     {
         if ($jenis == 1 || $jenis == 2) {
-            $this->db->select('op.*, s.name_student,  t.name_teacher, s.teacher_percentage, p.name as name_paket, p.price_idr as price_idr_paket, p.price_euro, p.price_dollar, s.is_new');
+            $this->db->select('op.*, s.name_student,  t.name_teacher, p.name as name_paket, p.price_idr as price_idr_paket, p.price_euro, p.price_dollar, s.is_new');
         } else {
-            $this->db->select('op.*, s.name_student,  t.name_teacher, t2.name_teacher as name_teacher2, s.teacher_percentage, p.name as name_paket, p.price_idr as price_idr_paket, p.price_euro, p.price_dollar, s.is_new');
+            $this->db->select('op.*, s.name_student,  t.name_teacher, t2.name_teacher as name_teacher2, p.name as name_paket, p.price_idr as price_idr_paket, p.price_euro, p.price_dollar, s.is_new');
         }
         $this->db->from('list_package as op');
         $this->db->join('paket as p', 'op.paket = p.id', 'left');
@@ -826,6 +896,20 @@ class M_Teacher extends CI_Model
         $this->db->where('op.status', '1');
         if ($id_list_pack != null) {
             $this->db->where('id_list_pack', $id_list_pack);
+        }
+        return $this->db->get()->result_array();
+    }
+
+    public function getData_pack_offline($id_list_package_offline = null)
+    {
+        $this->db->select('op.*, s.name_student,  t.name_teacher, p.name as name_paket, p.price_idr as price_idr_paket, p.price_euro, p.price_dollar, s.is_new');
+        $this->db->from('list_package_offline as op');
+        $this->db->join('paket as p', 'op.paket = p.id', 'left');
+        $this->db->join('student as s', 'op.id_student = s.id_student', 'left');
+        $this->db->join('teacher as t', 'op.id_teacher = t.id_teacher', 'left');
+        $this->db->where('op.status', '1');
+        if ($id_list_package_offline != null) {
+            $this->db->where('id_list_package_offline', $id_list_package_offline);
         }
         return $this->db->get()->result_array();
     }
@@ -882,6 +966,45 @@ class M_Teacher extends CI_Model
         return $this->db->get()->result_array();
     }
 
+    public function getData_schedule_package_offline($id_schedule_package_offline = null, $id_list_package_offline = null, $cek_status = null, $today = null, $jenis = null, $daysago = null)
+    {
+        $this->db->select('so.*, s.name_student, s.id_student, t.name_teacher, t.id_teacher,');
+        $this->db->from('schedule_package_offline as so');
+        $this->db->join('student as s', 'so.id_student = s.id_student', 'left');
+        $this->db->join('teacher as t', 'so.id_teacher = t.id_teacher', 'left');
+        $this->db->join('list_package_offline as op', 'so.id_list_package_offline = op.id_list_package_offline', 'left');
+        // $this->db->where('so.status', '1');
+        if ($id_schedule_package_offline != null) {
+            $this->db->where('so.id_schedule_package_offline', $id_schedule_package_offline);
+        }
+        if ($id_list_package_offline != null) {
+            $this->db->where('so.id_list_package_offline', $id_list_package_offline);
+        }
+        if ($today != null) {
+            $this->db->where('so.date_schedule <', $today);
+        }
+        if ($daysago != null) {
+            $this->db->where('so.date_schedule >', $daysago);
+        }
+        if ($cek_status != null) {
+            $this->db->where('so.status', $cek_status);
+        }
+        return $this->db->get()->result_array();
+    }
+
+    function fetch_all_package_offline($id_list_package_offline, $id_teacher = NULL)
+    {
+        $this->db->select('sc.*, s.name_student');
+        $this->db->from('schedule_package_offline as sc');
+        $this->db->join('student as s', 'sc.id_student = s.id_student', 'left');
+        $this->db->where('sc.id_list_package_offline', $id_list_package_offline);
+        if ($id_teacher != null) {
+            $this->db->where('sc.id_teacher', $id_teacher);
+        }
+        $this->db->order_by("id_schedule_package_offline", "ASC");
+        return $this->db->get();
+    }
+
     function fetch_all_package($id_list_pack, $id_teacher = NULL)
     {
         $this->db->select('sc.*, s.name_student');
@@ -906,6 +1029,12 @@ class M_Teacher extends CI_Model
         $this->db->update('schedule_package', $data);
     }
 
+    function update_event_schedule_package_offline($data, $id_schedule_package_offline)
+    {
+        $this->db->where('id_schedule_package_offline', $id_schedule_package_offline);
+        $this->db->update('schedule_package_offline', $data);
+    }
+
     function delete_event_schedule_package($id_schedule_pack)
     {
         $this->db->where('id_schedule_pack', $id_schedule_pack);
@@ -917,7 +1046,7 @@ class M_Teacher extends CI_Model
         $this->db->select('sl.*');
 
         $this->db->from('sirkulasi_lesson as sl');
-        
+
         if ($id_sirkulasi_lesson != null) {
             $this->db->where('id_sirkulasi_lesson', $id_sirkulasi_lesson);
         }
@@ -941,17 +1070,19 @@ class M_Teacher extends CI_Model
             $this->db->where('t.status', '1');
             $this->db->where('t.id_teacher', $id_teacher);
         }
-        
+
         $this->db->where('sl.status', '1');
         $this->db->order_by('id_sirkulasi_lesson', 'DESC');
         return $this->db->get()->result_array();
     }
 
-    public function getData_sirkulasi_lesson_detail($id_sirkulasi_lesson_detail = null, $no_sirkulasi_lesson = null, $id_teacher = null, $id_student = null, $tipe = null, $lesson_date = null)
+    public function getData_sirkulasi_lesson_detail($id_sirkulasi_lesson_detail = null, $no_sirkulasi_lesson = null, $id_teacher = null, $id_student = null, $tipe = null, $lesson_date = null, $rate = null, $periode_after = null, $periode_before = null)
     {
-        $this->db->select('sl.*');
+        $this->db->select('sl.*, pk.price_idr, pk.price_euro, pk.price_dollar, pk.status_pack_theory, pk.status_pack_practical');
 
         $this->db->from('sirkulasi_lesson_detail as sl');
+        $this->db->join('paket as pk', 'sl.paket = pk.id', 'left');
+
         if ($id_student != null) {
             $this->db->join('student as s', 'sl.id_student = s.id_student', 'left');
             $this->db->where('s.id_student', $id_student);
@@ -973,16 +1104,96 @@ class M_Teacher extends CI_Model
         }
 
         if ($tipe != null) {
-            $this->db->where('tipe', $tipe);
+            $this->db->where('sl.tipe', $tipe);
+        }
+
+        if ($rate != null) {
+            $this->db->where('rate', $rate);
         }
 
         if ($lesson_date != null) {
             $this->db->like('lesson_date', $lesson_date);
         }
 
-        
+        if ($periode_after != null) {
+            if (substr('sl.lesson_date', 0, 10) != "0000-00-00") {
+                $this->db->where('sl.lesson_date >=', "$periode_after");
+            }
+        }
 
-        $this->db->order_by('id_sirkulasi_lesson_detail', 'DESC');
+        if ($periode_before != null) {
+            if (substr('sl.lesson_date', 0, 10) != "0000-00-00") {
+                $this->db->where('sl.lesson_date <', "$periode_before");
+            }
+        }
+
+        $this->db->order_by('lesson_date', 'DESC');
+        return $this->db->get()->result_array();
+    }
+
+    public function getData_sirkulasi_lesson_detail_after($id_teacher = null, $id_student = null, $tipe = null, $periode_after = null, $rate = null)
+    {
+        $this->db->select('sl.*');
+
+        $this->db->from('sirkulasi_lesson_detail as sl');
+        if ($id_student != null) {
+            $this->db->join('student as s', 'sl.id_student = s.id_student', 'left');
+            $this->db->where('s.id_student', $id_student);
+        }
+
+        if ($id_teacher != null) {
+            $this->db->join('teacher as t', 'sl.id_teacher = t.id_teacher', 'left');
+            $this->db->where('t.id_teacher', $id_teacher);
+        }
+
+        if ($tipe != null) {
+            $this->db->where('tipe', $tipe);
+        }
+
+        if ($rate != null) {
+            $this->db->where('rate', $rate);
+        }
+
+        if ($periode_after != null) {
+            if (substr('sl.lesson_date', 0, 10) != "0000-00-00") {
+                $this->db->where('sl.lesson_date >', "$periode_after");
+            }
+        }
+
+        $this->db->order_by('lesson_date', 'ASC');
+        return $this->db->get()->result_array();
+    }
+
+    public function getData_sirkulasi_lesson_detail_before($id_teacher = null, $id_student = null, $tipe = null, $periode_before = null, $rate = null)
+    {
+        $this->db->select('sl.*');
+
+        $this->db->from('sirkulasi_lesson_detail as sl');
+        if ($id_student != null) {
+            $this->db->join('student as s', 'sl.id_student = s.id_student', 'left');
+            $this->db->where('s.id_student', $id_student);
+        }
+
+        if ($id_teacher != null) {
+            $this->db->join('teacher as t', 'sl.id_teacher = t.id_teacher', 'left');
+            $this->db->where('t.id_teacher', $id_teacher);
+        }
+
+        if ($tipe != null) {
+            $this->db->where('tipe', $tipe);
+        }
+
+        if ($rate != null) {
+            $this->db->where('rate', $rate);
+        }
+
+        if ($periode_before != null) {
+            if (substr('sl.lesson_date', 0, 10) != "0000-00-00") {
+                $this->db->where('sl.lesson_date <=', "$periode_before");
+            }
+        }
+
+        $this->db->order_by('lesson_date', 'ASC');
         return $this->db->get()->result_array();
     }
 
@@ -995,6 +1206,13 @@ class M_Teacher extends CI_Model
     public function addDataSirkulasiLessonDetail($data)
     {
         $this->db->insert('sirkulasi_lesson_detail', $data);
+        return true;
+    }
+
+    public function updateDataSirkulasiLessonDetail($data, $id_sirkulasi_lesson_detail)
+    {
+        $this->db->where('id_sirkulasi_lesson_detail', $id_sirkulasi_lesson_detail);
+        $this->db->update('sirkulasi_lesson_detail', $data);
         return true;
     }
 
@@ -1017,7 +1235,7 @@ class M_Teacher extends CI_Model
         $this->db->delete('sirkulasi_lesson_detail');
     }
 
-    public function getData_sirkulasi_feereport($id_sirkulasi_feereport = null, $no_sirkulasi_feereport = null, $status_approved = null, $id_teacher = null)
+    public function getData_sirkulasi_feereport($id_sirkulasi_feereport = null, $no_sirkulasi_feereport = null, $status_approved = null, $id_teacher = null, $periode_after = null, $id_barang = null)
     {
         $this->db->select('s.*');
         $this->db->from('sirkulasi_feereport as s');
@@ -1034,10 +1252,20 @@ class M_Teacher extends CI_Model
         if ($id_teacher != null) {
             $this->db->where('id_teacher', $id_teacher);
         }
+        if ($periode_after != null) {
+            if (substr('s.created_at', 0, 10) != "0000-00-00") {
+                $temp_period = $periode_after . "-01";
+                $this->db->where('s.created_at >=', "$temp_period");
+            }
+        }
+        if ($id_barang != null) {
+            $this->db->join('sirkulasi_feereport_detail as sl', 'sl.no_sirkulasi_feereport = s.no_sirkulasi_feereport', 'left');
+            $this->db->where('sl.id_barang', $id_barang);
+        }
         return $this->db->get()->result_array();
     }
 
-    public function getData_sirkulasi_feereport_detail($id = null, $no_sirkulasi_feereport = null, $tipe = null)
+    public function getData_sirkulasi_feereport_detail($id = null, $no_sirkulasi_feereport = null, $tipe = null, $id_barang = null)
     {
         $this->db->select('s.*');
         $this->db->from('sirkulasi_feereport_detail as s');
@@ -1048,7 +1276,10 @@ class M_Teacher extends CI_Model
             $this->db->like('no_sirkulasi_feereport', $no_sirkulasi_feereport);
         }
         if ($tipe != null) {
-            $this->db->like('tipe', $tipe);
+            $this->db->where('tipe', $tipe);
+        }
+        if ($id_barang != null) {
+            $this->db->where('id_barang', $id_barang);
         }
         return $this->db->get()->result_array();
     }

@@ -56,17 +56,17 @@
                     </div>
                     <div class="form-group">
                         <label for="distributor_price">Distributor Price</label>
-                        <input type="text" class="form-control" id="rupiah" />
+                        <input type="number" class="form-control" id="rupiah" required />
                         <input type="hidden" class="form-control" id="distributor_price" name="distributor_price">
                     </div>
                     <div id="sellingPrice" class="form-group">
                         <label for="selling_price">Selling Price</label>
-                        <input type="text" class="form-control" id="rupiah3" />
+                        <input type="number" class="form-control" id="rupiah3" required />
                         <input type="hidden" class="form-control" id="selling_price" name="selling_price">
                     </div>
                     <div class="form-group">
                         <label for="shipping_rate">Shipping Price</label>
-                        <input type="text" class="form-control" id="rupiah2" />
+                        <input type="number" class="form-control" id="rupiah2" required />
                         <input type="hidden" class="form-control" id="shipping_rate" name="shipping_rate">
                     </div>
                     <button type="submit" class="btn btn-primary btn-block">Order</button>

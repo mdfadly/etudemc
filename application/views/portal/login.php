@@ -36,7 +36,8 @@
                     <div class="form-group row">
                         <label for="inputPassword" class="col-lg-2 col-12 pt-lg-3 col-form-label">Password</label>
                         <div class="col-lg-9 col-10">
-                            <input type="password" class="form-control login-form pwd" required name="password" id="inputPassword">
+                            <input type="password" minlength="8" maxlength="20" class="form-control login-form pwd" required name="password" id="inputPassword">
+                            <small class="form-text">min 8 and max 20 characters</small>
                         </div>
                         <div class="col-lg-1 col-1">
                             <span class="input-group-btn text-left">

@@ -35,18 +35,11 @@
                         <input type="text" required class="form-control" id="event_name" required name="event_name">
                     </div>
                     <div class="form-group">
-                        <label for="member">Teacher/Student</label>
-                        <select class="form-control" id="member" required name="member">
-                            <option value="1">Teacher</option>
-                            <option value="2">Student</option>
-                        </select>
+                        <input type="hidden" required class="form-control" id="member" required name="member" value="2">
                     </div>
                     <div class="form-group">
                         <label for="event_date">Event Date</label><br>
                         <input type="date" required class="form-control" id="event_date" required name="event_date1">
-                        <!-- <div id="new_event_date">
-
-                        </div> -->
                         <input type="hidden" value="1" name="total_event_date" id="total_event_date">
                     </div>
 
@@ -54,9 +47,6 @@
                         <label for="price">Event Price</label>
                         <input type="text" class="form-control" id="rupiah" />
                         <input type="hidden" class="form-control" id="price" name="price1">
-                        <!-- <div id="new_price">
-
-                        </div> -->
                         <input type="hidden" value="1" name="total_price" id="total_price">
                     </div>
                     <div id="eventDetail2" class="hiden">

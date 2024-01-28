@@ -23,12 +23,12 @@
                 <?php endif; ?>
             </div>
             <div class="col-lg-12 pt-3">
-                <span class="mr-1 pb-2" style="border-bottom:2px solid #62A8D6">
+                <!-- <span class="mr-1 pb-2" style="border-bottom:2px solid #62A8D6">
                     Offline Invoice
                 </span>
-                |
+                | -->
                 <a href="<?= site_url() ?>portal/C_Admin/data_invoice_purchase" class="btn ml-1 mr-1 pl-4 pr-4" style="background-color:#f1f3f8; font-size:12px">
-                    Online Invoice
+                    Invoice
                 </a>
                 |
                 <a href="<?= site_url() ?>portal/C_Admin/data_invoice_parent_summary" class="btn ml-1 mr-1 pl-4 pr-4" style="background-color:#f1f3f8; font-size:12px">

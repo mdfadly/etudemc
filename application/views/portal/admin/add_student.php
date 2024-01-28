@@ -1,21 +1,28 @@
 <style>
-    .add,
-    .remove {
-        background-color: #263850;
-        color: white;
-        font-size: 12px;
+    h5 {
+        font-weight: bold;
     }
 
-    .add:hover,
-    .remove:hover {
-        background-color: #0676BD;
-        color: white;
+    .hiden {
+        display: none;
     }
 </style>
 <main class="page-content">
     <div class="container-fluid">
-        <h2>Add Data <?= ucfirst($data['choose']) ?></h2>
+        <div style="text-align:left;">
+            <span style="font-family:mReguler; font-size:20px;" class="font-weight-bold">
+                <a href="<?= site_url() ?>portal/data_student" class="btn btn-primary">
+                    <i class="fa fa-angle-left"></i> Back
+                </a>
+            </span>
+            <span style="float:right;">
+
+            </span>
+        </div>
+
         <hr>
+        <h2 style="font-weight:bold">Add Data</h2>
+
         <div class="row">
             <?php if ($this->session->flashdata('warning') != null) : ?>
                 <div class="col-lg-12">
@@ -24,14 +31,9 @@
                     </div>
                 </div>
             <?php endif; ?>
-            <div class="col-lg-12">
-                <a href="<?= site_url() ?>portal/data_student" class="btn btn-primary">
-                    <i class="fa fa-angle-left"></i> Back
-                </a>
-            </div>
 
             <div class="col-lg-12 col-12 mt-4">
-                <form action="<?= site_url('portal/C_Admin/add_data_student') ?>" method="POST">
+                <form action="<?= site_url('portal/C_Admin/add_data_student') ?>" method="POST" enctype="multipart/form-data">
                     <?php if ($data['choose'] == "student") : ?>
                         <div class="form-group">
                             <label for="parent_student">Parent Name</label><br>
@@ -53,113 +55,369 @@
                                 <?php endfor; ?>
                             </select>
                         </div>
+                        <input type="hidden" class="form-control regist-form" required value="add_student_admin" name="from_form" id="from_form">
                     <?php endif; ?>
-                    <?php if ($data['choose'] == "parent") : ?>
-                        <div class="form-group">
-                            <label for="parent_student">Parent Name</label>
-                            <input type="text" class="form-control" id="parent_student" required name="parent_student">
+                    <hr />
+                    <h5>Student's Information</h5>
+                    <div class="form-group text-center">
+                        <div class="cover-img" id="divImg_student">
+                            <img src="<?= site_url() ?>assets/img/avatar.png" class="avatar avatartemp rounded-circle img-thumbnail" alt="avatar">
                         </div>
-                    <?php endif; ?>
+                        <p class="mt-2">Upload Student's picture</p>
+                    </div>
+                    <div class="form-group ml-5" style="width: 100%;height: 100%;margin: auto;text-align: center;">
+                        <input type="hidden" value="tidak" name="ubah-pict1" class="ubah-pict1" id="ubah-pict1">
+                        <input type="file" id="pict_student1" name="pict_student1" class="file-upload" style="text-align: center; margin: auto; font-size:12px" accept="image/*">
+                    </div>
+                    <div class="row text-center mt-2 mb-3">
+                        <div class="col-lg-12">
+                            <span id="check-file-photo-parent">png,jpg,jpeg (max size file 2MB)</span>
+                        </div>
+                    </div>
                     <div class="form-group">
-                        <label for="name_student">Student Name</label>
+                        <label for="name_student">Student's Full Name <span style="color:red;font-weight:bold;">*</span></label>
                         <input type="text" class="form-control" id="name_student" required name="name_student1">
-
-                        <div id="new_student">
-
-                        </div>
-                        <input type="hidden" value="1" name="total_student" id="total_student">
-                        <div class="pt-2">
-                            <button type="button" class="add btn btn-info">Add</button>
-                            <button type="button" class="remove btn btn-info">remove</button>
-                        </div>
                     </div>
                     <div class="form-group">
-                        <label for="instrument">Instrument</label>
-                        <input type="text" class="form-control" id="instrument" required name="instrument1">
-                        <div id="new_instrument">
-
-                        </div>
-                        <input type="hidden" value="1" name="total_instrument" id="total_instrument">
+                        <label for="nickname_student">Student's Nick Name <span style="color:red;font-weight:bold;">*</span></label>
+                        <input type="text" class="form-control" id="nickname_student" required name="nickname_student1">
                     </div>
                     <div class="form-group">
-                        <label for="dob_student">DOB</label>
-                        <input type="text" class="form-control" id="dob_student" required name="dob_student1">
-                        <small id="emailHelp" class="form-text text-muted">(Ex: Jakarta, 20 Maret 1990)</small>
-                        <div id="new_dob">
-
-                        </div>
-                        <input type="hidden" value="1" name="total_dob" id="total_dob">
+                        <label for="gender_student">Student's Gender <span style="color:red;font-weight:bold;">*</span></label>
+                        <select class="form-control" style="width:100%;" id="gender_student1" name="gender_student1" required>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                        </select>
                     </div>
                     <div class="form-group">
-                        <label for="school_student">School</label>
-                        <input type="text" class="form-control" id="school_student" required name="school_student1">
-                        <div id="new_school">
-
-                        </div>
-                        <input type="hidden" value="1" name="total_school" id="total_school">
+                        <label for="tempat_dob1">Student's Place of Birth <span style="color:red;font-weight:bold;">*</span></label>
+                        <input type="text" class="form-control" id="tempat_dob1" required autocomplete="off" name="tempat_dob1">
                     </div>
-                    <?php if ($data['choose'] == "parent") : ?>
+                    <div class="form-group">
+                        <label for="tanggal_dob1">Student's Date of Birth <span style="color:red;font-weight:bold;">*</span></label>
+                        <input type="text" class="form-control datepicker" id="tanggal_dob1" required autocomplete="off" name="tanggal_dob1">
+                    </div>
+
+                    <input type="hidden" value="1" name="total_student" id="total_student">
+                    <div id="new_student">
+
+                    </div>
+                    <div class="form-group form-check">
+                        <input type="checkbox" name="check_address" value="1" checked class="form-check-input" id="check_address">
+                        <label class="form-check-label" for="check_address">
+                            The address same as parent</label>
+                        <span class="checkmark"></span>
+                    </div>
+                    <div id="address_parent_same" class="hiden">
                         <div class="form-group">
                             <label for="address_student">Address</label>
-                            <textarea class="form-control regist-form" rows="4" required name="address_student" id="address_student"></textarea>
+                            <textarea class="form-control regist-form" rows="4" name="address_student" id="address_student"></textarea>
                         </div>
                         <div class="form-row">
                             <div class="form-group col-lg-6">
-                                <label for="inputCity">Sub District</label>
-                                <input type="text" name="kelurahan" required class="form-control regist-form">
+                                <label for="kelurahan">Sub District</label>
+                                <input type="text" id="kelurahan" name="kelurahan" class="form-control regist-form">
                             </div>
                             <div class="form-group col-lg-6">
-                                <label for="inputCity">District</label>
-                                <input type="text" name="kecamatan" required class="form-control regist-form">
+                                <label for="kecamatan">District</label>
+                                <input type="text" name="kecamatan" id="kecamatan" class="form-control regist-form">
                             </div>
                         </div>
                         <div class="form-row">
                             <div class="form-group col-lg-6">
-                                <label for="inputCity">City</label>
-                                <input type="text" name="kota" required class="form-control regist-form">
+                                <label for="kota">City</label>
+                                <input type="text" name="kota" id="kota" class="form-control regist-form">
                             </div>
                             <div class="form-group col-lg-6">
-                                <label for="inputCity">Province</label>
-                                <input type="text" name="provinsi" required class="form-control regist-form">
+                                <label for="provinsi">Province</label>
+                                <input type="text" name="provinsi" id="provinsi" class="form-control regist-form">
                             </div>
                         </div>
                         <div class="form-row">
                             <div class="form-group col-lg-6">
                                 <label for="inputZip">Postal Code</label>
-                                <input type="text" name="zip" required class="form-control regist-form">
+                                <input type="text" name="zip" id="zip" class="form-control regist-form">
                             </div>
-                            <div id="check_country" class="form-group col-lg-6 hiden">
-                                <label for="inputCity">Country</label>
-                                <input id="country" type="text" name="country" required class="form-control regist-form">
+                            <div class="form-group col-lg-6">
+                                <label for="country">Country</label>
+                                <input type="text" name="country" id="country" class="form-control regist-form">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-6 col-lg-6">
+                            <button type="button" class="add btn btn-primary"><i class="fa fa-plus"></i></button>
+                            <button type="button" class="remove btn btn-primary"><i class="fa fa-minus"></i></button>
+                        </div>
+                        <div class="col-6 col-lg-6">
+                        </div>
+                    </div>
+                    <?php if ($data['choose'] == "parent") : ?>
+                        <h5>Etude Account</h5>
+                        <div class="form-group row">
+                            <label for="username_parent" class="col-3 col-lg-3 pt-lg-2 col-form-label">Username</label>
+                            <span class="col-1 col-lg-1 pt-lg-2"> : </span>
+                            <div class="col-12 col-lg-8">
+                                <input type="text" minlength="3" maxlength="15" class="form-control regist-form" required name="username_parent" id="username_parent">
+                                <small id="check-username-parent" class="form-text"></small>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="inputPassword_parent" class="col-3 col-lg-3 pt-lg-2 col-form-label">Password</label>
+                            <span class="col-1 col-lg-1 pt-lg-2"> : </span>
+                            <div class="col-10 col-lg-6">
+                                <input type="password" minlength="8" maxlength="20" class="form-control regist-form pwd-parent" required name="password_parent" id="inputPassword_parent">
+                                <small class="form-text">min 8 and max 20 characters</small>
+                            </div>
+                            <div class="col-lg-2 col-2">
+                                <button type="button" class="btn btn-default" id="btn-eye-parent" onclick="openPassParent()">
+                                    <i class="iconEyeParent fa fa-eye-slash"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <hr />
+                        <h5 style="font-weight:bold">Parent / Person in Charge Information</h5>
+                        <div class="form-group row pt-3">
+                            <label for="parent_student" class="col-3 col-lg-3 pt-lg-2 col-form-label">Name</label>
+                            <span class="col-1 col-lg-1 pt-lg-2"> : </span>
+                            <div class="col-12 col-lg-8">
+                                <input type="text" class="form-control regist-form" required name="parent_student" id="parent_student">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="email_parent_1" class="col-3 col-lg-3 pt-lg-2 col-form-label">Email</label>
+                            <span class="col-1 col-lg-1 pt-lg-2"> : </span>
+                            <div class="col-12 col-lg-8">
+                                <input type="email" class="form-control regist-form" required name="email_parent_1" id="email_parent_1">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="ig_parent_1" class="col-3 col-lg-3 pt-lg-2 col-form-label">Instagram</label>
+                            <span class="col-1 col-lg-1 pt-lg-2"> : </span>
+                            <div class="col-12 col-lg-8">
+                                <input type="text" class="form-control regist-form" required name="ig_parent_1" id="ig_parent_1">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="phone_parent_1" class="col-3 col-lg-3 pt-lg-2 col-form-label">Phone No.</label>
+                            <span class="col-1 col-lg-1 pt-lg-2"> : </span>
+                            <div class="col-12 col-lg-8">
+                                <input type="text" class="form-control regist-form" required name="phone_parent_1" id="phone_parent_1">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="phone_parent_2" class="col-3 col-lg-3 col-form-label">Alternative Phone No.</label>
+                            <span class="col-1 col-lg-1"> : </span>
+                            <div class="col-12 col-lg-8">
+                                <input type="text" class="form-control regist-form" required name="phone_parent_2" id="phone_parent_2">
+                                <small class="form-text text-muted">(Ex: housemate/babysitter/etc)</small>
                             </div>
                         </div>
                         <div class="form-group">
-                            <label for="phone_student_1">Phone 1</label>
-                            <input type="text" class="form-control" id="phone_student_1" required name="phone_student_1">
+                            <label for="address_parent">Address</label>
+                            <textarea class="form-control regist-form" rows="4" required name="address_parent" id="address_parent"></textarea>
                         </div>
-                        <div class="form-group">
-                            <label for="phone_student_2">Phone 2</label>
-                            <input type="text" class="form-control" id="phone_student_2" name="phone_student_2">
-                            <small id="emailHelp" class="form-text text-muted">If more than one</small>
+                        <div class="form-row">
+                            <div class="form-group col-lg-6">
+                                <label for="kelurahan_parent">Sub District</label>
+                                <input type="text" id="kelurahan_parent" name="kelurahan_parent" required class="form-control regist-form">
+                            </div>
+                            <div class="form-group col-lg-6">
+                                <label for="kecamatan_parent">District</label>
+                                <input type="text" name="kecamatan_parent" id="kecamatan_parent" required class="form-control regist-form">
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label for="">Select currency:</label>
-                            <select class="form-control" style="width:100%;" name="currency" id="currency">
-                                <option value="1">Rupiah</option>
-                                <option value="2">Dollar</option>
-                                <option value="3">Euro</option>
-                            </select>
+                        <div class="form-row">
+                            <div class="form-group col-lg-6">
+                                <label for="kota_parent">City</label>
+                                <input type="text" name="kota_parent" id="kota_parent" required class="form-control regist-form">
+                            </div>
+                            <div class="form-group col-lg-6">
+                                <label for="provinsi_parent">Province</label>
+                                <input type="text" name="provinsi_parent" id="provinsi_parent" required class="form-control regist-form">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group col-lg-6">
+                                <label for="zip_parent">Postal Code</label>
+                                <input type="text" name="zip_parent" id="zip_parent" required class="form-control regist-form">
+                            </div>
+                            <div class="form-group col-lg-6">
+                                <label for="country_parent">Country</label>
+                                <input type="text" name="country_parent" id="country_parent" required class="form-control regist-form">
+                            </div>
                         </div>
                     <?php endif; ?>
-
-                    <button type="submit" class="btn btn-primary btn-block">Submit</button>
+                    <div class="form-group row">
+                        <div class="col-12 col-lg-12">
+                            <button id="submit-parent" type="submit" class="btn btn-primary btn-block">Submit</button>
+                        </div>
+                    </div>
                 </form>
             </div>
         </div>
     </div>
 </main>
 <script src="<?= base_url('assets/js/jquery-3.4.0.min.js'); ?>"></script>
+<script src="<?= base_url('assets/js/bootstrap-datepicker.js') ?>"></script>
 <script>
+    $(".datepicker").datepicker({
+        weekStart: 1,
+        format: 'dd MM yyyy',
+        autoclose: true,
+        todayHighlight: true,
+    });
+    $(document).ready(function() {
+        $(".next").html('<i class="fa fa-arrow-right"></i>');
+        $(".prev").html('<i class="fa fa-arrow-left"></i>');
+        $('.select-form').select2();
+        var counter_total_student = parseInt($('#total_student').val());
+
+        var readURL = function(input) {
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    $('.avatartemp').attr('src', e.target.result);
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        $(".file-upload").on('change', function() {
+            let cekTipe = this.files[0].type.split("/");
+            if (this.files[0].size > (1000 * 2000)) {
+                $("#divImg_student").html("");
+                $("#divImg_student").html(`<img src="<?= site_url() ?>assets/img/avatar.png" class="avatar avatartemp rounded-circle img-thumbnail" alt="avatar">`);
+                $("#check-file-photo-parent").html("<span style='color:red; font-weight:bold'>Size more than 2MB</span>");
+                $('#pict_student1').val("");
+                document.getElementById('ubah-pict1').value = "tidak";
+            } else {
+                if (cekTipe[0] !== "image") {
+                    $("#divImg_student").html("");
+                    $("#divImg_student").html(`<img src="<?= site_url() ?>assets/img/avatarNotAllowed.jpg" class="avatar avatartemp rounded-circle img-thumbnail" alt="avatar">`);
+                    $("#check-file-photo-parent").html("<span style='color:red; font-weight:bold'>Filetype not allowed</span>");
+                    $('#pict_student1').val("");
+                    document.getElementById('ubah-pict1').value = "tidak";
+                } else {
+                    $("#check-file-photo-parent").html("");
+                    readURL(this);
+                    document.getElementById('ubah-pict1').value = "ya";
+                }
+            }
+        });
+
+        var x = window.matchMedia("(max-width: 990px)");
+        myFunction(x); // Call listener function at run time
+        x.addListener(myFunction); // Attach listener function on state changes
+
+        function myFunction(x) {
+            if (x.matches) { // If media query matches
+                $('.head-login').addClass('text-center');
+            } else {
+                $('.head-login').removeClass('text-center');
+            }
+        };
+
+        $('.add').on('click', add);
+        $('.remove').on('click', remove);
+
+        function add() {
+            var new_student_no = parseInt($('#total_student').val()) + 1;
+            var new_input = `<div id='new_` + new_student_no + `'>
+                    <p>Student ` + new_student_no + `</p>
+                    <div class="form-group text-center">
+                        <div class="cover-img" id="divImg_student` + new_student_no + `">
+                            <img src="<?= site_url() ?>assets/img/avatar.png" class="avatar avatartemp` + new_student_no + ` rounded-circle img-thumbnail" alt="avatar">
+                        </div>
+                        <p class="mt-2">Upload Student's picture</p>
+                    </div>
+                    <div class="form-group ml-5" style="width: 100%;height: 100%;margin: auto;text-align: center;">
+                        <input type="hidden" value="tidak" name="ubah-pict` + new_student_no + `" class="ubah-pict` + new_student_no + `" id="ubah-pict` + new_student_no + `">
+                        <input type="file" id="pict_student` + new_student_no + `" name="pict_student` + new_student_no + `" class="file-upload` + new_student_no + `" style="text-align: center; margin: auto; font-size:12px" accept="image/*">
+                    </div>
+                    <div class="row text-center mt-2 mb-3">
+                        <div class="col-lg-12">
+                            <span id="check-file-photo-parent` + new_student_no + `">png,jpg,jpeg (max size file 2MB)</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="name_student` + new_student_no + `">Student's Full Name <span style="color:red;font-weight:bold;">*</span></label>
+                        <input type="text" class="form-control" id="name_student` + new_student_no + `" required autocomplete="off" name="name_student` + new_student_no + `">
+                    </div>
+                    <div class="form-group">
+                        <label for="nickname_student` + new_student_no + `">Student's Nick Name <span style="color:red;font-weight:bold;">*</span></label>
+                        <input type="text" class="form-control" id="nickname_student` + new_student_no + `" required autocomplete="off" name="nickname_student` + new_student_no + `">
+                    </div>
+                    <div class="form-group">
+                        <label for="gender_student">Student Gender <span style="color:red;font-weight:bold;">*</span></label>
+                        <select class="form-control" style="width:100%;" id="gender_student` + new_student_no + `" name="gender_student` + new_student_no + `" required autocomplete="off">
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="tempat_dob` + new_student_no + `">Student's Place of Birth <span style="color:red;font-weight:bold;">*</span></label>
+                        <input type="text" class="form-control" id="tempat_dob` + new_student_no + `" required autocomplete="off" name="tempat_dob` + new_student_no + `">
+                    </div>
+                    <div class="form-group">
+                        <label for="tanggal_dob` + new_student_no + `">Student's Date of Birth <span style="color:red;font-weight:bold;">*</span></label>
+                        <input type="text" class="form-control datepicker2" id="tanggal_dob` + new_student_no + `" required autocomplete="off" name="tanggal_dob` + new_student_no + `">
+                    </div>
+                </div>`;
+            $('#new_student').append(new_input);
+            $('#total_student').val(new_student_no);
+            counter_total_student += 1;
+            console.log(counter_total_student);
+            for (let i = 2; i <= counter_total_student; i++) {
+                $('.file-upload' + i).on('change', function() {
+                    let cekTipe = this.files[0].type.split("/");
+                    if (this.files[0].size > (1000 * 2000)) {
+                        $("#divImg_student" + i).html("");
+                        $("#divImg_student" + i).html(`<img src="<?= site_url() ?>assets/img/avatar.png" class="avatar avatartemp` + new_student_no + ` rounded-circle img-thumbnail" alt="avatar">`);
+                        $("#check-file-photo-parent" + i).html("<span style='color:red; font-weight:bold'>Size more than 2MB</span>");
+                        $('#pict_student' + i).val("");
+                        document.getElementById('ubah-pict' + i).value = "tidak";
+                    } else {
+                        if (cekTipe[0] !== "image") {
+                            $("#divImg_student" + i).html("");
+                            $("#divImg_student" + i).html(`<img src="<?= site_url() ?>assets/img/avatarNotAllowed.jpg" class="avatar avatartemp` + new_student_no + ` rounded-circle img-thumbnail" alt="avatar">`);
+                            $("#check-file-photo-parent" + i).html("<span style='color:red; font-weight:bold'>Filetype not allowed</span>");
+                            $('#pict_student' + i).val("");
+                            document.getElementById('ubah-pict' + i).value = "tidak";
+                        } else {
+                            $("#check-file-photo-parent" + i).html("");
+                            if (this.files && this.files[0]) {
+                                document.getElementById('ubah-pict' + i).value = "ya";
+                                let reader = new FileReader();
+                                reader.onload = function(e) {
+                                    $('.avatartemp' + i).attr('src', e.target.result);
+                                }
+                                reader.readAsDataURL(this.files[0]);
+                            }
+                        }
+                    }
+                });
+            }
+            $(".datepicker2").datepicker({
+                weekStart: 1,
+                format: 'dd MM yyyy',
+                autoclose: true,
+                todayHighlight: true,
+            });
+            $(".next").html('<i class="fa fa-arrow-right"></i>');
+            $(".prev").html('<i class="fa fa-arrow-left"></i>');
+        }
+
+        function remove() {
+            var last_student_no = $('#total_student').val();
+            if (last_student_no > 1) {
+                $('#new_' + last_student_no).remove();
+                $('#total_student').val(last_student_no - 1);
+                counter_total_student -= 1;
+            }
+        }
+    });
+
     $("#status_country").on('click', function() {
         var value = $(this).val();
         if (value == 0) {
@@ -169,92 +427,16 @@
             document.getElementById("status_country").value = "0";
             document.getElementById("kat").value = "2";
         }
-
     });
-    $(document).ready(function() {
-        $('.select-form').select2();
-        $('.add').on('click', add);
-        $('.remove').on('click', remove);
+    $("#check_address").on('click', function() {
+        var value = $(this).val();
+        if (value == 0) {
+            document.getElementById("check_address").value = "1";
+            document.getElementById("address_parent_same").classList.add("hiden");
+        } else {
+            document.getElementById("check_address").value = "0";
+            document.getElementById("address_parent_same").classList.remove("hiden");
 
-        function add() {
-            add_dob();
-            add_school();
-            add_instrument();
-            var new_student_no = parseInt($('#total_student').val()) + 1;
-            var new_input = "<input class='form-control mt-2' placeholder='Student name " + new_student_no + "...' name='name_student" + new_student_no + "' type='text' id='new_" + new_student_no + "'>";
-
-            $('#new_student').append(new_input);
-
-            $('#total_student').val(new_student_no);
-        }
-
-        function remove() {
-            remove_dob();
-            remove_school();
-            remove_instrument();
-            var last_student_no = $('#total_student').val();
-
-            if (last_student_no > 1) {
-                $('#new_' + last_student_no).remove();
-                $('#total_student').val(last_student_no - 1);
-            }
-        }
-
-        // $('.add_dob').on('click', add_dob);
-        // $('.remove_dob').on('click', remove_dob);
-
-        function add_dob() {
-            var new_dob_no = parseInt($('#total_dob').val()) + 1;
-            var new_input = "<input class='form-control mt-2' placeholder='DOB Student " + new_dob_no + "..' name='dob_student" + new_dob_no + "' type='text' id='new_" + new_dob_no + "'>";
-
-            $('#new_dob').append(new_input);
-
-            $('#total_dob').val(new_dob_no);
-        }
-
-        function remove_dob() {
-            var last_dob_no = $('#total_dob').val();
-
-            if (last_dob_no > 1) {
-                $('#new_' + last_dob_no).remove();
-                $('#total_dob').val(last_dob_no - 1);
-            }
-        }
-
-        function add_school() {
-            var new_school_no = parseInt($('#total_school').val()) + 1;
-            var new_input = "<input class='form-control mt-2' placeholder='school Student " + new_school_no + "..' name='school_student" + new_school_no + "' type='text' id='new_" + new_school_no + "'>";
-
-            $('#new_school').append(new_input);
-
-            $('#total_school').val(new_school_no);
-        }
-
-        function remove_school() {
-            var last_school_no = $('#total_school').val();
-
-            if (last_school_no > 1) {
-                $('#new_' + last_school_no).remove();
-                $('#total_school').val(last_school_no - 1);
-            }
-        }
-
-        function add_instrument() {
-            var new_instrument_no = parseInt($('#total_instrument').val()) + 1;
-            var new_input = "<input class='form-control mt-2' placeholder='instrument Student " + new_instrument_no + "..' name='instrument" + new_instrument_no + "' type='text' id='new_" + new_instrument_no + "'>";
-
-            $('#new_instrument').append(new_input);
-
-            $('#total_instrument').val(new_instrument_no);
-        }
-
-        function remove_instrument() {
-            var last_instrument_no = $('#total_instrument').val();
-
-            if (last_instrument_no > 1) {
-                $('#new_' + last_instrument_no).remove();
-                $('#total_instrument').val(last_instrument_no - 1);
-            }
         }
     });
 </script>

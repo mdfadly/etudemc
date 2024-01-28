@@ -23,12 +23,12 @@
                 <?php endif; ?>
             </div>
             <div class="col-lg-12 pt-3">
-                <a href="<?= site_url() ?>portal/invoice" class="btn ml-1 mr-1 pl-4 pr-4" style="background-color:#f1f3f8; font-size:12px">
+                <!-- <a href="<?= site_url() ?>portal/invoice" class="btn ml-1 mr-1 pl-4 pr-4" style="background-color:#f1f3f8; font-size:12px">
                     Offline Invoice
                 </a>
-                |
+                | -->
                 <span class="mr-1 pb-2" style="border-bottom:2px solid #62A8D6">
-                    Online Invoice
+                    Invoice
                 </span>
                 |
                 <a href="<?= site_url() ?>portal/C_Admin/data_invoice_parent_summary" class="btn ml-1 mr-1 pl-4 pr-4" style="background-color:#f1f3f8; font-size:12px">
@@ -63,11 +63,6 @@
                                             <i class="fa fa-info"></i>
                                         </a>
                                     </td>
-                                    <!-- <td>
-                                        <a href="<?= site_url(); ?>portal/C_Admin/data_invoice_summary_offline/<?= $invoice_temp[$i] ?>" class="btn btn-secondary">
-                                            <i class="fa fa-archive"></i>
-                                        </a>
-                                    </td> -->
                                 </tr>
                             <?php endfor; ?>
                         </tbody>

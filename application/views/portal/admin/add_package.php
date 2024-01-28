@@ -39,7 +39,7 @@
                     <div class="form-group">
                         <label for="id_student">Student Name</label>
                         <select class="form-control select-form" name="id_student" onchange="studentIdFunc(event)">
-                            <option>Choose Student</option>
+                            <option>--- Choose Student ---</option>
                             <?php foreach ($student as $t) : ?>
                                 <option value="<?= $t['id_student'] ?>"><?= $t['name_student'] ?></option>
                             <?php endforeach; ?>
@@ -48,13 +48,24 @@
                     <div class="form-group">
                         <label for="id_paket">Name of Package</label>
                         <select class="form-control select-form" id="paket" name="id_paket" onchange="paketIdFunc(event)">
-                            <option>Choose package</option>
-                            <?php foreach ($paket as $t) : ?>
-                                <option value="<?= $t['id'] ?>&<?= $t['price_idr'] ?>&<?= $t['price_dollar'] ?>&<?= $t['price_euro'] ?>&<?= $t['status_pack_theory'] ?>&<?= $t['status_pack_practical'] ?>"><?= $t['name'] ?></option>
-                            <?php endforeach; ?>
+                            <option>--- Choose package ---</option>
                         </select>
                     </div>
+                    <div class="form-group">
+                        <label for="instrument">Instrument</label>
+                        <select class="form-control" style="width:100%;" name="instrument" id="instrument" onchange="instrumentFunc(event)">
+                            <option value="Piano">Piano</option>
+                            <option value="Violin">Violin</option>
+                            <option value="Cello">Cello</option>
+                            <option value="Bass">Bass</option>
+                            <option value="Vocal">Vocal</option>
+                            <option value="Guitar">Guitar</option>
+                            <option value="Others1">Others</option>
+                        </select>
+                        <div id="inputOthers">
 
+                        </div>
+                    </div>
                     <br>
                     <div>
                         <h5 style="font-weight:bold">Data Teacher</h5>
@@ -62,7 +73,7 @@
                         <div id="check_practical_teacher" class="form-group">
                             <label for="id_teacher">Teacher Pratical Name</label>
                             <select class="form-control select-form" name="id_teacher_practical">
-                                <option value="NULL">Choose Teacher</option>
+                                <option value="NULL">--- Choose Teacher ---</option>
                                 <?php foreach ($teacher as $t) : ?>
                                     <option value="<?= $t['id_teacher'] ?>"><?= $t['name_teacher'] ?></option>
                                 <?php endforeach; ?>
@@ -77,12 +88,21 @@
                                 <?php endforeach; ?>
                             </select>
                         </div>
+                        <div class="form-group">
+                            <label for="pack_theory">Teacher Fee Percentage</label>
+                            <input type="number" class="form-control" id="teacher_percentage" value="0" required name="teacher_percentage">
+                        </div>
+                        <div class="form-group">
+                            <label for="total_discount_rate">Potongan Fee Percentage</label>
+                            <input type="number" class="form-control" id="total_discount_rate" value="0" required name="total_discount_rate">
+                        </div>
                     </div>
+
                     <br>
                     <div>
                         <h5 style="font-weight:bold">Data Package</h5>
                         <hr>
-                        
+
                         <input type="hidden" class="form-control" readonly id="temp_paket" name="temp_paket">
                         <input type="hidden" class="form-control" value="0" readonly id="temp_harga_paket" name="temp_harga_paket">
                         <input type="hidden" id="status_pack_practical" name="status_pack_practical" value="0">
@@ -93,21 +113,7 @@
                                 <input type="date" class="form-control" id="created_at" required name="created_at">
                             </div>
                         </div>
-                        <div class="form-group">
-                            <label for="instrument">Instrument</label>
-                            <select class="form-control" style="width:100%;" name="instrument" id="instrument" onchange="instrumentFunc(event)">
-                                <option value="Piano">Piano</option>
-                                <option value="Violin">Violin</option>
-                                <option value="Cello">Cello</option>
-                                <option value="Bass">Bass</option>
-                                <option value="Vocal">Vocal</option>
-                                <option value="Guitar">Guitar</option>
-                                <option value="Others1">Others</option>
-                            </select>
-                            <div id="inputOthers">
 
-                            </div>
-                        </div>
                         <div id="check_practical_pack" class="form-group">
                             <label style="font-weight:bold" for="pack_pratical">Detail of Package</label>
                             <br>
@@ -137,6 +143,7 @@
                             <label for="discount">Discount</label>
                             <input type="text" class="form-control" id="discount_rupiah" name="discount_rupiah" value="0">
                             <input type="hidden" class="form-control" id="discount" name="discount" value="0">
+                            <small>Percentage (%)</small>
                         </div>
                         <div class="form-group">
                             <label for="rate">Total Price</label>
@@ -194,10 +201,115 @@
         }
     }
 
-
     function studentIdFunc(e) {
         var temp_val = e.target.value;
         document.getElementById("temp_id_student").value = temp_val;
+
+        $.ajax({
+            url: "<?= base_url('portal/C_Admin/getDataPaket') ?>",
+            dataType: "JSON",
+            type: "POST",
+            data: {
+                'id_student': temp_val,
+                'tipe': "Online",
+            },
+            success: function(data) {
+                let html = "<option>--- Choose Package ---</option>";
+                if (data.length > 0) {
+                    paketFunction(`${data[0].id_paket}&${data[0].price_idr}&${data[0].price_dollar}&${data[0].price_euro}&${data[0].status_pack_theory}&${data[0].status_pack_practical}`);
+                    html = "";
+                }
+                for (let i = 0; i < data.length; i++) {
+                    const element = data[i];
+                    html += `<option value="${data[i].id_paket}&${data[i].price_idr}&${data[i].price_dollar}&${data[i].price_euro}&${data[i].status_pack_theory}&${data[i].status_pack_practical}">${data[i].name_paket}</option>`
+                }
+                $('#paket').html(html);
+            }
+        });
+
+        $.ajax({
+            url: "<?= base_url('portal/C_Admin/getDataFeePercentage') ?>",
+            dataType: "JSON",
+            type: "POST",
+            data: {
+                'id_student': temp_val,
+            },
+            success: function(data) {
+                console.log(data)
+                document.getElementById("teacher_percentage").value = data;
+            }
+        });
+    }
+
+    function paketFunction(e) {
+        var temp_val = e;
+        console.log(temp_val);
+
+        //reset 0
+        var reset = 0;
+        document.getElementById("total_pack_theory").value = reset;
+        document.getElementById("total_pack_pratical").value = reset;
+        document.getElementById("total_meet_pratical").value = reset;
+        document.getElementById("temp_rate_rupiah").value = formatRupiah(String(reset));
+        document.getElementById("temp_rate").value = reset;
+        document.getElementById("temp_harga_paket").value = reset;
+        document.getElementById('discount').value = reset;
+        document.getElementById("rate_rupiah").value = formatRupiah(String(reset));
+        document.getElementById("rate").value = reset;
+
+        document.getElementById("temp_paket").value = temp_val.split('&')[0];
+        var jmlhPaket = document.getElementById("total_pack_pratical").value;
+
+        var status_pack_theory = temp_val.split('&')[4];
+        document.getElementById("status_pack_theory").value = temp_val.split('&')[4];
+        var status_pack_practical = temp_val.split('&')[5];
+        document.getElementById("status_pack_practical").value = temp_val.split('&')[5];
+        console.log(status_pack_theory);
+        console.log(status_pack_practical);
+
+        if (status_pack_theory === "0") {
+            document.getElementById("check_theory_teacher").classList.add("hiden");
+            document.getElementById("check_theory_pack").classList.add("hiden");
+            document.getElementById("total_pack_theory").value = 0;
+        } else {
+            document.getElementById("check_theory_teacher").classList.remove("hiden");
+            document.getElementById("check_theory_pack").classList.remove("hiden");
+            var total_pack_pratical = document.getElementById("total_pack_pratical").value;
+            document.getElementById("total_pack_theory").value = total_pack_pratical;
+        }
+
+        if (status_pack_practical === "0") {
+            document.getElementById("check_practical_teacher").classList.add("hiden");
+            document.getElementById("check_practical_pack").classList.add("hiden");
+        } else {
+            document.getElementById("check_practical_teacher").classList.remove("hiden");
+            document.getElementById("check_practical_pack").classList.remove("hiden");
+        }
+
+        if (status_pack_theory === "1" && status_pack_practical === "1") {
+            $('#total_pack_theory').attr('readonly', true);
+        } else {
+            $('#total_pack_theory').attr('readonly', false);
+        }
+
+        var temp = "";
+        var temp_harga_paket = '';
+        if (document.getElementById("rate_dollar").value == 1) {
+            temp = temp_val.split('&')[1] * jmlhPaket;
+            temp_harga_paket = temp_val.split('&')[1];
+        } else if (document.getElementById("rate_dollar").value == 2) {
+            temp = temp_val.split('&')[2] * jmlhPaket;
+            temp_harga_paket = temp_val.split('&')[2];
+        } else {
+            temp = temp_val.split('&')[3] * jmlhPaket;
+            temp_harga_paket = temp_val.split('&')[3];
+        }
+        var discount = document.getElementById('discount').value;
+        document.getElementById("temp_rate_rupiah").value = formatRupiah(String(temp));
+        document.getElementById("temp_rate").value = temp;
+        document.getElementById("temp_harga_paket").value = temp_harga_paket;
+        document.getElementById("rate_rupiah").value = formatRupiah(String(temp - discount));
+        document.getElementById("rate").value = temp - discount;
     }
 
     function paketIdFunc(e) {
@@ -274,14 +386,17 @@
 
     var total_pack_pratical = document.getElementById('total_pack_pratical');
     total_pack_pratical.addEventListener('keyup', function(e) {
-        var discount = document.getElementById('discount').value;
-        console.log(discount)
+        var persentase = document.getElementById('discount').value;
         var temp_harga_paket = document.getElementById("temp_harga_paket").value;
+
+        let totPaket = temp_harga_paket * total_pack_pratical.value;
+        let discount = (totPaket * persentase / 100);
+
         document.getElementById("total_meet_pratical").value = total_pack_pratical.value * 2;
-        document.getElementById("temp_rate_rupiah").value = formatRupiah(String(temp_harga_paket * total_pack_pratical.value));
-        document.getElementById("temp_rate").value = temp_harga_paket * total_pack_pratical.value;
-        document.getElementById("rate_rupiah").value = formatRupiah(String(temp_harga_paket * total_pack_pratical.value - discount));
-        document.getElementById("rate").value = temp_harga_paket * total_pack_pratical.value - discount;
+        document.getElementById("temp_rate_rupiah").value = formatRupiah(String(totPaket));
+        document.getElementById("temp_rate").value = totPaket;
+        document.getElementById("rate_rupiah").value = formatRupiah(String(totPaket - discount));
+        document.getElementById("rate").value = totPaket - discount;
 
         //cek theory atau tidak
         var status_pack_theory = document.getElementById("status_pack_theory").value;
@@ -312,8 +427,10 @@
         discount_rupiah.value = formatRupiah(this.value);
         valuee2 = discount_rupiah.value;
         discount.value = valuee2.split('.').join("");
-        document.getElementById("rate_rupiah").value = formatRupiah(String(temp_rate.value - discount.value));
-        document.getElementById("rate").value = temp_rate.value - discount.value;
+        let persentase = temp_rate.value - (temp_rate.value * discount.value / 100);
+
+        document.getElementById("rate_rupiah").value = formatRupiah(String(persentase));
+        document.getElementById("rate").value = persentase;
     });
 
     function formatRupiah(angka, prefix) {

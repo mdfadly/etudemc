@@ -28,6 +28,20 @@
     <link rel="stylesheet" href="<?= base_url() ?>assets/plugins/fullcalendar/fullcalendar.min.css" />
 
     <script src="<?= base_url('assets/js/fontawesome.min.js'); ?>"></script>
+    <style>
+        @media only screen and (orientation : portrait) {
+            body {
+                -webkit-transform: scale(0.85);
+            }
+        }
+    </style>
+    <style>
+        @media only screen and (orientation : landscape) {
+            body {
+                -webkit-transform: scale(0.95);
+            }
+        }
+    </style>
 </head>
 
 <body>
@@ -125,22 +139,23 @@
                 <?php $parents_invoice_others_category = 0 ?>
                 <?php $tot_other_invoice = 0 ?>
                 <?php $total_rate_lesson = 0; ?>
+                <?php $total_rate_offline_lesson = 0; ?>
                 <?php $total_rate_event = 0; ?>
                 <?php $total_rate_book = 0; ?>
-                <p style="<?= count($package) > 0  ? 'font-weight:bold' : 'display:none' ?>"><i>Lesson Package</i></p>
+                <p style="<?= count($package) > 0 ? 'font-weight:bold' : 'display:none' ?>"><i>Lesson Package Online</i></p>
 
-                <div class="table-responsive-sm mb-5" style="<?= count($package) > 0  ? '' : 'display:none' ?>">
-                    <table class="table table-bordered table-white" style="<?= count($package) > 0  ? '' : 'display:none' ?>">
+                <div class="table-responsive-sm mb-5" style="<?= count($package) > 0 ? '' : 'display:none' ?>">
+                    <table class="table table-bordered table-white" style="<?= count($package) > 0 ? '' : 'display:none' ?>">
                         <thead class="text-center">
                             <tr>
                                 <th>No.</th>
                                 <th>Student Name</th>
                                 <th>Name of Package</th>
-                                <th>Lesson Type</th>
-                                <th>Lesson Date</th>
                                 <th>Total Pack</th>
                                 <th>Price/Pack</th>
                                 <th>Total Price</th>
+                                <th>Purchase Date</th>
+                                <th>Expired Date</th>
                             </tr>
                         </thead>
                         <tbody id="show_data">
@@ -150,26 +165,6 @@
                                     <td class="text-center"><?= $z++ ?></td>
                                     <td class="text-center"><?= $package[$i]['name_student'] ?></td>
                                     <td class="text-center"><?= $package[$i]['name'] ?></td>
-                                    <td class="text-center">
-                                        <?= $package[$i]['status_pack_practical'] == 1 ? 'Practice' : '' ?>
-                                        <br>
-                                        <hr>
-                                        <?= $package[$i]['status_pack_theory'] == 1 ? 'Theory' : '' ?>
-                                    </td>
-                                    <td>
-                                        <?php for ($j = 0; $j < count($schedule_package[$package[$i]['id_list_pack']][0]); $j++) : ?>
-                                            <?php if ($schedule_package[$package[$i]['id_list_pack']][0][$j]['jenis'] == 1) : ?>
-                                                <?= date_format(date_create(substr($schedule_package[$package[$i]['id_list_pack']][0][$j]['date_schedule'], 0, 10)), "d/m, ") ?>
-                                            <?php endif; ?>
-                                        <?php endfor; ?>
-                                        <br>
-                                        <hr>
-                                        <?php for ($j = 0; $j < count($schedule_package[$package[$i]['id_list_pack']][0]); $j++) : ?>
-                                            <?php if ($schedule_package[$package[$i]['id_list_pack']][0][$j]['jenis'] == 2) : ?>
-                                                <?= date_format(date_create(substr($schedule_package[$package[$i]['id_list_pack']][0][$j]['date_schedule'], 0, 10)), "d/m, ") ?>
-                                            <?php endif; ?>
-                                        <?php endfor; ?>
-                                    </td>
                                     <td class="text-center">
                                         <?= $package[$i]['total_package'] ?>
                                     </td>
@@ -186,10 +181,12 @@
                                         <?php $tot_other_invoice += $package[$i]['rate_package'] ?>
                                         <?php $total_rate_lesson += $package[$i]['rate_package'] ?>
                                         <?= $currency . " " . number_format($package[$i]['rate_package'], 0, ',', '.'); ?>
-                                        <!-- <?php if (number_format($package[$i]['discount'], 0, ',', '.') > 0) : ?>
-                                            <br>
-                                            <small style="color:red">(Discount <?= $currency . " " . number_format($package[$i]['discount'], 0, ',', '.'); ?>)</small>
-                                        <?php endif; ?> -->
+                                    </td>
+                                    <td class="text-center">
+                                        <?= date_format(date_create(substr($package[$i]['created_at'], 0, 10)), "d M Y") ?>
+                                    </td>
+                                    <td class="text-center">
+                                        <?= date_format(date_create(substr($package[$i]['end_at'], 0, 10)), "d M Y") ?>
                                     </td>
                                 </tr>
                             <?php endfor; ?>
@@ -203,6 +200,99 @@
                                             <?= $currency ?>
                                             <span style="float:right;">
                                                 <?= number_format($total_rate_lesson, 0, ',', '.'); ?>
+                                            </span>
+                                        </p>
+
+                                    </h5>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <p style="<?= count($package_offline) > 0  ? 'font-weight:bold' : 'display:none' ?>"><i>Lesson Package Offline</i></p>
+                <?php $price_discount_offline_lesson = 0 ?>
+                <div class="table-responsive-sm mb-5" style="<?= count($package_offline) > 0  ? '' : 'display:none' ?>">
+                    <table class="table table-bordered table-white" style="<?= count($package_offline) > 0  ? '' : 'display:none' ?>">
+                        <thead class="text-center">
+                            <tr>
+                                <th>No.</th>
+                                <th>Student Name</th>
+                                <th>Name of Package</th>
+                                <th>Total Pack</th>
+                                <th>Price/Pack</th>
+                                <th>Total Price</th>
+                                <th>Purchase Date</th>
+                                <th>Expired Date</th>
+                            </tr>
+                        </thead>
+                        <tbody id="show_data">
+                            <?php $z = 1; ?>
+                            <?php for ($i = 0; $i < count($package_offline); $i++) : ?>
+                                <tr>
+                                    <td class="text-center"><?= $z++ ?></td>
+                                    <td class="text-center"><?= $package_offline[$i]['name_student'] ?></td>
+                                    <td class="text-center"><?= $package_offline[$i]['name'] ?></td>
+                                    <td class="text-center">
+                                        <?= $package_offline[$i]['total_package'] ?>
+                                    </td>
+                                    <td class="text-right" style="width: 15%;">
+                                        <?php if ($package_offline[$i]['rate_dollar'] == '1') : ?>
+                                            <?= $currency . " " . number_format($package_offline[$i]['price_idr'], 0, ',', '.'); ?>
+                                        <?php elseif ($package_offline[$i]['rate_dollar'] == '2') : ?>
+                                            <?= $currency . " " . number_format($package_offline[$i]['price_dollar'], 2, ',', '.'); ?>
+                                        <?php else : ?>
+                                            <?= $currency . " " . number_format($package_offline[$i]['price_euro'], 2, ',', '.'); ?>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td class="text-right" style="width: 15%;">
+                                        <?php $tot_other_invoice += $package_offline[$i]['rate_package'] ?>
+                                        <?php $total_rate_offline_lesson += $package_offline[$i]['rate_package'] ?>
+                                        <?= $currency . " " . number_format($package_offline[$i]['rate_package'], 0, ',', '.'); ?>
+                                    </td>
+                                    <td class="text-center">
+                                        <?= date_format(date_create(substr($package_offline[$i]['created_at'], 0, 10)), "d M Y") ?>
+                                    </td>
+                                    <td class="text-center">
+                                        <?= date_format(date_create(substr($package_offline[$i]['end_at'], 0, 10)), "d M Y") ?>
+                                    </td>
+                                </tr>
+                            <?php endfor; ?>
+                            <?php if (count($other_offline_lesson_discount) > 0) : ?>
+                                <tr style="background-color:#FFFFF">
+                                    <td colspan="6" class="text-center">
+                                        <?php if (count($other_offline_lesson_discount) > 0) : ?>
+                                            <?= $other_offline_lesson_discount[0]['detail_discount'] ?>
+                                        <?php else : ?>
+                                            No Discount
+                                        <?php endif; ?>
+                                    </td>
+                                    <td colspan="2">
+                                        <h5 class="font-weight:bold">
+                                            <p style="text-align:left;">
+                                                <?= $currency ?>
+                                                <span style="float:right;">
+                                                    <?php if (count($other_offline_lesson_discount) > 0) : ?>
+                                                        <?php $price_discount_offline_lesson = $other_offline_lesson_discount[0]['price'] ?>
+                                                    <?php endif; ?>
+                                                    <input type="hidden" class="form-control" id="value_discount_coupon" name="value_discount_coupon" value="<?= $price_discount_offline_lesson ?>">
+                                                    <input style="background-color:white; font-size:20px; margin-top:-5px; text-align:right; border:0;" type="text" disabled class="form-control" id="value_discount_coupon_format" name="value_discount_coupon_format" value="<?= number_format($price_discount_offline_lesson, 0, ',', '.') ?>">
+                                                </span>
+                                            </p>
+                                        </h5>
+                                    </td>
+                                </tr>
+                            <?php endif; ?>
+                            <tr style="background-color:#E8F6EF">
+                                <td colspan="6" class="text-center">
+                                    <h5 class="font-weight:bold">Total Price</h5>
+                                </td>
+                                <td colspan="2">
+                                    <h5 class="font-weight:bold">
+                                        <p style="text-align:left;">
+                                            <?= $currency ?>
+                                            <span style="float:right;">
+                                                <?= number_format($total_rate_offline_lesson - $price_discount_offline_lesson, 0, ',', '.'); ?>
                                             </span>
                                         </p>
 
@@ -238,9 +328,9 @@
                                         <?= date_format(date_create(substr($book[$i]['tgl_order'], 0, 10)), "d/m/Y") ?>
                                     </td>
                                     <td class="text-right" style="width: 15%;">
-                                        <?php $total_rate_book += $book[$i]['price'] ?>
-                                        <?php $tot_other_invoice += $book[$i]['price'] ?>
-                                        <?= $currency . " " . number_format($book[$i]['price'], 0, ',', '.'); ?>
+                                        <?php $total_rate_book += $book[$i]['selling_price'] + $book[$i]['shipping_price'] ?>
+                                        <?php $tot_other_invoice += $book[$i]['selling_price'] + $book[$i]['shipping_price'] ?>
+                                        <?= $currency . " " . number_format($book[$i]['selling_price'] + $book[$i]['shipping_price'], 0, ',', '.'); ?>
                                     </td>
                                 </tr>
                             <?php endfor; ?>
@@ -325,8 +415,6 @@
                     </table>
                 </div>
 
-
-
                 <?php $date_periode = date_format(date_create(substr($sirkulasi[0]['created_at'], 0, 10)), "Y-m") ?>
                 <h5>
                     Other(s) Category
@@ -344,40 +432,40 @@
                         <tbody>
                             <?php $z = 1; ?>
                             <?php if (count($other_discount_lesson) > 0) : ?>
-                                <?php foreach ($other_discount_lesson as $od) : ?>
+                                <?php for ($i = 0; $i < count($other_discount_lesson); $i++) : ?>
                                     <?php $temp_other_discount_lesson[$i] = explode("&", $other_discount_lesson[$i]); ?>
                                     <tr>
                                         <td class="text-center">
                                             <?= $z++ ?><br>
                                         </td>
                                         <td class="text-center">
-                                            Discount <?= $temp_other_discount_lesson[$i][1] ?> - <?= $temp_other_discount_lesson[$i][3] ?>
+                                            Discount
                                         </td>
                                         <td class="text-center">
-                                            -
+                                            <?= $temp_other_discount_lesson[$i][2] ?>% for <?= $temp_other_discount_lesson[$i][3] ?>
                                         </td>
                                         <td class="text-center">
-                                            <?php $tot_other_invoice += -($temp_other_discount_lesson[$i][2]) ?>
-                                            <?php $parents_invoice_others_category += -($temp_other_discount_lesson[$i][2]) ?>
+                                            <?php $tot_other_invoice += -($temp_other_discount_lesson[$i][4]) ?>
+                                            <?php $parents_invoice_others_category += -($temp_other_discount_lesson[$i][4]) ?>
                                             <span class="text-danger" style="font-weight:bold">
-                                                - <?= $currency ?> <?= number_format($temp_other_discount_lesson[$i][2], 0, ',', '.'); ?>
+                                                - <?= $currency ?> <?= number_format($temp_other_discount_lesson[$i][4], 0, ',', '.'); ?>
                                             </span>
                                         </td>
                                     </tr>
-                                <?php endforeach ?>
+                                <?php endfor ?>
                             <?php endif ?>
                             <?php if (count($other_discount_event) > 0) : ?>
-                                <?php foreach ($other_discount_event as $od) : ?>
+                                <?php for ($i = 0; $i < count($other_discount_event); $i++) : ?>
                                     <?php $temp_other_discount_event[$i] = explode("&", $other_discount_event[$i]); ?>
                                     <tr>
                                         <td class="text-center">
                                             <?= $z++ ?><br>
                                         </td>
                                         <td class="text-center">
-                                            Discount <?= $temp_other_discount_event[$i][1] ?> - <?= $temp_other_discount_event[$i][3] ?>
+                                            Discount Event - <?= $temp_other_discount_event[$i][4] ?>
                                         </td>
                                         <td class="text-center">
-                                            -
+                                            <?= $currency ?> <?= number_format($temp_other_discount_event[$i][2], 0, ',', '.') ?> for <?= $temp_other_discount_event[$i][3] ?>
                                         </td>
                                         <td class="text-center">
                                             <?php $tot_other_invoice += -($temp_other_discount_event[$i][2]) ?>
@@ -387,7 +475,30 @@
                                             </span>
                                         </td>
                                     </tr>
-                                <?php endforeach ?>
+                                <?php endfor ?>
+                            <?php endif ?>
+                            <?php if (count($other_discount_book) > 0) : ?>
+                                <?php for ($i = 0; $i < count($other_discount_book); $i++) : ?>
+                                    <?php $temp_other_discount_book[$i] = explode("&", $other_discount_book[$i]); ?>
+                                    <tr>
+                                        <td class="text-center">
+                                            <?= $z++ ?><br>
+                                        </td>
+                                        <td class="text-center">
+                                            Discount book - <?= $temp_other_discount_book[$i][4] ?>
+                                        </td>
+                                        <td class="text-center">
+                                            <?= $temp_other_discount_book[$i][2] ?>% for <?= $temp_other_discount_book[$i][3] ?>
+                                        </td>
+                                        <td class="text-center">
+                                            <?php $tot_other_invoice += -($temp_other_discount_book[$i][5]) ?>
+                                            <?php $parents_invoice_others_category += -($temp_other_discount_book[$i][5]) ?>
+                                            <span class="text-danger" style="font-weight:bold">
+                                                - <?= $currency ?> <?= number_format($temp_other_discount_book[$i][5], 0, ',', '.'); ?>
+                                            </span>
+                                        </td>
+                                    </tr>
+                                <?php endfor ?>
                             <?php endif ?>
                             <?php if (count($other_invoice) > 0) : ?>
                                 <?php foreach ($other_invoice as $oi) : ?>
@@ -467,8 +578,11 @@
                             <p style="text-align:left;">
                                 <?= $currency ?>
                                 <span style="float:right;" id="total_rate_rupiah">
-                                    <?= number_format(intval($total_rate_lesson) + intval($total_rate_book) + intval($total_rate_event) + intval($parents_invoice_others_category), 0, ',', '.'); ?>
-                                    <!-- <?= number_format($sirkulasi[0]['total_rate'], 0, ',', '.'); ?> -->
+                                    <?php if (count($other_offline_lesson_discount) > 0) : ?>
+                                        <?= number_format(intval($total_rate_lesson) + intval($total_rate_offline_lesson) - intval($other_offline_lesson_discount[0]['price']) + intval($total_rate_book) + intval($total_rate_event) + intval($parents_invoice_others_category), 0, ',', '.'); ?>
+                                    <?php else : ?>
+                                        <?= number_format(intval($total_rate_lesson) + intval($total_rate_offline_lesson) + intval($total_rate_book) + intval($total_rate_event) + intval($parents_invoice_others_category), 0, ',', '.'); ?>
+                                    <?php endif; ?>
                                 </span>
                             </p>
                         </h5>
@@ -544,7 +658,7 @@
                 var other_price<?= $oi['id_other_invoice'] ?> = document.getElementById('other_price<?= $oi['id_other_invoice'] ?>').value;
                 document.getElementById('rupiah_other_price<?= $oi['id_other_invoice'] ?>').value = convertToRupiah(other_price<?= $oi['id_other_invoice'] ?>);
 
-                var total_rate_rupiah = parseInt(<?= $total_rate_lesson ?>) + parseInt(<?= $total_rate_book ?>) + parseInt(<?= $total_rate_event ?>) + parseInt(<?= $parents_invoice_others_category ?>);
+                var total_rate_rupiah = parseInt(<?= $total_rate_lesson ?>) + parseInt(<?= $total_rate_offline_lesson ?>) + parseInt(<?= $total_rate_book ?>) + parseInt(<?= $total_rate_event ?>) + parseInt(<?= $parents_invoice_others_category ?>);
 
                 document.getElementById('total_rate_rupiah').innerHTML = convertToRupiah(total_rate_rupiah);
                 document.getElementById('parents_invoice_others_category').innerHTML = convertToRupiah(parseInt(<?= $parents_invoice_others_category ?>));
@@ -559,7 +673,7 @@
                     rupiah_other_price<?= $oi['id_other_invoice'] ?>.value = convertToRupiah(value_input);
                     other_price<?= $oi['id_other_invoice'] ?>.value = value_input;
 
-                    let total_invoice_new = parseInt(<?= $total_rate_lesson ?>) + parseInt(<?= $total_rate_book ?>) + parseInt(<?= $total_rate_event ?>) + (parseInt(tot_sementara) + parseInt(value_input));
+                    let total_invoice_new = parseInt(<?= $total_rate_lesson ?>) + parseInt(<?= $total_rate_offline_lesson ?>) + parseInt(<?= $total_rate_book ?>) + parseInt(<?= $total_rate_event ?>) + (parseInt(tot_sementara) + parseInt(value_input));
 
                     console.log(e)
                     console.log(tot_sementara + "sementara")

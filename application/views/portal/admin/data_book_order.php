@@ -57,14 +57,8 @@
                                 <th>Student Name</th>
                                 <th>Book Title - Level</th>
                                 <th>Qty</th>
-                                <!-- <th>Distributor Price</th>
-                                <th>Sent Date</th>
-                                <th>Receive Date</th>
-                                <th>Receiver Name</th> -->
                                 <th>Status</th>
                                 <th>Detail</th>
-                                <!-- <th>Total Price</th> -->
-                                <!-- <th>Action</th> -->
                             </tr>
                         </thead>
                         <tbody>

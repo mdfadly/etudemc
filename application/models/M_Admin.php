@@ -3,6 +3,40 @@ defined('BASEPATH') or exit('No direct script access allowed');
 
 class M_Admin extends CI_Model
 {
+
+    var $column_order_parent = array(null, 'id_parent', 'parent_student', null);
+    var $column_search_parent = array('id_parent', 'parent_student');
+    var $order_parent = array('id_parent' => 'asc');
+
+    private function _get_datatables_query_parent()
+    {
+        $this->db->distinct();
+        $this->db->select('id_parent, parent_student');
+        $this->db->from('student as s');
+        $this->db->where('status', '1');
+        $i = 0;
+        foreach ($this->column_search_parent as $item) {
+            if (@$_POST['search']['value']) {
+                if ($i === 0) {
+                    $this->db->group_start();
+                    $this->db->like($item, $_POST['search']['value']);
+                } else {
+                    $this->db->or_like($item, $_POST['search']['value']);
+                }
+                if (count($this->column_search_parent) - 1 == $i)
+                    $this->db->group_end();
+            }
+            $i++;
+        }
+
+        if (isset($_POST['order'])) {
+            $this->db->order_by($this->column_order_parent[$_POST['order']['0']['column']], $_POST['order']['0']['dir']);
+        } else if (isset($this->order)) {
+            $order_parent = $this->order;
+            $this->db->order_by(key($order_parent), $order_parent[key($order_parent)]);
+        }
+    }
+
     var $column_order_student = array(null, 'id_student', 'name_student', 'instrument', null);
     var $column_search_student = array('id_student', 'name_student', 'instrument');
     var $order_student = array('id_student' => 'asc');
@@ -102,6 +136,45 @@ class M_Admin extends CI_Model
         }
     }
 
+    var $column_order_list_package_offline = array(null, 'op.id_student', 's.name_student', null, null, 'op.created_at', null);
+    var $column_search_list_package_offline = array('op.id_student', 's.name_student', 'op.created_at');
+    var $order_list_package_offline = array('op.id_list_package_offline' => 'asc');
+
+    private function _get_datatables_query_list_package_offline()
+    {
+        $this->db->select('op.*, s.name_student, t.name_teacher, a.nama_admin, p.name as name_paket, p.type_of_class, p.status_pack_practical, p.status_pack_theory');
+        $this->db->from('list_package_offline as op');
+        $this->db->join('student as s', 'op.id_student = s.id_student', 'left');
+        $this->db->join('teacher as t', 'op.id_teacher = t.id_teacher', 'left');
+        $this->db->join('admin as a', 'op.created_by = a.id_admin', 'left');
+        $this->db->join('paket as p', 'op.paket = p.id', 'left');
+        $this->db->order_by('created_at', 'DESC');
+
+        $this->db->where('op.status', '1');
+
+        $i = 0;
+        foreach ($this->column_search_list_package_offline as $item) {
+            if (@$_POST['search']['value']) {
+                if ($i === 0) {
+                    $this->db->group_start();
+                    $this->db->like($item, $_POST['search']['value']);
+                } else {
+                    $this->db->or_like($item, $_POST['search']['value']);
+                }
+                if (count($this->column_search_list_package_offline) - 1 == $i)
+                    $this->db->group_end();
+            }
+            $i++;
+        }
+
+        if (isset($_POST['order'])) {
+            $this->db->order_by($this->column_order_list_package_offline[$_POST['order']['0']['column']], $_POST['order']['0']['dir']);
+        } else if (isset($this->order)) {
+            $order_list_package_offline = $this->order;
+            $this->db->order_by(key($order_list_package_offline), $order_list_package_offline[key($order_list_package_offline)]);
+        }
+    }
+
     var $column_order_online_pratical = array(null, 'op.id_student', 's.name_student', 't.name_teacher', 't2.name_teacher', null, null, 'op.created_at', null);
     var $column_search_online_pratical = array('op.id_student', 's.name_student', 't.name_teacher', 't2.name_teacher', 'op.created_at');
     var $order_online_pratical = array('op.id_list_pack' => 'asc');
@@ -118,7 +191,7 @@ class M_Admin extends CI_Model
         $this->db->order_by('created_at', 'DESC');
 
         $this->db->where('op.status', '1');
-        if($data_online_lesson != null){
+        if ($data_online_lesson != null) {
             if ($data_online_lesson == 'data_all') {
                 $this->db->where('op.status_pack_practical', '1');
                 $this->db->where('op.status_pack_theory', '1');
@@ -130,7 +203,7 @@ class M_Admin extends CI_Model
             if ($data_online_lesson == 'data_theory') {
                 $this->db->where('op.status_pack_practical', '0');
                 $this->db->where('op.status_pack_theory', '1');
-             }
+            }
         }
 
 
@@ -460,16 +533,16 @@ class M_Admin extends CI_Model
         }
     }
 
-    var $column_order_sirkulasi = array(null, 'si.created_at', 'si.no_transaksi',null, null);
+    var $column_order_sirkulasi = array(null, 'si.created_at', 'si.no_transaksi', null, null);
     var $column_search_sirkulasi = array('si.created_at', 'si.no_transaksi');
-    var $order_sirkulasi = array('si.created_at' => 'DESC');
+    var $order_sirkulasi = array('si.no_transaksi' => 'DESC');
 
     private function _get_datatables_query_sirkulasi($periode = null)
     {
         $this->db->select('si.*');
         $this->db->from('sirkulasi as si');
         $this->db->where('si.status_sirkulasi', '1');
-        if($periode != null){
+        if ($periode != null) {
             $this->db->like('si.created_at', "$periode");
         }
         // $this->db->order_by('si.created_at', 'DESC');
@@ -498,6 +571,9 @@ class M_Admin extends CI_Model
 
     function get_datatables($table, $data_online_lesson = null, $periode = null, $teacher = null)
     {
+        if ($table == "parent") {
+            $this->_get_datatables_query_parent();
+        }
         if ($table == "student") {
             $this->_get_datatables_query_student();
         }
@@ -506,6 +582,9 @@ class M_Admin extends CI_Model
         }
         if ($table == "offline_lesson") {
             $this->_get_datatables_query_offline_lesson();
+        }
+        if ($table == "list_package_offline") {
+            $this->_get_datatables_query_list_package_offline();
         }
         if ($table == "list_package") {
             $this->_get_datatables_query_online_pratical($data_online_lesson);
@@ -528,11 +607,11 @@ class M_Admin extends CI_Model
         if ($table == "event_teacher") {
             $this->_get_datatables_query_event_teacher();
         }
-        
+
         if ($table == "register_event") {
-            if($teacher != null){
+            if ($teacher != null) {
                 $this->_get_datatables_query_event_teacher_new();
-            }else{
+            } else {
                 $this->_get_datatables_query_event_student();
             }
         }
@@ -550,6 +629,9 @@ class M_Admin extends CI_Model
 
     function count_filtered($table, $data_online_lesson = null, $periode = null, $teacher = null)
     {
+        if ($table == "parent") {
+            $this->_get_datatables_query_parent();
+        }
         if ($table == "student") {
             $this->_get_datatables_query_student();
         }
@@ -558,6 +640,9 @@ class M_Admin extends CI_Model
         }
         if ($table == "offline_lesson") {
             $this->_get_datatables_query_offline_lesson();
+        }
+        if ($table == "list_package_offline") {
+            $this->_get_datatables_query_list_package_offline();
         }
         if ($table == "list_package") {
             $this->_get_datatables_query_online_pratical($data_online_lesson);
@@ -599,7 +684,14 @@ class M_Admin extends CI_Model
 
     function count_all($table, $data_online_lesson = null, $periode = null, $teacher = null)
     {
-        $this->db->from($table);
+        if ($table == 'parent') {
+            $this->db->distinct();
+            $this->db->select('id_parent, parent_student');
+            $this->db->where('status', '1');
+            $this->db->from('student');
+        } else {
+            $this->db->from($table);
+        }
         if ($table == "list_package") {
             $this->db->where('status', '1');
             if ($data_online_lesson != null) {
@@ -621,6 +713,9 @@ class M_Admin extends CI_Model
             $this->db->where('status', '1');
         }
         if ($table == "offline_lesson") {
+            $this->db->where('status', '1');
+        }
+        if ($table == "list_package_offline") {
             $this->db->where('status', '1');
         }
         if ($table == "online_theory") {
@@ -670,177 +765,98 @@ class M_Admin extends CI_Model
         return $data->result_array();
     }
 
-    public function insertDataStudent()
+    public function insertDataParent()
     {
-        $id_parent = "";
-        $id_student = "";
-        $parent_student = "";
-        $kelurahan = "";
-        $kecamatan = "";
-        $kota = "";
-        $provinsi = "";
-        $zip = "";
-        $country = "";
-        $currency = "";
-        $phone_student_1 = "";
-        $phone_student_2 = "";
-        $kat = "";
-
-        $total_student = $this->input->post('total_student');
-
-        if ($this->input->post('id_parent') != null) {
-            $temp = $this->input->post('id_parent');
-            $temp_id_parent = substr($temp, 0, 6);
-            $user = $this->getLastStudent($temp_id_parent);
-            $id_parent  =  $user[0]['id_parent'];
-            $id_student =  intval($user[0]['id_student']) + 1;
-            $parent_student  =  $user[0]['parent_student'];
-            $address_student = $user[0]['address_student'];
-            $kat = $user[0]['kat'];
-            $phone_student_1 = $user[0]['phone_student_1'];
-            $phone_student_2 = $user[0]['phone_student_2'];
+        $user = $this->getLastStudent();
+        if (count($user) < 1) {
+            $id_parent  = "100001";
+            $id_student = "1000011";
         } else {
-            $user = $this->getLastStudent();
-            if (count($user) < 1) {
-                $id_parent  = "100001";
-                $id_student = "1000011";
-            } else {
-                $id_parent  =  intval($user[0]['id_parent']) + 1;
-                $id_student =  intval($user[0]['id_parent']) + 1 . "1";
-            }
-            $parent_student =  $this->input->post('parent_student');
-            $address_student = $this->input->post('address_student');
-            $kelurahan = $this->input->post('kelurahan');
-            $kecamatan = $this->input->post('kecamatan');
-            $kota = $this->input->post('kota');
-            $provinsi = $this->input->post('provinsi');
-            $zip = $this->input->post('zip');
-            $country = $this->input->post('country');
-            $currency = $this->input->post('currency');
-            $phone_student_1 = $this->input->post('phone_student_1');
-            $phone_student_2 = $this->input->post('phone_student_2');
+            $id_parent  =  intval($user[0]['id_parent']) + 1;
+            $id_student =  intval($user[0]['id_parent']) + 1 . "1";
         }
 
+        $username_parent =  $this->input->post('username_parent');
+        $password_parent =  $this->input->post('password_parent');
 
+        $parent_student =  $this->input->post('parent_student');
+        $phone_parent_1 = $this->input->post('phone_parent_1');
+        $phone_parent_2 = $this->input->post('phone_parent_2');
+        $email_parent_1 = $this->input->post('email_parent_1');
+        $ig_parent_1 = $this->input->post('ig_parent_1');
 
-        for ($i = 1; $i <= $total_student; $i++) {
+        $address_parent = $this->input->post('address_parent');
+        $kelurahan_parent = $this->input->post('kelurahan_parent');
+        $kecamatan_parent = $this->input->post('kecamatan_parent');
+        $kota_parent = $this->input->post('kota_parent');
+        $provinsi_parent = $this->input->post('provinsi_parent');
+        $zip_parent = $this->input->post('zip_parent');
+        $country_parent = $this->input->post('country_parent');
 
-            $id_parent_temp = $id_parent;
-            $id_student_temp = $id_student;
+        $data =  [
+            'id_parent' => $id_parent,
+            'id_student' => $id_student,
+            'username_parent' => $username_parent,
+            'password_parent' => $password_parent,
+            'parent_student' => $parent_student,
+            'address_parent' => $address_parent,
+            'kelurahan_parent' => $kelurahan_parent,
+            'kecamatan_parent' => $kecamatan_parent,
+            'kota_parent' => $kota_parent,
+            'provinsi_parent' => $provinsi_parent,
+            'zip_parent' => $zip_parent,
+            'country_parent' => $country_parent,
 
-            if ($i > 1) {
-                $id_parent = $id_parent_temp;
-                $id_student = intval($id_student_temp + 1);
-            }
-
-            $name_student = "name_student" . $i;
-            $dob_student = "dob_student" . $i;
-            $school_student = "school_student" . $i;
-            $instrument = "instrument" . $i;
-
-            $data =  [
-                'id_parent' => $id_parent,
-                'parent_student' => $parent_student,
-                'id_student' => $id_student,
-                'name_student' => $this->input->post($name_student),
-                'instrument' => $this->input->post($instrument),
-                'dob_student' => $this->input->post($dob_student),
-                'school_student' => $this->input->post($school_student),
-                'address_student' => $address_student,
-                'kelurahan' => $kelurahan,
-                'kecamatan' => $kecamatan,
-                'kota' => $kota,
-                'provinsi' => $provinsi,
-                'zip' => $zip,
-                'country' => $country,
-                'currency' => $currency,
-                'phone_student_1' => $phone_student_1,
-                'phone_student_2' => $phone_student_2,
-            ];
-            $this->db->insert('student', $data);
-        }
-
-        return true;
+            'phone_parent_1' => $phone_parent_1,
+            'phone_parent_2' => $phone_parent_2,
+            'email_parent_1' => $email_parent_1,
+            'ig_parent_1' => $ig_parent_1,
+        ];
+        $this->db->insert('student', $data);
     }
 
-    public function insertDataStudent2()
+    public function insertDataStudent()
     {
-        $id_parent = "";
-        $id_student = "";
-        $parent_student = "";
-        $kelurahan = "";
-        $kecamatan = "";
-        $kota = "";
-        $provinsi = "";
-        $zip = "";
-        $country = "";
-        $currency = "";
-        $phone_parent_1 = "";
-        $phone_parent_2 = "";
-        $kat = "";
-
-        $address_student = "";
-        $kelurahan = "";
-        $kecamatan = "";
-        $kota = "";
-        $provinsi = "";
-        $zip = "";
-        $country = "";
-
-        $address_parent = "";
-        $kelurahan_parent = "";
-        $kecamatan_parent = "";
-        $kota_parent = "";
-        $provinsi_parent = "";
-        $zip_parent = "";
-        $country_parent = "";
-
         $total_student = $this->input->post('total_student');
 
-        if ($this->input->post('id_parent') != "") {
-            $user = $this->getLastStudent($this->input->post('id_parent'));
-            $id_parent  =  $user[0]['id_parent'];
-            $id_student =  intval($user[0]['id_student']) + 1;
-            $parent_student  =  $user[0]['parent_student'];
-            $parent_student_2  =  $user[0]['parent_student_2'];
-            $status_parent_1 = $user[0]['status_parent_1'];
-            $status_parent_2 = $user[0]['status_parent_2'];
-            $phone_parent_1 = $user[0]['phone_parent_1'];
-            $phone_parent_2 = $user[0]['phone_parent_2'];
-            $email_parent_1 = $user[0]['email_parent_1'];
-            $email_parent_2 = $user[0]['email_parent_2'];
-            $ig_parent_1 = $user[0]['ig_parent_1'];
-            $ig_parent_2 = $user[0]['ig_parent_2'];
-            $address_student = $user[0]['address_student'];
-            $kelurahan = $user[0]['kelurahan'];
-            $kecamatan = $user[0]['kecamatan'];
-            $kota = $user[0]['kota'];
-            $provinsi = $user[0]['provinsi'];
-            $zip = $user[0]['zip'];
-            $country = $user[0]['country'];
-            $kat = $user[0]['kat'];
+        $temp = $this->input->post('id_parent');
+        $temp_id_parent = substr($temp, 0, 6);
+        $user = $this->getLastStudent($temp_id_parent);
+        $id_parent  =  $user[0]['id_parent'];
+        $id_student =  intval($user[0]['id_student']) + 1;
+
+        $username_parent =  $user[0]['username_parent'];
+        $password_parent =  $user[0]['password_parent'];
+
+        $parent_student =  $user[0]['parent_student'];
+        $parent_student_2 =  $user[0]['parent_student_2'];
+        $phone_parent_1 = $user[0]['phone_parent_1'];
+        $phone_parent_2 = $user[0]['phone_parent_2'];
+        $email_parent_1 = $user[0]['email_parent_1'];
+        $ig_parent_1 = $user[0]['ig_parent_1'];
+
+        $address_parent = $user[0]['address_parent'];
+        $kelurahan_parent = $user[0]['kelurahan_parent'];
+        $kecamatan_parent = $user[0]['kecamatan_parent'];
+        $kota_parent = $user[0]['kota_parent'];
+        $provinsi_parent = $user[0]['provinsi_parent'];
+        $zip_parent = $user[0]['zip_parent'];
+        $country_parent = $user[0]['country_parent'];
+
+        $status_parent_1 = $user[0]['status_parent_1'];
+        $status_parent_2 = $user[0]['status_parent_2'];
+        $email_parent_2 = "-";
+        $ig_parent_2 = "-";
+
+        if ($this->input->post('check_address') == 1) {
+            $address_student = $user[0]['address_parent'];
+            $kelurahan = $user[0]['kelurahan_parent'];
+            $kecamatan = $user[0]['kecamatan_parent'];
+            $kota = $user[0]['kota_parent'];
+            $provinsi = $user[0]['provinsi_parent'];
+            $zip = $user[0]['zip_parent'];
+            $country = $user[0]['country_parent'];
         } else {
-            $user = $this->getLastStudent();
-            if (count($user) < 1) {
-                $id_parent  = "100001";
-                $id_student = "1000011";
-            } else {
-                $id_parent  =  intval($user[0]['id_parent']) + 1;
-                $id_student =  intval($user[0]['id_parent']) + 1 . "1";
-            }
-
-            $parent_student =  $this->input->post('parent_student');
-            $parent_student_2 =  $this->input->post('parent_student_2');
-            $status_parent_1 = $this->input->post('status_parent_1');
-            $status_parent_2 = $this->input->post('status_parent_2');
-            $phone_parent_1 = $this->input->post('phone_parent_1');
-            $phone_parent_2 = $this->input->post('phone_parent_2');
-            $email_parent_1 = $this->input->post('email_parent_1');
-            $email_parent_2 = $this->input->post('email_parent_2');
-            $ig_parent_1 = $this->input->post('ig_parent_1');
-            $ig_parent_2 = $this->input->post('ig_parent_2');
-
-
             $address_student = $this->input->post('address_student');
             $kelurahan = $this->input->post('kelurahan');
             $kecamatan = $this->input->post('kecamatan');
@@ -848,11 +864,8 @@ class M_Admin extends CI_Model
             $provinsi = $this->input->post('provinsi');
             $zip = $this->input->post('zip');
             $country = $this->input->post('country');
-            $currency = $this->input->post('currency');
         }
 
-
-        $instrument = '';
         for ($i = 1; $i <= $total_student; $i++) {
 
             $id_parent_temp = $id_parent;
@@ -865,50 +878,53 @@ class M_Admin extends CI_Model
 
             $name_student = "name_student" . $i;
             $nickname_student = "nickname_student" . $i;
-            $dob_student = "dob_student" . $i;
-            $school_student = "school_student" . $i;
-            $phone_student = "phone_student" . $i;
-            $paket = "paket" . $i;
-            $instrument_temp = "instrument" . $i;
-            $instrument = $this->input->post($instrument_temp);
-            $Others_temp = "Others" . $i;
-            $others = "others" . $i;
-            if ($instrument == $Others_temp) {
-                $instrument = "Others|" . $this->input->post($others);
-            }
+            $gender_student = "gender_student" . $i;
+            $tempat_dob = "tempat_dob" . $i;
+            $tanggal_dob = "tanggal_dob" . $i;
+            $pict_student_ava = "pict_student" . $i;
 
-            if ($this->input->post('check_address') == 1) {
-                $address_parent = $address_student;
-                $kelurahan_parent = $kelurahan;
-                $kecamatan_parent = $kecamatan;
-                $kota_parent = $kota;
-                $provinsi_parent = $provinsi;
-                $zip_parent = $zip;
-                $country_parent = $country;
+            $this->load->library('upload');
+            //upload Picture
+            $pict_student = "";
+
+            $config['upload_path'] = './assets/img/pict_student';
+            $config['allowed_types'] = 'pdf|PDF|jpg|JPG|jpeg|JPEG|png|PNG';
+            $new_name = "pict_" . $this->input->post($name_student);
+            $config['file_name'] = $new_name;
+
+            $this->upload->initialize($config);
+
+            if (!$this->upload->do_upload($pict_student_ava)) {
+                $this->session->set_flashdata('warning', $this->upload->display_errors());
+                if ($this->input->post('from_form') == "add_student_parent") {
+                    redirect('portal/profile-parent/' . $username_parent);
+                }
+                if ($this->input->post('from_form') == "register_signup") {
+                    redirect('portal/user-register');
+                }
+                if ($this->input->post('from_form') == "add_parent_admin") {
+                    redirect('portal/data_parent');
+                }
+                if ($this->input->post('from_form') == "add_student_admin") {
+                    redirect('portal/data_student');
+                }
             } else {
-                $address_parent = $this->input->post('address_parent');
-                $kelurahan_parent = $this->input->post('kelurahan_parent');
-                $kecamatan_parent = $this->input->post('kecamatan_parent');
-                $kota_parent = $this->input->post('kota_parent');
-                $provinsi_parent = $this->input->post('provinsi_parent');
-                $zip_parent = $this->input->post('zip_parent');
-                $country_parent = $this->input->post('country_parent');
+                $upload_data_team = $this->upload->data(); // added this..
+                //get the uploaded file name
+                $pict_student = $upload_data_team['file_name']; // changed this..
             }
-
             $data =  [
                 'id_parent' => $id_parent,
-                'parent_student' => $parent_student,
-                'parent_student_2' => $parent_student_2,
                 'id_student' => $id_student,
+                'username_parent' => $username_parent,
+                'password_parent' => $password_parent,
+                'parent_student' => $parent_student,
                 'name_student' => $this->input->post($name_student),
                 'nickname_student' => $this->input->post($nickname_student),
-                'dob_student' => $this->input->post($dob_student),
-                'school_student' => $this->input->post($school_student),
-                'phone_student' => $this->input->post($phone_student),
-                'instrument' => $instrument,
-                'ig_student' => $this->input->post('ig_student'),
-                'email_student' => $this->input->post('email_student'),
-                'paket' => $this->input->post($paket),
+                // 'dob_student' => $this->input->post($dob_student),
+                'gender_student' => $this->input->post($gender_student),
+
+                'pict_student' => $pict_student,
                 'address_student' => $address_student,
                 'kelurahan' => $kelurahan,
                 'kecamatan' => $kecamatan,
@@ -923,7 +939,7 @@ class M_Admin extends CI_Model
                 'provinsi_parent' => $provinsi_parent,
                 'zip_parent' => $zip_parent,
                 'country_parent' => $country_parent,
-                'currency' => $currency,
+
                 'status_parent_1' => $status_parent_1,
                 'status_parent_2' => $status_parent_2,
                 'phone_parent_1' => $phone_parent_1,
@@ -932,19 +948,31 @@ class M_Admin extends CI_Model
                 'email_parent_2' => $email_parent_2,
                 'ig_parent_1' => $ig_parent_1,
                 'ig_parent_2' => $ig_parent_2,
-                'teacher_percentage' => $this->input->post('teacher_percentage'),
-                'currency' => $this->input->post('currency'),
             ];
-            // echo var_dump($data);
-            // die();
             $this->db->insert('student', $data);
         }
-
         return true;
     }
 
-    public function updateDataStudent2()
+    public function insertDataStudent2()
     {
+        $username_parent = "";
+        $password_parent = "";
+
+        $id_parent = "";
+        $id_student = "";
+        $parent_student = "";
+        $kelurahan = "";
+        $kecamatan = "";
+        $kota = "";
+        $provinsi = "";
+        $zip = "";
+        $country = "";
+        $currency = "";
+        $phone_parent_1 = "";
+        $phone_parent_2 = "";
+        $kat = "";
+
         $address_parent = "";
         $kelurahan_parent = "";
         $kecamatan_parent = "";
@@ -953,24 +981,63 @@ class M_Admin extends CI_Model
         $zip_parent = "";
         $country_parent = "";
 
-        $address_student = $this->input->post('address_student');
-        $kelurahan = $this->input->post('kelurahan');
-        $kecamatan = $this->input->post('kecamatan');
-        $kota = $this->input->post('kota');
-        $provinsi = $this->input->post('provinsi');
-        $zip = $this->input->post('zip');
-        $country = $this->input->post('country');
-        $currency = $this->input->post('currency');
+        $status_parent_1 = "-";
+        $status_parent_2 = "-";
+        $phone_parent_1 = "-";
+        $phone_parent_2 = "-";
+        $email_parent_1 = "-";
+        $email_parent_2 = "-";
+        $ig_parent_1 = "-";
+        $ig_parent_2 = "-";
 
-        if ($this->input->post('check_address') == 1) {
-            $address_parent = $address_student;
-            $kelurahan_parent = $kelurahan;
-            $kecamatan_parent = $kecamatan;
-            $kota_parent = $kota;
-            $provinsi_parent = $provinsi;
-            $zip_parent = $zip;
-            $country_parent = $country;
+        $total_student = $this->input->post('total_student');
+
+        if ($this->input->post('id_parent') != "") {
+            $user = $this->getLastStudent($this->input->post('id_parent'));
+            $id_parent  =  $user[0]['id_parent'];
+            $id_student =  intval($user[0]['id_student']) + 1;
+            $username_parent  =  $user[0]['username_parent'];
+            $password_parent  =  $user[0]['password_parent'];
+            $parent_student  =  $user[0]['parent_student'];
+            $parent_student_2  =  $user[0]['parent_student_2'];
+            $status_parent_1 = $user[0]['status_parent_1'];
+            $status_parent_2 = $user[0]['status_parent_2'];
+            $phone_parent_1 = $user[0]['phone_parent_1'];
+            $phone_parent_2 = $user[0]['phone_parent_2'];
+            $email_parent_1 = $user[0]['email_parent_1'];
+            $email_parent_2 = $user[0]['email_parent_2'];
+            $ig_parent_1 = $user[0]['ig_parent_1'];
+            $ig_parent_2 = $user[0]['ig_parent_2'];
+
+            $address_parent = $user[0]['address_parent'];
+            $kelurahan_parent = $user[0]['kelurahan_parent'];
+            $kecamatan_parent = $user[0]['kecamatan_parent'];
+            $kota_parent = $user[0]['kota_parent'];
+            $provinsi_parent = $user[0]['provinsi_parent'];
+            $zip_parent = $user[0]['zip_parent'];
+            $country_parent = $user[0]['country_parent'];
         } else {
+            $user = $this->getLastStudent();
+            if (count($user) < 1) {
+                $id_parent  = "100001";
+                $id_student = "1000011";
+            } else {
+                $id_parent  =  intval($user[0]['id_parent']) + 1;
+                $id_student =  intval($user[0]['id_parent']) + 1 . "1";
+            }
+
+            $username_parent =  $this->input->post('username_parent');
+            $password_parent =  $this->input->post('password_parent');
+
+            $parent_student =  $this->input->post('parent_student');
+            $parent_student_2 =  $this->input->post('parent_student_2');
+            $phone_parent_1 = $this->input->post('phone_parent_1');
+            $phone_parent_2 = $this->input->post('phone_parent_2');
+            $email_parent_1 = $this->input->post('email_parent_1');
+            $ig_parent_1 = $this->input->post('ig_parent_1');
+            $status_parent_1 =  $this->input->post('status_parent_1');
+            $status_parent_2 =  $this->input->post('status_parent_2');
+
             $address_parent = $this->input->post('address_parent');
             $kelurahan_parent = $this->input->post('kelurahan_parent');
             $kecamatan_parent = $this->input->post('kecamatan_parent');
@@ -980,22 +1047,177 @@ class M_Admin extends CI_Model
             $country_parent = $this->input->post('country_parent');
         }
 
+        $instrument = '';
+        for ($i = 1; $i <= $total_student; $i++) {
+
+            $id_parent_temp = $id_parent;
+            $id_student_temp = $id_student;
+
+            if ($i > 1) {
+                $id_parent = $id_parent_temp;
+                $id_student = intval($id_student_temp + 1);
+            }
+
+            $name_student = "name_student" . $i;
+            $nickname_student = "nickname_student" . $i;
+            $gender_student = "gender_student" . $i;
+            $tempat_dob = "tempat_dob" . $i;
+            $tanggal_dob = "tanggal_dob" . $i;
+            $pict_student_ava = "pict_student" . $i;
+            $name_picture = strtolower($username_parent) . "_" . $i . "_1";
+
+            $ubah_pict = "ubah-pict" . $i;
+            $ubah = $this->input->post($ubah_pict);
+
+            $pict_student = "";
+            if ($ubah == "ya") {
+                $this->load->library('upload');
+                //upload Picture
+
+                $config['upload_path'] = './assets/img/pict_student';
+                $config['allowed_types'] = 'pdf|PDF|jpg|JPG|jpeg|JPEG|png|PNG';
+                $new_name = "pict_" . $name_picture;
+                $config['file_name'] = $new_name;
+
+                $this->upload->initialize($config);
+
+
+                if (!$this->upload->do_upload($pict_student_ava)) {
+                    $this->session->set_flashdata('warning', $this->upload->display_errors());
+                    if ($this->input->post('from_form') == "register_signup") {
+                        redirect('portal/user-register');
+                    }
+                    if ($this->input->post('from_form') == "add_parent_admin") {
+                        redirect('portal/data_parent');
+                    }
+                    if ($this->input->post('from_form') == "add_student_parent") {
+                        redirect('portal/profile-parent' . $username_parent);
+                    }
+                } else {
+                    $upload_data_team = $this->upload->data(); // added this..
+                    $pict_student = $upload_data_team['file_name']; // changed this..
+                }
+            } else {
+                $pict_student = 'avatar.png';
+            }
+
+            if ($this->input->post('check_address') == 1) {
+                $address_student = $address_parent;
+                $kelurahan = $kelurahan_parent;
+                $kecamatan = $kecamatan_parent;
+                $kota = $kota_parent;
+                $provinsi = $provinsi_parent;
+                $zip = $zip_parent;
+                $country = $country_parent;
+            } else {
+                $address_student = $this->input->post('address_student');
+                $kelurahan = $this->input->post('kelurahan');
+                $kecamatan = $this->input->post('kecamatan');
+                $kota = $this->input->post('kota');
+                $provinsi = $this->input->post('provinsi');
+                $zip = $this->input->post('zip');
+                $country = $this->input->post('country');
+            }
+
+            $data =  [
+                'id_parent' => $id_parent,
+                'id_student' => $id_student,
+                'username_parent' => $username_parent,
+                'password_parent' => $password_parent,
+                'parent_student' => $parent_student,
+                'parent_student_2' => $parent_student_2,
+                'name_student' => $this->input->post($name_student),
+                'nickname_student' => $this->input->post($nickname_student),
+                'dob_student' => $this->input->post($tempat_dob) . ", " . $this->input->post($tanggal_dob),
+                'gender_student' => $this->input->post($gender_student),
+
+                'pict_student' => $pict_student,
+                'address_student' => $address_student,
+                'kelurahan' => $kelurahan,
+                'kecamatan' => $kecamatan,
+                'kota' => $kota,
+                'provinsi' => $provinsi,
+                'zip' => $zip,
+                'country' => $country,
+                'address_parent' => $address_parent,
+                'kelurahan_parent' => $kelurahan_parent,
+                'kecamatan_parent' => $kecamatan_parent,
+                'kota_parent' => $kota_parent,
+                'provinsi_parent' => $provinsi_parent,
+                'zip_parent' => $zip_parent,
+                'country_parent' => $country_parent,
+
+                'status_parent_1' => $status_parent_1,
+                'status_parent_2' => $status_parent_2,
+                'phone_parent_1' => $phone_parent_1,
+                'phone_parent_2' => $phone_parent_2,
+                'email_parent_1' => $email_parent_1,
+                'email_parent_2' => $email_parent_2,
+                'ig_parent_1' => $ig_parent_1,
+                'ig_parent_2' => $ig_parent_2,
+            ];
+            $this->db->insert('student', $data);
+        }
+        if ($this->input->post('from_form') == "register_signup") {
+            $session_data = array(
+                'login_user' => true,
+                'username' => $username_parent,
+                'name'     => $parent_student,
+                'id'     => $id_parent,
+            );
+            $this->session->set_userdata($session_data);
+            $this->session->set_flashdata('success', 'Login Berhasi! hallo ' . $username_parent);
+            redirect('portal', $session_data);
+        }
+        return true;
+    }
+
+    public function updateDataStudent2()
+    {
         $id_student = $this->input->post('id_student');
         $id_parent = $this->input->post('id_parent');
         $instrument = $this->input->post('instrument');
         if ($instrument == "Others") {
             $instrument = "Others|" . $this->input->post('others');
         }
+        $pict_student = "";
+        $ubah = $_POST['ubah-pict'];
+        if ($ubah == "ya") {
+            $this->load->library('upload');
+            $config['upload_path'] = './assets/img/pict_student';
+            $config['allowed_types'] = 'pdf|PDF|jpg|JPG|jpeg|JPEG|png|PNG';
+            $new_name = "pict_" . $this->input->post('name_student');
+            $config['file_name'] = $new_name;
+
+            if ($_POST['pict_lama'] != "avatar.png") {
+                $filename = './assets/img/pict_student/' . $_POST['pict_lama'];
+                if (file_exists($filename)) {
+                    unlink($filename);
+                }
+            }
+
+            $this->upload->initialize($config);
+            if (!$this->upload->do_upload('pict')) {
+                $this->session->set_flashdata('warning', $this->upload->display_errors());
+                redirect('portal/data_student/detail/' . $this->input->post('id_student'));
+            } else {
+                $upload_data_team = $this->upload->data(); // added this..
+                $pict_student = $upload_data_team['file_name']; // changed this..
+            }
+        } else {
+            $pict_student = $_POST['pict_lama'];
+        }
+
         $data =  [
             'name_student' => $this->input->post('name_student'),
             'nickname_student' => $this->input->post('nickname_student'),
-            'dob_student' => $this->input->post('dob_student'),
-            'school_student' => $this->input->post('school_student'),
-            'phone_student' => $this->input->post('phone_student'),
+            'dob_student' => $this->input->post('tempat_dob') . ", " . $this->input->post('tanggal_dob'),
+            'school_student' => "-",
+            'phone_student' => "-",
+            'gender_student' => $this->input->post('gender_student'),
             'instrument' => $instrument,
-            'paket' => $this->input->post('paket'),
-            'email_student' => $this->input->post('email_student'),
-            'ig_student' => $this->input->post('ig_student'),
+            'email_student' => "-",
+            'ig_student' => "-",
             'address_student' => $this->input->post('address_student'),
             'kelurahan' => $this->input->post('kelurahan'),
             'kecamatan' => $this->input->post('kecamatan'),
@@ -1005,34 +1227,26 @@ class M_Admin extends CI_Model
             'country' => $this->input->post('country'),
             'teacher_percentage' => $this->input->post('teacher_percentage'),
             'currency' => $this->input->post('currency'),
+            'pict_student' => $pict_student,
+            'link_repository' => $this->input->post('link_repository'),
         ];
 
         $this->db->update('student', $data, ['id_student' => $id_student]);
 
         $data2 = [
-            'parent_student' =>  $this->input->post('parent_student'),
-            'parent_student_2' =>  $this->input->post('parent_student_2'),
-            'status_parent_1' => $this->input->post('status_parent_1'),
-            'status_parent_2' => $this->input->post('status_parent_2'),
-            'phone_parent_1' => $this->input->post('phone_parent_1'),
-            'phone_parent_2' => $this->input->post('phone_parent_2'),
-            'email_parent_1' => $this->input->post('email_parent_1'),
-            'email_parent_2' => $this->input->post('email_parent_2'),
-            'ig_parent_1' => $this->input->post('ig_parent_1'),
-            'ig_parent_2' => $this->input->post('ig_parent_2'),
-
-
-            'address_parent' => $address_parent,
-            'kelurahan_parent' => $kelurahan_parent,
-            'kecamatan_parent' => $kecamatan_parent,
-            'kota_parent' => $kota_parent,
-            'provinsi_parent' => $provinsi_parent,
-            'zip_parent' => $zip_parent,
-            'country_parent' => $country_parent,
             'currency' => $this->input->post('currency'),
         ];
         $this->db->update('student', $data2, ['id_parent' => $id_parent]);
 
+        $paketArr = $this->input->post('paket');
+        $this->db->delete('student_package', ['id_student' => $id_student]);
+        for ($i = 0; $i < count($paketArr); $i++) {
+            $dataPaket = [
+                'id_student' =>  $id_student,
+                'id_paket' =>  $paketArr[$i],
+            ];
+            $this->db->insert('student_package', $dataPaket);
+        }
         return true;
     }
 
@@ -1067,6 +1281,16 @@ class M_Admin extends CI_Model
         return true;
     }
 
+    public function deleteDataParent($id_parent)
+    {
+        $data =  [
+            'status' => '2'
+        ];
+
+        $this->db->update('student', $data, ['id_parent' => $id_parent]);
+        return true;
+    }
+
     public function deleteDataStudent($id_student)
     {
         $data =  [
@@ -1088,21 +1312,16 @@ class M_Admin extends CI_Model
     }
 
     public function insertDataPaket()
-    {   
+    {
         $type_of_class = 0;
-        if($this->input->post('description') == 'Online Private'){
-            $type_of_class = 1;
-        }
-        if ($this->input->post('description') == 'Offline Private') {
-            $type_of_class = 2;
-        }
-        if ($this->input->post('description') == 'Online Group Class') {
-            $type_of_class = 3;
-        }
         $data =  [
             'name' => $this->input->post('name'),
             'detail' => $this->input->post('detail'),
-            'description' => $this->input->post('description'),
+            // 'description' => $this->input->post('description'),
+            'tipe' => $this->input->post('tipe'),
+            'tipe_cat' => $this->input->post('tipe_cat'),
+            'tipe_sub' => $this->input->post('tipe_sub'),
+            'tipe_detail' => $this->input->post('tipe_detail'),
             'type_of_class' => $type_of_class,
             'duration' => $this->input->post('duration'),
             'status_pack_practical' => $this->input->post('status_pack_practical'),
@@ -1119,19 +1338,15 @@ class M_Admin extends CI_Model
     {
         $id = $this->input->post('id');
         $type_of_class = 0;
-        if ($this->input->post('description') == 'Online Private') {
-            $type_of_class = 1;
-        }
-        if ($this->input->post('description') == 'Offline Private') {
-            $type_of_class = 2;
-        }
-        if ($this->input->post('description') == 'Online Group Class') {
-            $type_of_class = 3;
-        }
+
         $data =  [
             'name' => $this->input->post('name'),
             'detail' => $this->input->post('detail'),
-            'description' => $this->input->post('description'),
+            // 'description' => $this->input->post('description'),
+            'tipe' => $this->input->post('tipe'),
+            'tipe_cat' => $this->input->post('tipe_cat'),
+            'tipe_sub' => $this->input->post('tipe_sub'),
+            'tipe_detail' => $this->input->post('tipe_detail'),
             'type_of_class' => $type_of_class,
             'duration' => $this->input->post('duration'),
             'status_pack_practical' => $this->input->post('status_pack_practical'),
@@ -1189,6 +1404,156 @@ class M_Admin extends CI_Model
             'rate' => $rate,
         ];
         $this->db->insert('offline_lesson', $data);
+        return true;
+    }
+
+    public function insertDataOfflineLesson2()
+    {
+        date_default_timezone_set("Asia/Jakarta");
+        // $today = date("Y-m-d");
+        $today = $this->input->post('created_at');
+        $startdate = strtotime($today);
+        $enddate = strtotime("+3 months", $startdate);
+        $temp_date =  date("Y-m-d", $enddate);
+
+        $id_teacher = $this->input->post('id_teacher');
+        $total_package = $this->input->post('total_package');
+
+        $instrument = $this->input->post('instrument');
+        $Others_temp1 = "Others1";
+        $others1 = "others1";
+        if ($instrument == $Others_temp1) {
+            $instrument = "Others|" . $this->input->post($others1);
+        }
+
+        //nomor transaksi package
+        //POF/210629/0041/001
+        $temp_date_sirkulasi =  date("ymd", $startdate);
+        $temp_id_student = substr($this->input->post('id_student'), 3);
+        $no_transaksi_package = "POF/" . $temp_date_sirkulasi . "/" . $temp_id_student;
+        $data_transaksi_package = $this->getData_transaksi_package_offline($no_transaksi_package);
+        $z = 0;
+        if (count($data_transaksi_package) == 0) {
+            $z = "001";
+        } else {
+            if (count($data_transaksi_package) < 10) {
+                $z = "00" . (count($data_transaksi_package) + 1);
+            } else if (count($data_transaksi_package) < 100) {
+                $z = "0" . (count($data_transaksi_package) + 1);
+            } else {
+                $z = (count($data_transaksi_package) + 1);
+            }
+        }
+
+        $price_paket = $this->input->post('rate_package') / $total_package;
+        $discount_price_paket = $price_paket - ($price_paket * $this->input->post('discount') / 100);
+
+        $data =  [
+            'no_transaksi_package_offline' => $no_transaksi_package . "/" . $z,
+            'id_student' => $this->input->post('id_student'),
+            'id_teacher' => $id_teacher,
+            'instrument' =>  $instrument,
+            'paket' => $this->input->post('temp_paket'),
+            'price_paket' => $discount_price_paket,
+            'total_package' => $total_package,
+            'rate_dollar' => $this->input->post('rate_dollar'),
+            'rate' => $this->input->post('rate'),
+            'discount' => $this->input->post('discount'),
+            'rate_package' => $this->input->post('rate_package'),
+            'total_discount_rate' => $this->input->post('total_discount_rate'),
+            'created_at' => $today,
+            'end_at' => $temp_date,
+            'created_by' => $this->session->userdata('id'),
+            'teacher_percentage' => $this->input->post('teacher_percentage'),
+        ];
+
+        // echo var_dump($data);
+        // die();
+        $this->db->insert('list_package_offline', $data);
+
+        //nomor invoice
+        //INV/210629/004/001
+        $temp_id_parent = substr($this->input->post('id_student'), 3, -1);
+        $no_transaksi = "INV001/" . $temp_date_sirkulasi . "/" . $temp_id_parent;
+        $data_sirkulasi = $this->getData_sirkulasi(null, $no_transaksi, $today);
+
+        //cek transaksi hari ini
+        $counter = $this->getData_sirkulasi_new(null, null, substr($today, 0, 7));
+        sort($counter);
+        $data2 = [];
+        $data3 = [];
+        if (count($data_sirkulasi) == 0) {
+            if (count($counter) == 0) {
+                $data2 =  [
+                    'no_transaksi' => $no_transaksi . "/001",
+                    'is_id_parent' => substr($this->input->post('id_student'), 0, -1),
+                    'created_at' => $today,
+                    'created_by' => $this->session->userdata('id'),
+                    'rate' => $this->input->post('rate'),
+                    'total_rate' => $this->input->post('rate')
+                ];
+                $data3 = [
+                    'no_transaksi' => $no_transaksi . "/001",
+                    'is_id_parent' => substr($this->input->post('id_student'), 0, -1),
+                    'id_barang' => $no_transaksi_package . "/" . $z,
+                    'tipe_barang' => '5',
+                    'price' => $this->input->post('rate'),
+                ];
+            } else {
+                $temp_last3digits = substr($counter[count($counter) - 1]['no_transaksi'], -3);
+                $temp_number = 1;
+                if (substr($temp_last3digits, 0, 1) == 0) {
+                    if (substr($temp_last3digits, 1, 1) == 0) {
+                        $temp_number = substr($temp_last3digits, 2, 1);
+                    } else {
+                        $temp_number = substr($temp_last3digits, 1, 2);
+                    }
+                } else {
+                    $temp_number = $temp_last3digits;
+                }
+                $x = 0;
+                $temp_count = 1 + $temp_number;
+                if ($temp_count < 10) {
+                    $x = "00" . $temp_count;
+                } else if ($temp_count < 100) {
+                    $x = "0" . $temp_count;
+                } else {
+                    $x = $temp_count;
+                }
+                $data2 =  [
+                    'no_transaksi' => $no_transaksi . "/" . $x,
+                    'is_id_parent' => substr($this->input->post('id_student'), 0, -1),
+                    'created_at' => $today,
+                    'created_by' => $this->session->userdata('id'),
+                    'rate' => $this->input->post('rate'),
+                    'total_rate' => $this->input->post('rate')
+                ];
+                $data3 = [
+                    'no_transaksi' => $no_transaksi . "/" . $x,
+                    'is_id_parent' => substr($this->input->post('id_student'), 0, -1),
+                    'id_barang' => $no_transaksi_package . "/" . $z,
+                    'tipe_barang' => '5',
+                    'price' => $this->input->post('rate'),
+                ];
+            }
+            $this->db->insert('sirkulasi', $data2);
+            $this->db->insert('sirkulasi_transaksi', $data3);
+        } else {
+            $data2 =  [
+                'rate' => intval($data_sirkulasi[0]['rate']) + intval($this->input->post('rate')),
+                'total_rate' => intval($data_sirkulasi[0]['rate']) + intval($this->input->post('rate'))
+            ];
+            $this->db->update('sirkulasi', $data2, ['id_sirkulasi' => $data_sirkulasi[0]['id_sirkulasi']]);
+            $data3 = [
+                'no_transaksi' => $data_sirkulasi[0]['no_transaksi'],
+                'is_id_parent' => $data_sirkulasi[0]['is_id_parent'],
+                'id_barang' => $no_transaksi_package . "/" . $z,
+                'tipe_barang' => '5',
+                'price' => $this->input->post('rate'),
+            ];
+            $this->db->insert('sirkulasi_transaksi', $data3);
+        }
+
         return true;
     }
 
@@ -1273,7 +1638,7 @@ class M_Admin extends CI_Model
         return $this->db->get()->result_array();
     }
 
-    public function getData_list_pack($id_list_pack = null, $id_parent = null, $periode = null, $periode_end = null)
+    public function getData_list_pack($id_list_pack = null, $id_parent = null, $periode = null, $periode_end = null, $status_pack_practical = null, $status_pack_theory = null)
     {
         $this->db->select('op.*, s.name_student, s.id_parent, s.parent_student, t.name_teacher, t2.name_teacher as name_teacher2, p.price_idr, p.price_dollar, p.price_euro, p.name, s.teacher_percentage, s.is_new');
         $this->db->from('list_package as op');
@@ -1285,6 +1650,12 @@ class M_Admin extends CI_Model
         $this->db->where('s.status', '1');
         if ($id_list_pack != null) {
             $this->db->where('id_list_pack', $id_list_pack);
+        }
+        if ($status_pack_practical != null) {
+            $this->db->where('op.status_pack_practical', $status_pack_practical);
+        }
+        if ($status_pack_theory != null) {
+            $this->db->where('op.status_pack_theory', $status_pack_theory);
         }
         if ($id_parent != null) {
             $this->db->where('s.id_parent', $id_parent);
@@ -1308,6 +1679,83 @@ class M_Admin extends CI_Model
 
             $temp_date =  date("Y-m-05", $enddate);
             $this->db->where('op.end_at >', "$temp_date");
+        }
+        return $this->db->get()->result_array();
+    }
+
+    public function getData_list_package_offline($id_list_package_offline = null, $id_parent = null, $periode = null, $periode_end = null)
+    {
+        $this->db->select('op.*, s.name_student, s.id_parent, s.parent_student, t.name_teacher, p.price_idr, p.price_dollar, p.price_euro, p.name, s.teacher_percentage, s.is_new');
+        $this->db->from('list_package_offline as op');
+        $this->db->join('paket as p', 'op.paket = p.id', 'left');
+        $this->db->join('student as s', 'op.id_student = s.id_student', 'left');
+        $this->db->join('teacher as t', 'op.id_teacher = t.id_teacher', 'left');
+        $this->db->where('op.status', '1');
+        $this->db->where('s.status', '1');
+        if ($id_list_package_offline != null) {
+            $this->db->where('id_list_package_offline', $id_list_package_offline);
+        }
+        if ($id_parent != null) {
+            $this->db->where('s.id_parent', $id_parent);
+        }
+        if ($periode != null) {
+            $temp_period = $periode . "-05";
+            $this->db->where('op.created_at <=', "$temp_period");
+
+            $startdate = strtotime("$periode");
+            $enddate = strtotime("-1 months", $startdate);
+
+            $temp_date =  date("Y-m-05", $enddate);
+            $this->db->where('op.created_at >', "$temp_date");
+        }
+        if ($periode_end != null) {
+            $temp_period = $periode_end . "-05";
+            $this->db->where('op.end_at <=', "$temp_period");
+
+            $startdate = strtotime("$periode_end");
+            $enddate = strtotime("-1 months", $startdate);
+
+            $temp_date =  date("Y-m-05", $enddate);
+            $this->db->where('op.end_at >', "$temp_date");
+        }
+        return $this->db->get()->result_array();
+    }
+
+    public function getData_schedule_package_offline($id_schedule_package_offline = null, $id_list_package_offline = null, $not_in = null, $id_student = null, $status = null, $periode = null, $id_teacher = null)
+    {
+        $this->db->select('so.*, s.name_student, s.id_parent, s.parent_student, t.name_teacher,');
+        $this->db->from('schedule_package_offline as so');
+        $this->db->join('student as s', 'so.id_student = s.id_student', 'left');
+        $this->db->join('teacher as t', 'so.id_teacher = t.id_teacher', 'left');
+        $this->db->join('list_package_offline as op', 'so.id_list_package_offline = op.id_list_package_offline', 'left');
+        // $this->db->where('so.status', '1');
+        if ($id_schedule_package_offline != null) {
+            $this->db->where('so.id_schedule_package_offline', $id_schedule_package_offline);
+        }
+        if ($id_list_package_offline != null) {
+            $this->db->where('so.id_list_package_offline', $id_list_package_offline);
+        }
+        if ($not_in != null) {
+            $this->db->where('so.status !=', $not_in);
+        }
+        if ($status != null) {
+            $this->db->where('so.status', $status);
+        }
+        if ($id_student != null) {
+            $this->db->where('so.id_student', $id_student);
+        }
+        if ($id_teacher != null) {
+            $this->db->where('so.id_teacher', $id_teacher);
+        }
+        if ($periode != null) {
+            $temp_period = $periode . "-05";
+            $this->db->where('so.date_schedule <=', "$temp_period");
+
+            $startdate = strtotime("$periode");
+            $enddate = strtotime("-1 months", $startdate);
+
+            $temp_date =  date("Y-m-05", $enddate);
+            $this->db->where('so.date_schedule >', "$temp_date");
         }
         return $this->db->get()->result_array();
     }
@@ -1423,7 +1871,7 @@ class M_Admin extends CI_Model
         // $today = date("Y-m-d");
         $today = $this->input->post('created_at');
         $startdate = strtotime($today);
-        $enddate = strtotime("+2 months", $startdate);
+        $enddate = strtotime("+3 months", $startdate);
         $temp_date =  date("Y-m-d", $enddate);
 
         $id_teacher_practical = NULL;
@@ -1434,7 +1882,7 @@ class M_Admin extends CI_Model
 
         //Practical
         $status_pack_practical = $this->input->post('status_pack_practical');
-        if($status_pack_practical == '1'){
+        if ($status_pack_practical == '1') {
             $id_teacher_practical = $this->input->post('id_teacher_practical');
             $total_pack_practical = $this->input->post('pack_pratical');
             $total_package = $this->input->post('total_package');
@@ -1463,18 +1911,32 @@ class M_Admin extends CI_Model
         $no_transaksi_package = "PAC/" . $temp_date_sirkulasi . "/" . $temp_id_student;
         $data_transaksi_package = $this->getData_transaksi_package($no_transaksi_package);
         $z = 0;
-        if(count($data_transaksi_package) == 0){
+        if (count($data_transaksi_package) == 0) {
             $z = "001";
-        }else{
+        } else {
             if (count($data_transaksi_package) < 10) {
-                $z = "00" . (count($data_transaksi_package)+1);
+                $z = "00" . (count($data_transaksi_package) + 1);
             } else if (count($data_transaksi_package) < 100) {
-                $z = "0" . (count($data_transaksi_package)+1);
+                $z = "0" . (count($data_transaksi_package) + 1);
             } else {
-                $z = (count($data_transaksi_package)+1);
+                $z = (count($data_transaksi_package) + 1);
             }
         }
-        
+
+        $price_paket = $this->input->post('rate_package') / $total_package;
+        $price_paket_theory = 0;
+        $price_paket_pratical = 0;
+        if ($status_pack_practical == '1') {
+            if ($status_pack_theory == '1') {
+                $price_paket = $price_paket - 100000;
+                $price_paket_theory = 100000 - (100000 * $this->input->post('discount') / 100);
+            }
+            $price_paket_pratical = $price_paket - ($price_paket * $this->input->post('discount') / 100);
+        } else {
+            if ($status_pack_theory == '1') {
+                $price_paket_theory = $price_paket - ($price_paket * $this->input->post('discount') / 100);
+            }
+        }
 
         $data =  [
             'no_transaksi_package' => $no_transaksi_package . "/" . $z,
@@ -1485,6 +1947,9 @@ class M_Admin extends CI_Model
             'status_pack_theory' => $status_pack_theory,
             'instrument' =>  $instrument,
             'paket' => $this->input->post('temp_paket'),
+            'price_paket_pratical' => $price_paket_pratical,
+            'price_paket_theory' => $price_paket_theory,
+            'total_discount_rate' => $this->input->post('total_discount_rate'),
             'total_package' => $total_package,
             'total_pack_practical' => $total_pack_practical,
             'total_pack_theory' => $total_pack_theory,
@@ -1495,29 +1960,29 @@ class M_Admin extends CI_Model
             'created_at' => $today,
             'end_at' => $temp_date,
             'created_by' => $this->session->userdata('id'),
+            'teacher_percentage' => $this->input->post('teacher_percentage'),
         ];
 
-        // echo var_dump($data);
-        // die();
         $this->db->insert('list_package', $data);
 
-
         //nomor invoice
-        //INV/210629/004/001
-        $temp_id_parent = substr($this->input->post('id_student'),3,-1);
-        $no_transaksi = "INV/". $temp_date_sirkulasi . "/" . $temp_id_parent;
+        //INV001/210629/004/001
+        $temp_id_parent = substr($this->input->post('id_student'), 3, -1);
+        $no_transaksi = "INV001/" . $temp_date_sirkulasi . "/" . $temp_id_parent;
         $data_sirkulasi = $this->getData_sirkulasi(null, $no_transaksi);
 
         //cek transaksi hari ini
-        $temp_counter = "INV/" . $temp_date_sirkulasi;
-        $counter = $this->getData_sirkulasi(null, $temp_counter);
+        $temp_counter = "INV001/" . $temp_date_sirkulasi;
+        // $counter = $this->getData_sirkulasi(null, $temp_counter);
+        $counter = $this->getData_sirkulasi_new(null, null, substr($today, 0, 7));
+        sort($counter);
         $data2 = [];
         $data3 = [];
-        if(count($data_sirkulasi) == 0){
-            if(count($counter) == 0){
-                $data2 =  [  
+        if (count($data_sirkulasi) == 0) {
+            if (count($counter) == 0) {
+                $data2 =  [
                     'no_transaksi' => $no_transaksi . "/001",
-                    'is_id_parent' => substr($this->input->post('id_student'),0,-1),
+                    'is_id_parent' => substr($this->input->post('id_student'), 0, -1),
                     'created_at' => $today,
                     'created_by' => $this->session->userdata('id'),
                     'rate' => $this->input->post('rate'),
@@ -1530,14 +1995,26 @@ class M_Admin extends CI_Model
                     'tipe_barang' => '1',
                     'price' => $this->input->post('rate'),
                 ];
-            }else{
+            } else {
+                $temp_last3digits = substr($counter[count($counter) - 1]['no_transaksi'], -3);
+                $temp_number = 1;
+                if (substr($temp_last3digits, 0, 1) == 0) {
+                    if (substr($temp_last3digits, 1, 1) == 0) {
+                        $temp_number = substr($temp_last3digits, 2, 1);
+                    } else {
+                        $temp_number = substr($temp_last3digits, 1, 2);
+                    }
+                } else {
+                    $temp_number = $temp_last3digits;
+                }
                 $x = 0;
-                if(count($counter) < 10){
-                    $x = "00" . count($counter);
-                }else if (count($counter) < 100){
-                    $x = "0" . count($counter);
-                }else{
-                    $x = count($counter);
+                $temp_count = 1 + $temp_number;
+                if ($temp_count < 10) {
+                    $x = "00" . $temp_count;
+                } else if ($temp_count < 100) {
+                    $x = "0" . $temp_count;
+                } else {
+                    $x = $temp_count;
                 }
                 $data2 =  [
                     'no_transaksi' => $no_transaksi . "/" . $x,
@@ -1557,7 +2034,7 @@ class M_Admin extends CI_Model
             }
             $this->db->insert('sirkulasi', $data2);
             $this->db->insert('sirkulasi_transaksi', $data3);
-        }else{
+        } else {
             $data2 =  [
                 'rate' => intval($data_sirkulasi[0]['rate']) + intval($this->input->post('rate')),
                 'total_rate' => intval($data_sirkulasi[0]['rate']) + intval($this->input->post('rate'))
@@ -1572,7 +2049,7 @@ class M_Admin extends CI_Model
             ];
             $this->db->insert('sirkulasi_transaksi', $data3);
         }
-        
+
         return true;
     }
 
@@ -1599,9 +2076,22 @@ class M_Admin extends CI_Model
         return $this->db->get()->result_array();
     }
 
+    public function getData_transaksi_package_offline($no_transaksi_package_offline = null)
+    {
+        $this->db->select('lp.id_list_package_offline, lp.total_package, lp.rate_dollar, lp.rate, lp.id_student, lp.discount, s.name_student, p.name, p.price_idr, p.price_dollar, p.price_euro, p.duration, t.name_teacher, lp.no_transaksi_package_offline, s.currency, lp.rate_package, lp.created_at, lp.end_at');
+        $this->db->from('list_package_offline as lp');
+        $this->db->join('paket as p', 'lp.paket = p.id', 'left');
+        $this->db->join('student as s', 'lp.id_student = s.id_student', 'left');
+        $this->db->join('teacher as t', 'lp.id_teacher = t.id_teacher', 'left');
+        if ($no_transaksi_package_offline != null) {
+            $this->db->like('no_transaksi_package_offline', $no_transaksi_package_offline);
+        }
+        return $this->db->get()->result_array();
+    }
+
     public function getData_transaksi_package($no_transaksi_package = null)
     {
-        $this->db->select('lp.id_list_pack, lp.total_package, lp.rate_dollar, lp.rate, lp.id_student, lp.total_pack_practical, lp.total_pack_theory, lp.discount, s.name_student, p.name, p.price_idr, p.price_dollar, p.price_euro, p.status_pack_theory, p.status_pack_practical, t.name_teacher as teacher_pratical, tt.name_teacher as teacher_teory, lp.no_transaksi_package, s.currency, lp.rate_package');
+        $this->db->select('lp.id_list_pack, lp.total_package, lp.rate_dollar, lp.rate, lp.id_student, lp.total_pack_practical, lp.total_pack_theory, lp.discount, s.name_student, p.name, p.price_idr, p.price_dollar, p.price_euro, p.status_pack_theory, p.status_pack_practical, t.name_teacher as teacher_pratical, tt.name_teacher as teacher_teory, lp.no_transaksi_package, s.currency, lp.rate_package, lp.created_at, lp.end_at');
         $this->db->from('list_package as lp');
         $this->db->join('paket as p', 'lp.paket = p.id', 'left');
         $this->db->join('student as s', 'lp.id_student = s.id_student', 'left');
@@ -1609,6 +2099,23 @@ class M_Admin extends CI_Model
         $this->db->join('teacher as tt', 'lp.id_teacher_theory = tt.id_teacher', 'left');
         if ($no_transaksi_package != null) {
             $this->db->like('no_transaksi_package', $no_transaksi_package);
+        }
+        return $this->db->get()->result_array();
+    }
+
+    public function getData_sirkulasi_new($id_sirkulasi = null, $no_transaksi = null, $periode = null)
+    {
+        $this->db->select('s.id_sirkulasi, s.no_transaksi');
+        $this->db->from('sirkulasi as s');
+        $this->db->where('s.status_sirkulasi', '1');
+        if ($id_sirkulasi != null) {
+            $this->db->where('id_sirkulasi', $id_sirkulasi);
+        }
+        if ($no_transaksi != null) {
+            $this->db->like('no_transaksi', $no_transaksi);
+        }
+        if ($periode != null) {
+            $this->db->like('created_at', $periode);
         }
         return $this->db->get()->result_array();
     }
@@ -1698,29 +2205,91 @@ class M_Admin extends CI_Model
         return true;
     }
 
+    public function deleteDataPackageOffline($id_list_package_offline, $no_transaksi_package)
+    {
+        $no_transaksi_pack = $this->getData_sirkulasi_transaksi(null, $no_transaksi_package);
+        $count_transaksi_sirkulasi = $this->getData_sirkulasi_transaksi($no_transaksi_pack[0]['no_transaksi']);
+        $no_transaksi = $this->getData_sirkulasi(null, $no_transaksi_pack[0]['no_transaksi']);
+
+        if (count($count_transaksi_sirkulasi) <= 1) {
+            $this->db->delete('sirkulasi_transaksi', ['id_barang' => $no_transaksi_package]);
+            $this->db->delete('sirkulasi', ['no_transaksi' => $no_transaksi_pack[0]['no_transaksi']]);
+        } else {
+            $rate = intval($no_transaksi[0]['rate']) - intval($no_transaksi_pack[0]['price']);
+            $total_rate = $rate - $no_transaksi[0]['discount'];
+            $data =  [
+                'rate' => $rate,
+                'total_rate' => $total_rate,
+            ];
+            $this->db->delete('sirkulasi_transaksi', ['id' => $no_transaksi_pack[0]['id']]);
+            $this->db->update('sirkulasi', $data, ['no_transaksi' => $no_transaksi_pack[0]['no_transaksi']]);
+        };
+
+        $no_transaksi_fee = $this->getData_sirkulasi_feereport_detail(null, null, 3, $no_transaksi_package);
+        $count_transaksi_fee = $this->getData_sirkulasi_feereport_detail(null, $no_transaksi_fee[0]['no_sirkulasi_feereport']);
+        $no_feereport = $this->getData_sirkulasi_feereport(null, $no_transaksi_fee[0]['no_sirkulasi_feereport']);
+
+        if (count($count_transaksi_fee) <= 1) {
+            $this->db->delete('sirkulasi_feereport_detail', ['id_barang' => $no_transaksi_package]);
+            $this->db->delete('sirkulasi_feereport', ['no_sirkulasi_feereport' => $no_transaksi_fee[0]['no_sirkulasi_feereport']]);
+        } else {
+            $rate = intval($no_feereport[0]['price']) - intval($no_transaksi_fee[0]['price']);
+            $total_rate = $rate - $no_feereport[0]['discount'];
+            $data =  [
+                'price' => $rate,
+                'total_price' => $total_rate,
+            ];
+            $this->db->delete('sirkulasi_feereport_detail', ['id_barang' => $no_transaksi_package]);
+            $this->db->update('sirkulasi_feereport', $data, ['no_sirkulasi_feereport' => $no_transaksi_fee[0]['no_sirkulasi_feereport']]);
+        };
+
+        $this->db->delete('sirkulasi_lesson', ['id_list_package_offline' => $id_list_package_offline]);
+        $this->db->delete('sirkulasi_lesson_detail', ['id_list_package_offline' => $id_list_package_offline]);
+        $this->db->delete('list_package_offline', ['id_list_package_offline' => $id_list_package_offline]);
+        $this->db->delete('schedule_package_offline', ['id_list_package_offline' => $id_list_package_offline]);
+        return true;
+    }
+
     public function deleteDataPackage($id_list_pack, $no_transaksi_package)
     {
         $no_transaksi_pack = $this->getData_sirkulasi_transaksi(null, $no_transaksi_package);
         $count_transaksi_sirkulasi = $this->getData_sirkulasi_transaksi($no_transaksi_pack[0]['no_transaksi']);
         $no_transaksi = $this->getData_sirkulasi(null, $no_transaksi_pack[0]['no_transaksi']);
-        
-        $temp_price = 0;
-        if(count($count_transaksi_sirkulasi) <= 1){
+
+        if (count($count_transaksi_sirkulasi) <= 1) {
             $this->db->delete('sirkulasi_transaksi', ['id_barang' => $no_transaksi_package]);
             $this->db->delete('sirkulasi', ['no_transaksi' => $no_transaksi_pack[0]['no_transaksi']]);
-        }else{
-            foreach($count_transaksi_sirkulasi as $c){
-                $temp_price = $temp_price + $c['price'];
-            }
-            $rate = $temp_price - $no_transaksi_pack[0]['price'];
+        } else {
+            $rate = intval($no_transaksi[0]['rate']) - intval($no_transaksi_pack[0]['price']);
             $total_rate = $rate - $no_transaksi[0]['discount'];
-            $this->db->delete('sirkulasi_transaksi', ['id_barang' => $no_transaksi_package]);
             $data =  [
                 'rate' => $rate,
                 'total_rate' => $total_rate,
             ];
             $this->db->update('sirkulasi', $data, ['no_transaksi' => $no_transaksi_pack[0]['no_transaksi']]);
+            $this->db->delete('sirkulasi_transaksi', ['id' => $no_transaksi_pack[0]['id']]);
         }
+
+        $no_transaksi_fee = $this->getData_sirkulasi_feereport_detail(null, null, 1, $no_transaksi_package);
+        $count_transaksi_fee = $this->getData_sirkulasi_feereport_detail(null, $no_transaksi_fee[0]['no_sirkulasi_feereport']);
+        $no_feereport = $this->getData_sirkulasi_feereport(null, $no_transaksi_fee[0]['no_sirkulasi_feereport']);
+
+        if (count($count_transaksi_fee) <= 1) {
+            $this->db->delete('sirkulasi_feereport_detail', ['id_barang' => $no_transaksi_package]);
+            $this->db->delete('sirkulasi_feereport', ['no_sirkulasi_feereport' => $no_transaksi_fee[0]['no_sirkulasi_feereport']]);
+        } else {
+            $rate = intval($no_feereport[0]['price']) - intval($no_transaksi_fee[0]['price']);
+            $total_rate = $rate - $no_feereport[0]['discount'];
+            $data =  [
+                'price' => $rate,
+                'total_price' => $total_rate,
+            ];
+            $this->db->delete('sirkulasi_feereport_detail', ['id_barang' => $no_transaksi_package]);
+            $this->db->update('sirkulasi_feereport', $data, ['no_sirkulasi_feereport' => $no_transaksi_fee[0]['no_sirkulasi_feereport']]);
+        };
+
+        $this->db->delete('sirkulasi_lesson', ['id_list_pack' => $id_list_pack]);
+        $this->db->delete('sirkulasi_lesson_detail', ['id_list_pack' => $id_list_pack]);
         $this->db->delete('list_package', ['id_list_pack' => $id_list_pack]);
         $this->db->delete('schedule_package', ['id_list_pack' => $id_list_pack]);
         return true;
@@ -1827,16 +2396,33 @@ class M_Admin extends CI_Model
         return $data->result_array();
     }
 
+    public function getData_student_package($id_student = null, $id_paket = null, $tipe = null)
+    {
+        $this->db->select('s.*, p.name as name_paket, p.price_idr, p.price_dollar, p.price_euro, p.duration, p.status_pack_theory, p.status_pack_practical');
+        $this->db->from('student_package as s');
+        $this->db->join('paket as p', 's.id_paket = p.id', 'left');
+        if ($id_student != null) {
+            $this->db->where('id_student', $id_student);
+        }
+        if ($id_paket != null) {
+            $this->db->where('id_paket', $id_paket);
+        }
+        if ($tipe != null) {
+            $this->db->where('p.tipe', $tipe);
+        }
+        return $this->db->get()->result_array();
+    }
+
     public function getData_student($id_student = null, $id_parent = null)
     {
         $this->db->select('s.*');
         $this->db->from('student as s');
         $this->db->where('s.status', '1');
         if ($id_student != null) {
-            $this->db->where('id_student', $id_student);
+            $this->db->where('s.id_student', $id_student);
         }
         if ($id_parent != null) {
-            $this->db->where('id_parent', $id_parent);
+            $this->db->where('s.id_parent', $id_parent);
         }
         return $this->db->get()->result_array();
     }
@@ -2364,7 +2950,7 @@ class M_Admin extends CI_Model
 
     public function getData_transaksi_book($no_transaksi_book = null)
     {
-        $this->db->select('s.id_order, s.no_transaksi_book, st.name_student, s.price, b.title, s.tgl_order');
+        $this->db->select('s.id_order, s.no_transaksi_book, st.name_student, s.price, b.title, s.tgl_order, s.selling_price, s.shipping_price, s.discount');
         $this->db->from('order_book as s');
         $this->db->join('student as st', 's.id_student = st.id_student', 'left');
         $this->db->join('book as b', 's.id_book = b.id_book', 'left');
@@ -2383,18 +2969,17 @@ class M_Admin extends CI_Model
 
         $temp_id_student = substr($this->input->post('id_student'), 3);
         $no_transaksi_book = "BOK/" . $temp_date_sirkulasi . "/" . $temp_id_student;
-
         $data_transaksi_book = $this->getData_transaksi_book($no_transaksi_book);
         $z = 0;
         if (count($data_transaksi_book) == 0) {
             $z = "001";
         } else {
             if (count($data_transaksi_book) < 10) {
-                $z = "00" . (count($data_transaksi_book)+1);
+                $z = "00" . (count($data_transaksi_book) + 1);
             } else if (count($data_transaksi_book) < 100) {
-                $z = "0" . (count($data_transaksi_book)+1);
+                $z = "0" . (count($data_transaksi_book) + 1);
             } else {
-                $z = (count($data_transaksi_book)+1);
+                $z = (count($data_transaksi_book) + 1);
             }
         }
         // echo var_dump($temp_id_student);
@@ -2420,14 +3005,14 @@ class M_Admin extends CI_Model
 
         $total_price = $this->input->post('price');
         //nomor invoice
-        //INV/210629/004/001
+        //INV002/210629/004/001
         $temp_id_parent = substr($this->input->post('id_student'), 3, -1);
-        $no_transaksi = "INV/" . $temp_date_sirkulasi . "/" . $temp_id_parent;
-        $data_sirkulasi = $this->getData_sirkulasi(null, $no_transaksi);
+        $no_transaksi = "INV002/" . $temp_date_sirkulasi . "/" . $temp_id_parent;
+        $data_sirkulasi = $this->getData_sirkulasi(null, $no_transaksi, $created_at);
 
         //cek transaksi hari ini
-        $temp_counter = "INV/" . $temp_date_sirkulasi;
-        $counter = $this->getData_sirkulasi(null, $temp_counter);
+        $counter = $this->getData_sirkulasi_new(null, null, substr($created_at, 0, 7));
+        sort($counter);
         $data2 = [];
         $data3 = [];
         if (count($data_sirkulasi) == 0) {
@@ -2448,13 +3033,25 @@ class M_Admin extends CI_Model
                     'price' => $total_price,
                 ];
             } else {
-                $x = 0;
-                if (count($counter) < 10) {
-                    $x = "00" . count($counter);
-                } else if (count($counter) < 100) {
-                    $x = "0" . count($counter);
+                $temp_last3digits = substr($counter[count($counter) - 1]['no_transaksi'], -3);
+                $temp_number = 1;
+                if (substr($temp_last3digits, 0, 1) == 0) {
+                    if (substr($temp_last3digits, 1, 1) == 0) {
+                        $temp_number = substr($temp_last3digits, 2, 1);
+                    } else {
+                        $temp_number = substr($temp_last3digits, 1, 2);
+                    }
                 } else {
-                    $x = count($counter);
+                    $temp_number = $temp_last3digits;
+                }
+                $x = 0;
+                $temp_count = 1 + $temp_number;
+                if ($temp_count < 10) {
+                    $x = "00" . $temp_count;
+                } else if ($temp_count < 100) {
+                    $x = "0" . $temp_count;
+                } else {
+                    $x = $temp_count;
                 }
                 $data2 =  [
                     'no_transaksi' => $no_transaksi . "/" . $x,
@@ -2472,6 +3069,7 @@ class M_Admin extends CI_Model
                     'price' => $total_price,
                 ];
             }
+
             $this->db->insert('sirkulasi', $data2);
             $this->db->insert('sirkulasi_transaksi', $data3);
         } else {
@@ -2489,7 +3087,6 @@ class M_Admin extends CI_Model
             ];
             $this->db->insert('sirkulasi_transaksi', $data3);
         }
-
         return true;
     }
 
@@ -2510,7 +3107,6 @@ class M_Admin extends CI_Model
             ];
             $this->db->update('book', $data, ['id_book' => $id_book]);
         }
-
         return true;
     }
 
@@ -2518,23 +3114,17 @@ class M_Admin extends CI_Model
     {
         $id_order = $this->input->post('id_order');
         $data =  [
-            // 'id_book' => $this->input->post('id_book'),
-            // 'id_student' => $this->input->post('id_student'),
-            // 'qty' => $this->input->post('qty'),
-            // 'distributor_price' => $this->input->post('distributor_price'),
-            // 'price' => $this->input->post('price'),
             'status' => $this->input->post('status'),
             'tgl_send' => $this->input->post('tgl_send'),
             'tgl_terima' => $this->input->post('tgl_terima'),
             'penerima' => $this->input->post('penerima'),
         ];
-
         $this->db->update('order_book', $data, ['id_order' => $id_order]);
         return true;
     }
 
     public function deleteDataBookOrder($id_order, $id_book = null, $qty, $no_transaksi_book)
-    {   
+    {
         $no_transaksi_pack = $this->getData_sirkulasi_transaksi(null, $no_transaksi_book);
         $count_transaksi_sirkulasi = $this->getData_sirkulasi_transaksi($no_transaksi_pack[0]['no_transaksi']);
         $no_transaksi = $this->getData_sirkulasi(null, $no_transaksi_pack[0]['no_transaksi']);
@@ -2544,28 +3134,24 @@ class M_Admin extends CI_Model
             $this->db->delete('sirkulasi_transaksi', ['id_barang' => $no_transaksi_book]);
             $this->db->delete('sirkulasi', ['no_transaksi' => $no_transaksi_pack[0]['no_transaksi']]);
         } else {
-            foreach ($count_transaksi_sirkulasi as $c) {
-                $temp_price = $temp_price + $c['price'];
-            }
-            $rate = $temp_price - $no_transaksi_pack[0]['price'];
+            $rate = intval($no_transaksi[0]['rate']) - intval($no_transaksi_pack[0]['price']);
             $total_rate = $rate - $no_transaksi[0]['discount'];
-            $this->db->delete('sirkulasi_transaksi', ['id_barang' => $no_transaksi_book]);
             $data =  [
                 'rate' => $rate,
                 'total_rate' => $total_rate,
             ];
+            $this->db->delete('sirkulasi_transaksi', ['id' => $no_transaksi_pack[0]['id']]);
             $this->db->update('sirkulasi', $data, ['no_transaksi' => $no_transaksi_pack[0]['no_transaksi']]);
         }
-
-        $book = $this->getData_book($id_book);
-        $temp_qty = intval($book[0]['qty']) + $qty;
-        $data =  [
-            'qty' => $temp_qty,
-            'status' => '1'
-        ];
-        
-        $this->db->update('book', $data, ['id_book' => $id_book]);
-
+        if ($id_book != "-") {
+            $book = $this->getData_book($id_book);
+            $temp_qty = intval($book[0]['qty']) + $qty;
+            $data =  [
+                'qty' => $temp_qty,
+                'status' => '1'
+            ];
+            $this->db->update('book', $data, ['id_book' => $id_book]);
+        }
         $this->db->delete('order_book', ['id_order' => $id_order]);
         return true;
     }
@@ -2581,7 +3167,7 @@ class M_Admin extends CI_Model
     }
 
     public function insertDataBookPurchase()
-    {   
+    {
         $distributor = '';
         $distributor_temp = "distributor";
         $distributor = $this->input->post($distributor_temp);
@@ -2590,7 +3176,7 @@ class M_Admin extends CI_Model
         if ($distributor == $Others_temp) {
             $distributor = "Others|" . $this->input->post($others);
         }
-        
+
         $data =  [
             'date' => $this->input->post('date'),
             'title' => $this->input->post('title'),
@@ -2623,6 +3209,7 @@ class M_Admin extends CI_Model
         $selling_price = $this->input->post('selling_price');
         $shipping_rate = $this->input->post('shipping_rate');
         $qty = $this->input->post('qty');
+        $qty_before = $this->input->post('qty_before');
 
         $data =  [
             'title' => $title,
@@ -2646,34 +3233,33 @@ class M_Admin extends CI_Model
         $selling_price_stock = $this->input->post('selling_price_stock');
         $shipping_rate_stock = $this->input->post('shipping_rate_stock');
 
-        if(($title == $title_stock) && ($publisher == $publisher_stock) &&($distributor == $distributor_stock) &&($distributor_price == $distributor_price_stock) &&($selling_price == $selling_price_stock) &&($shipping_rate == $shipping_rate_stock)){
+        if (($title == $title_stock) && ($publisher == $publisher_stock) && ($distributor == $distributor_stock) && ($distributor_price == $distributor_price_stock) && ($selling_price == $selling_price_stock)) {
             $data2 =  [
-                'title' => $this->input->post('title'),
-                'publisher' => $this->input->post('publisher'),
-                'qty' => intval($qty_stock) + intval($this->input->post('qty')),
-                'distributor' => $this->input->post('distributor'),
-                'distributor_price' => $this->input->post('distributor_price'),
-                'selling_price' => $this->input->post('selling_price'),
-                'shipping_rate' => $this->input->post('shipping_rate'),
+                'title' => $title,
+                'publisher' => $publisher,
+                'qty' => intval($qty_stock) + intval($qty) - intval($qty_before),
+                'distributor' => $distributor,
+                'distributor_price' => $distributor_price,
+                'selling_price' => $selling_price,
             ];
             $this->db->update('book', $data2, ['id_book' => $id_book]);
-        }else{
-            $count_temp = intval($qty_stock) - intval($this->input->post('qty'));
-            if($count_temp > 0){
+        } else {
+            $count_temp = intval($qty_stock) - intval($qty_before);
+            if ($count_temp > 0) {
                 $data2 =  [
                     'qty' => $count_temp,
                 ];
                 $this->db->update('book', $data2, ['id_book' => $id_book]);
-            }else{
+            } else {
                 $this->db->delete('book', ['id_book' => $id_book]);
             }
-            $cek = $this->M_Admin->getData_booksame($title, $publisher, $distributor, $distributor_price, $selling_price, $shipping_rate);
-            if(count($cek) > 0){
+            $cek = $this->M_Admin->getData_booksame($title, $publisher, $distributor, $distributor_price, $selling_price);
+            if (count($cek) > 0) {
                 $data3 =  [
                     'qty' => intval($qty) + intval($cek[0]['qty']),
                 ];
                 $this->db->update('book', $data3, ['id_book' => $cek[0]['id_book']]);
-            }else{
+            } else {
                 $data3 =  [
                     'title' => $title,
                     'publisher' => $publisher,
@@ -2681,7 +3267,6 @@ class M_Admin extends CI_Model
                     'distributor' => $distributor,
                     'distributor_price' => $distributor_price,
                     'selling_price' => $selling_price,
-                    'shipping_rate' => $shipping_rate,
                 ];
                 $this->db->insert('book', $data3);
             }
@@ -2693,9 +3278,9 @@ class M_Admin extends CI_Model
     {
         $temp_book = $this->getData_book_purchase($id_purchase);
         $getQty = $this->getData_booksame($temp_book[0]['title'], $temp_book[0]['publisher'], $temp_book[0]['distributor'], $temp_book[0]['distributor_price'], $temp_book[0]['selling_price'], $temp_book[0]['shipping_rate']);
-        
+
         $countQty = $getQty[0]['qty'] - $temp_book[0]['qty'];
-        if($countQty > 0){
+        if ($countQty > 0) {
             $data =  [
                 'qty' => $countQty,
             ];
@@ -2706,7 +3291,7 @@ class M_Admin extends CI_Model
             $this->db->where('selling_price', $temp_book[0]['selling_price']);
             $this->db->where('shipping_rate', $temp_book[0]['shipping_rate']);
             $this->db->update('book', $data);
-        }else{
+        } else {
             $this->db->where('title', $temp_book[0]['title']);
             $this->db->where('publisher', $temp_book[0]['publisher']);
             $this->db->where('distributor', $temp_book[0]['distributor']);
@@ -2781,15 +3366,18 @@ class M_Admin extends CI_Model
         return $this->db->get()->result_array();
     }
 
-    public function getRegisterEvent($id_transaksi = null, $no_transaksi_event = null)
+    public function getRegisterEvent($id_transaksi = null, $no_transaksi_event = null, $parent_event = null)
     {
         $this->db->select('*');
-        $this->db->from('register_event_detail');
+        $this->db->from('register_event');
         if ($id_transaksi != null) {
             $this->db->where('id_transaksi', $id_transaksi);
         }
         if ($no_transaksi_event != null) {
             $this->db->where('no_transaksi_event', $no_transaksi_event);
+        }
+        if ($parent_event != null) {
+            $this->db->where('parent_event', $parent_event);
         }
         return $this->db->get()->result_array();
     }
@@ -2812,6 +3400,21 @@ class M_Admin extends CI_Model
         $this->db->select('*');
         $this->db->from('event');
         $this->db->where('status', '1');
+
+        if ($parent_event != null) {
+            $this->db->where('parent_event', $parent_event);
+        }
+        $not_in_ex = explode('-', $not_in);
+        if ($not_in != null) {
+            $this->db->where_not_in('id_event', $not_in_ex);
+        }
+        return $this->db->get()->result_array();
+    }
+
+    public function getEventByParent_($parent_event = null, $not_in = null)
+    {
+        $this->db->select('*');
+        $this->db->from('event');
 
         if ($parent_event != null) {
             $this->db->where('parent_event', $parent_event);
@@ -3015,7 +3618,7 @@ class M_Admin extends CI_Model
 
         $dateChar = preg_replace("/[^a-zA-Z0-9]/", "", $created_at);
         $randomChar = substr(str_shuffle(str_repeat("0123456789abcdefghijklmnopqrstuvwxyz", 5)), 0, 5);
-        $no_transaksi = $dateChar .''. $randomChar;
+        $no_transaksi = $dateChar . '' . $randomChar;
 
 
         //nomor transaksi event
@@ -3034,11 +3637,11 @@ class M_Admin extends CI_Model
             $z = "001";
         } else {
             if (count($data_transaksi_event) < 10) {
-                $z = "00" . (count($data_transaksi_event)+1);
+                $z = "00" . (count($data_transaksi_event) + 1);
             } else if (count($data_transaksi_event) < 100) {
-                $z = "0" . (count($data_transaksi_event)+1);
+                $z = "0" . (count($data_transaksi_event) + 1);
             } else {
-                $z = (count($data_transaksi_event)+1);
+                $z = (count($data_transaksi_event) + 1);
             }
         }
 
@@ -3061,7 +3664,8 @@ class M_Admin extends CI_Model
         ];
         $this->db->insert('register_event', $data);
 
-        $counter = $this->input->post('total_event');
+        // $counter = $this->input->post('total_event');
+        $counter = 1;
         for ($i = 1; $i <= $counter; $i++) {
             $event = "event" . $i;
             if ($this->input->post($event) == 1) {
@@ -3080,14 +3684,14 @@ class M_Admin extends CI_Model
         }
 
         //nomor invoice
-        //INV/210629/004/001
+        //INV003/210629/004/001
         $temp_id_parent = substr($this->input->post('id_student'), 3, -1);
-        $no_transaksi = "INV/" . $temp_date_sirkulasi . "/" . $temp_id_parent;
-        $data_sirkulasi = $this->getData_sirkulasi(null, $no_transaksi);
+        $no_transaksi = "INV003/" . $temp_date_sirkulasi . "/" . $temp_id_parent;
+        $data_sirkulasi = $this->getData_sirkulasi(null, $no_transaksi, $created_at);
 
         //cek transaksi hari ini
-        $temp_counter = "INV/" . $temp_date_sirkulasi;
-        $counter = $this->getData_sirkulasi(null, $temp_counter);
+        $counter = $this->getData_sirkulasi_new(null, null, substr($created_at, 0, 7));
+        sort($counter);
         $data2 = [];
         $data3 = [];
         if (count($data_sirkulasi) == 0) {
@@ -3108,13 +3712,25 @@ class M_Admin extends CI_Model
                     'price' => $total_price,
                 ];
             } else {
-                $x = 0;
-                if (count($counter) < 10) {
-                    $x = "00" . count($counter);
-                } else if (count($counter) < 100) {
-                    $x = "0" . count($counter);
+                $temp_last3digits = substr($counter[count($counter) - 1]['no_transaksi'], -3);
+                $temp_number = 1;
+                if (substr($temp_last3digits, 0, 1) == 0) {
+                    if (substr($temp_last3digits, 1, 1) == 0) {
+                        $temp_number = substr($temp_last3digits, 2, 1);
+                    } else {
+                        $temp_number = substr($temp_last3digits, 1, 2);
+                    }
                 } else {
-                    $x = count($counter);
+                    $temp_number = $temp_last3digits;
+                }
+                $x = 0;
+                $temp_count = 1 + $temp_number;
+                if ($temp_count < 10) {
+                    $x = "00" . $temp_count;
+                } else if ($temp_count < 100) {
+                    $x = "0" . $temp_count;
+                } else {
+                    $x = $temp_count;
                 }
                 $data2 =  [
                     'no_transaksi' => $no_transaksi . "/" . $x,
@@ -3154,15 +3770,42 @@ class M_Admin extends CI_Model
 
     public function updateDataEventStudent()
     {
-        $id_event_student = $this->input->post('id_event_student');
-        $data =  [
-            'id_event' => $this->input->post('id_event'),
-            'id_student' => $this->input->post('id_student'),
-            'price' => $this->input->post('price'),
-            'regist' => $this->input->post('regist'),
-        ];
+        $id_transaksi = $this->input->post('id_transaksi');   
+        $no_transaksi_event = $this->input->post('no_transaksi_event');   
+        
+        $price = $this->input->post('total_price');
+        $discount = $this->input->post('discount');
+        $total_price = $this->input->post('rate');
 
-        $this->db->update('event_student', $data, ['id_event_student' => $id_event_student]);
+        $temp = $this->getData_sirkulasi_transaksi(null, $no_transaksi_event);
+        $before_price = $temp[0]['price'];
+        $temp_sirkulasi = $this->getData_sirkulasi(null, $temp[0]['no_transaksi']);
+        $rate = $temp_sirkulasi[0]['rate'];
+        $discount_sirkulasi = $temp_sirkulasi[0]['discount'];
+        if($before_price > $total_price){
+            $after_price = $before_price - $total_price;
+            $rate -= $after_price;
+        }
+        if($before_price < $total_price){
+            $after_price = $total_price - $before_price;
+            $rate += $after_price;
+        }
+
+        $data = [
+            'discount' => $discount,
+            'total_price' => $total_price,
+        ];
+        $this->db->update('register_event', $data, ['id_transaksi' => $id_transaksi]);
+        $data2 = [
+            'price' => $total_price
+        ];
+        $this->db->update('sirkulasi_transaksi', $data2, ['id_barang' => $no_transaksi_event]);
+        $data3 = [
+            'rate' => $rate,
+            'total_rate' => $rate - $discount_sirkulasi
+        ];
+        $this->db->update('sirkulasi', $data3, ['no_transaksi' => $temp[0]['no_transaksi']]);
+        
         return true;
     }
 
@@ -3183,34 +3826,34 @@ class M_Admin extends CI_Model
         $no_transaksi_pack = $this->getData_sirkulasi_transaksi(null, $no_transaksi_event);
         $count_transaksi_sirkulasi = $this->getData_sirkulasi_transaksi($no_transaksi_pack[0]['no_transaksi']);
         $no_transaksi = $this->getData_sirkulasi(null, $no_transaksi_pack[0]['no_transaksi']);
-    
+
         $temp_price = 0;
         if (count($count_transaksi_sirkulasi) <= 1) {
             $this->db->delete('sirkulasi_transaksi', ['id_barang' => $no_transaksi_event]);
             $this->db->delete('sirkulasi', ['no_transaksi' => $no_transaksi_pack[0]['no_transaksi']]);
         } else {
-            foreach ($count_transaksi_sirkulasi as $c) {
-                $temp_price = $temp_price + $c['price'];
-            }
-            $rate = $temp_price - $no_transaksi_pack[0]['price'];
+            $rate = intval($no_transaksi[0]['rate']) - intval($no_transaksi_pack[0]['price']);
             $total_rate = $rate - $no_transaksi[0]['discount'];
-            $this->db->delete('sirkulasi_transaksi', ['id_barang' => $no_transaksi_event]);
             $data =  [
                 'rate' => $rate,
                 'total_rate' => $total_rate,
             ];
+            $this->db->delete('sirkulasi_transaksi', ['id' => $no_transaksi_pack[0]['id']]);
             $this->db->update('sirkulasi', $data, ['no_transaksi' => $no_transaksi_pack[0]['no_transaksi']]);
         }
-
         $this->db->delete('register_event_detail', ['no_transaksi_event' => $no_transaksi_event]);
         $this->db->delete('register_event', ['no_transaksi_event' => $no_transaksi_event]);
-        // $data =  [
-        //     'status' => '2'
-        // ];
-
-        // $this->db->update('event_student', $data, ['id_event_student' => $id_event_student]);
-        // $this->db->delete('event_student', ['id_event_student' => $id_event_student]);
         return true;
+    }
+
+    function fetch_all_package_offline($id_list_package_offline)
+    {
+        $this->db->select('sc.*, s.name_student');
+        $this->db->from('schedule_package_offline as sc');
+        $this->db->join('student as s', 'sc.id_student = s.id_student', 'left');
+        $this->db->where('sc.id_list_package_offline', $id_list_package_offline);
+        $this->db->order_by("id_schedule_package_offline", "ASC");
+        return $this->db->get();
     }
 
     function fetch_all_package($id_list_pack)
@@ -3221,6 +3864,23 @@ class M_Admin extends CI_Model
         $this->db->where('sc.id_list_pack', $id_list_pack);
         $this->db->order_by("id_schedule_pack", "ASC");
         return $this->db->get();
+    }
+
+    function insert_event_schedule_package_offline($data)
+    {
+        $this->db->insert('schedule_package_offline', $data);
+    }
+
+    function update_event_schedule_package_offline($data, $id_schedule_package)
+    {
+        $this->db->where('id_schedule_package_offline', $id_schedule_package);
+        $this->db->update('schedule_package_offline', $data);
+    }
+
+    function delete_event_schedule_package_offline($id_schedule_package)
+    {
+        $this->db->where('id_schedule_package_offline', $id_schedule_package);
+        $this->db->delete('schedule_package_offline');
     }
 
     function insert_event_schedule_package($data)
@@ -3541,23 +4201,42 @@ class M_Admin extends CI_Model
         return true;
     }
 
-    public function getData_sirkulasi_lesson_detail($id_sirkulasi_lesson_detail = null, $no_sirkulasi_lesson = null, $id_teacher = null, $id_student = null, $tipe = null, $periode = null, $rate = null, $id_list_pack = null, $id_offline_lesson = null)
+    public function getData_sirkulasi_lesson($id_sirkulasi_lesson = null, $no_sirkulasi_lesson = null, $id_teacher = null, $tipe = null)
+    {
+        $this->db->from('sirkulasi_lesson as sl');
+        if ($id_sirkulasi_lesson != null) {
+            $this->db->where('id_sirkulasi_lesson', $id_sirkulasi_lesson);
+        }
+        if ($no_sirkulasi_lesson != null) {
+            $this->db->where('no_sirkulasi_lesson', $no_sirkulasi_lesson);
+        }
+        if ($id_teacher != null) {
+            $this->db->where('t.status', '1');
+            $this->db->where('t.id_teacher', $id_teacher);
+        }
+        if ($tipe != null) {
+            $this->db->where('sl.tipe', $tipe);
+        }
+        return $this->db->get()->result_array();
+    }
+
+    public function getData_sirkulasi_lesson_detail($id_sirkulasi_lesson_detail = null, $no_sirkulasi_lesson = null, $id_teacher = null, $id_student = null, $tipe = null, $periode = null, $rate = null, $id_list_pack = null, $id_list_package_offline = null)
     {
         if ($id_list_pack != null) {
-            $this->db->select('sl.*, t.name_teacher, s.name_student, p.name as name_paket,  s.teacher_percentage, s.is_new, lp.rate_dollar');
+            $this->db->select('sl.*, t.name_teacher, s.name_student, p.name as name_paket,  s.teacher_percentage, s.is_new, lp.rate_dollar, p.price_idr, p.status_pack_theory, p.status_pack_practical');
             $this->db->join('list_package as lp', 'sl.id_list_pack = lp.id_list_pack', 'left');
             $this->db->where('sl.id_list_pack', $id_list_pack);
-        }else{
-            $this->db->select('sl.*, t.name_teacher, s.name_student, p.name as name_paket,  s.teacher_percentage, s.is_new');
+        } else {
+            $this->db->select('sl.*, t.name_teacher, s.name_student, p.name as name_paket,  s.teacher_percentage, s.is_new, p.price_idr, p.status_pack_theory, p.status_pack_practical');
         }
 
 
         $this->db->from('sirkulasi_lesson_detail as sl');
-        
+
         $this->db->join('student as s', 'sl.id_student = s.id_student', 'left');
         $this->db->join('teacher as t', 'sl.id_teacher = t.id_teacher', 'left');
         $this->db->join('paket as p', 'sl.paket = p.id', 'left');
-        
+
 
         if ($id_sirkulasi_lesson_detail != null) {
             $this->db->where('id_sirkulasi_lesson_detail', $id_sirkulasi_lesson_detail);
@@ -3573,9 +4252,9 @@ class M_Admin extends CI_Model
         if ($rate != null) {
             $this->db->where('sl.rate', $rate);
         }
-        
-        if ($id_offline_lesson != null) {
-            $this->db->where('sl.id_offline_lesson', $id_offline_lesson);
+
+        if ($id_list_package_offline != null) {
+            $this->db->where('sl.id_list_package_offline', $id_list_package_offline);
         }
 
         if ($periode != null) {
@@ -3596,7 +4275,7 @@ class M_Admin extends CI_Model
         return $this->db->get()->result_array();
     }
 
-    public function getData_sirkulasi_lesson_detail_before_periode($id_sirkulasi_lesson_detail = null, $no_sirkulasi_lesson = null, $id_teacher = null, $id_student = null, $tipe = null, $periode = null, $rate = null, $id_list_pack = null, $id_offline_lesson = null)
+    public function getData_sirkulasi_lesson_detail_before_periode($id_sirkulasi_lesson_detail = null, $no_sirkulasi_lesson = null, $id_teacher = null, $id_student = null, $tipe = null, $periode = null, $rate = null, $id_list_pack = null, $id_list_package_offline = null)
     {
         $this->db->select('sl.*, t.name_teacher, s.name_student, p.name as name_paket ,  s.teacher_percentage');
 
@@ -3622,8 +4301,8 @@ class M_Admin extends CI_Model
         if ($id_list_pack != null) {
             $this->db->where('sl.id_list_pack', $id_list_pack);
         }
-        if ($id_offline_lesson != null) {
-            $this->db->where('sl.id_offline_lesson', $id_offline_lesson);
+        if ($id_list_package_offline != null) {
+            $this->db->where('sl.id_list_package_offline', $id_list_package_offline);
         }
 
         if ($periode != null) {
@@ -3671,7 +4350,7 @@ class M_Admin extends CI_Model
         return $this->db->get()->result_array();
     }
 
-    public function getData_sirkulasi_feereport_detail($id = null, $no_sirkulasi_feereport = null, $tipe = null)
+    public function getData_sirkulasi_feereport_detail($id = null, $no_sirkulasi_feereport = null, $tipe = null, $id_barang = null)
     {
         $this->db->select('s.*');
         $this->db->from('sirkulasi_feereport_detail as s');
@@ -3683,6 +4362,9 @@ class M_Admin extends CI_Model
         }
         if ($tipe != null) {
             $this->db->like('tipe', $tipe);
+        }
+        if ($id_barang != null) {
+            $this->db->like('id_barang', $id_barang);
         }
         return $this->db->get()->result_array();
     }
@@ -3698,6 +4380,68 @@ class M_Admin extends CI_Model
             'other_price' => '0',
         ];
         $this->db->insert('other_feereport', $data);
+        return true;
+    }
+
+    public function getData_discount($id_discount = null, $for_discount = null)
+    {
+        $this->db->select('*');
+        $this->db->from('discount_coupon');
+        if ($id_discount != null) {
+            $this->db->where('id_discount', $id_discount);
+        }
+        if ($for_discount != null) {
+            $this->db->where('for_discount', $for_discount);
+        }
+        $this->db->where('status', 1);
+        $data = $this->db->get();
+        return $data->result_array();
+    }
+
+    public function getData_ohter_offline_lesson_discount($id = null, $no_transaksi = null, $id_parent = null, $periode = null)
+    {
+        $this->db->select('*, dc.detail_discount, dc.value_discount, dc.jenis_discount');
+        $this->db->from('other_offline_lesson_discount as od');
+        $this->db->join('discount_coupon as dc', 'od.id_discount = dc.id_discount', 'left');
+        if ($id != null) {
+            $this->db->where('id', $id);
+        }
+        if ($no_transaksi != null) {
+            $this->db->where('no_transaksi', $no_transaksi);
+        }
+        if ($id_parent != null) {
+            $this->db->where('id_parent', $id_parent);
+        }
+        if ($periode != null) {
+            $this->db->where('periode', $periode);
+        }
+        $data = $this->db->get();
+        return $data->result_array();
+    }
+
+    public function insertDataDiscount()
+    {
+        $detail_jenis = "percentage";
+        if ($this->input->post('jenis_discount') == "2") {
+            $detail_jenis = "nominal";
+        }
+        $data =  [
+            'name_discount' => $this->input->post('name_discount'),
+            'for_discount' => $this->input->post('for_discount'),
+            'jenis_discount' => $this->input->post('jenis_discount'),
+            'detail_jenis' => $detail_jenis,
+            'value_discount' => $this->input->post('value_discount'),
+            'detail_discount' => $this->input->post('detail_discount'),
+        ];
+        $this->db->insert('discount_coupon', $data);
+
+        return true;
+    }
+
+    public function deleteDataFeeReport($no_sirkulasi)
+    {
+        $this->db->delete('sirkulasi_feereport_detail', ['no_sirkulasi_feereport' => $no_sirkulasi]);
+        $this->db->delete('sirkulasi_feereport', ['no_sirkulasi_feereport' => $no_sirkulasi]);
         return true;
     }
 }

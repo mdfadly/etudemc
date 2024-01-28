@@ -49,7 +49,7 @@
                             <option value="">Choose</option>
                             <?php foreach ($book as $s) : ?>
                                 <option value="<?= $s['id_book'] ?>-<?= $s['distributor_price'] ?>-<?= $s['qty'] ?>-<?= $s['selling_price'] ?>">
-                                    <?= $s['title'] ?>
+                                    <?= $s['title'] ?> | <?= $s['publisher'] ?> | <?= $s['selling_price'] ?>
                                 </option>
                             <?php endforeach; ?>
                         </select>
@@ -77,19 +77,12 @@
                         <input type="text" class="form-control" id="shipping_price_rupiah" name="shipping_price_rupiah" value="0">
                         <input type="hidden" class="form-control" id="shipping_price" name="shipping_price" value="0">
                     </div>
-
                     <div class="form-group">
                         <label for="discount">Discount</label>
                         <input type="text" class="form-control" id="discount_rupiah" name="discount_rupiah" value="0">
                         <input type="hidden" class="form-control" id="discount" name="discount" value="0">
+                        <small>Percentage (%)</small>
                     </div>
-
-                    <!-- <div class="form-group">
-                        <label for="price">Total Price</label>
-                        <input type="text" class="form-control" readonly id="price_rupiah" name="price_rupiah">
-                        <input type="hidden" class="form-control" readonly id="price" name="price">
-                    </div> -->
-
                     <div class="form-group">
                         <label for="price">Total Price</label>
                         <input type="text" readonly class="form-control" id="temp_price">
@@ -120,21 +113,17 @@
         var selling_price = temp_val.split('-')[3];
         document.getElementById("selling_price").value = selling_price;
         document.getElementById("selling_price_rupiah").value = formatRupiah(selling_price.toString());
-        let qty = document.getElementById("qty").value;
 
+        let qty = document.getElementById("qty").value;
         var discount = $('#discount').val();
         var shipping_price = $('#shipping_price').val();
 
-        let rumus = (parseInt(selling_price) * parseInt(qty)) + parseInt(shipping_price) - parseInt(discount);
-        var total = (parseInt(temp) * 10 / 100) + 70000 + parseInt(temp);
+        let total_price_book = (parseInt(selling_price) * parseInt(qty));
+        let persentase = parseInt(total_price_book) - (parseInt(total_price_book) * discount / 100);
+        var temp_price = persentase + parseInt(shipping_price);
 
-        // document.getElementById("price").value = total;
-        // document.getElementById("temp_price").value = "Rp " + formatRupiah(total.toString());
-
-        document.getElementById("price").value = rumus;
-        document.getElementById("temp_price").value = "Rp " + formatRupiah(rumus.toString());
-
-
+        $('#temp_price').val('Rp ' + formatRupiah(String(temp_price)));
+        $('#price').val(temp_price);
     }
 
     var qty = document.getElementById('qty');
@@ -148,10 +137,9 @@
         var discount = $('#discount').val();
         var shipping_price = $('#shipping_price').val();
 
-        // document.getElementById("price").value = total;
-        // document.getElementById("temp_price").value = "Rp " + formatRupiah(total.toString());
+        let persentase = parseInt(rumus) - (parseInt(rumus) * discount / 100);
+        var temp_price = persentase + parseInt(shipping_price);
 
-        var temp_price = rumus + parseInt(shipping_price) - parseInt(discount);
         $('#temp_price').val('Rp ' + formatRupiah(String(temp_price)));
         $('#price').val(temp_price);
     });
@@ -167,7 +155,10 @@
         var qty = $('#qty').val();
         var selling_price = $('#selling_price').val();
         var discount = $('#discount').val();
-        var temp_price = (parseInt(selling_price) * parseInt(qty)) + parseInt(shipping_price.value) - parseInt(discount);
+
+        let total_price_book = (parseInt(selling_price) * parseInt(qty));
+        let persentase = parseInt(total_price_book) - (parseInt(total_price_book) * discount / 100);
+        var temp_price = persentase + parseInt(shipping_price.value);
 
         $('#temp_price').val('Rp ' + formatRupiah(String(temp_price)));
         $('#price').val(temp_price);
@@ -184,7 +175,10 @@
         var qty = $('#qty').val();
         var selling_price = $('#selling_price').val();
         var shipping_price = $('#shipping_price').val();
-        var temp_price = (parseInt(selling_price) * parseInt(qty)) - parseInt(discount.value) + parseInt(shipping_price);
+
+        let total_price_book = (parseInt(selling_price) * parseInt(qty));
+        let persentase = parseInt(total_price_book) - (parseInt(total_price_book) * discount.value / 100);
+        var temp_price = persentase + parseInt(shipping_price);
 
         $('#temp_price').val('Rp ' + formatRupiah(String(temp_price)));
         $('#price').val(temp_price);

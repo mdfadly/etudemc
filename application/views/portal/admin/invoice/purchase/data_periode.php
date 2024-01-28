@@ -45,7 +45,7 @@
         $temp_date2 =  date("F - Y", $enddate2);
         ?>
 
-        <h2 style="font-weight:bold">Online Invoice</h2>
+        <h2 style="font-weight:bold">Invoice</h2>
         <h5>
             <?= $temp_date2 ?>
         </h5>
@@ -66,7 +66,7 @@
                 </a>
                 |
                 <span class="mr-1 pb-2" style="border-bottom:2px solid #62A8D6">
-                    Online Invoice
+                    Invoice
                 </span>
                 |
                 <a href="<?= site_url() ?>portal/C_Admin/data_invoice_parent_summary" class="btn ml-1 mr-1 pl-4 pr-4" style="background-color:#f1f3f8; font-size:12px">

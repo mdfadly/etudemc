@@ -8,7 +8,6 @@
                     <table id="example" class="table table-striped table-white display" style="width:100%">
                         <thead>
                             <tr>
-                                <!-- <th>No.</th> -->
                                 <th>Student Name</th>
                                 <th>Package Range</th>
                                 <th>Status</th>
@@ -45,14 +44,15 @@
                 }
             },
             'columnDefs': [{
-                'targets': [1, 2, 3], // column index (start from 0)
-                'orderable': false, // set orderable false for selected columns
-            },
-            {
+                    'targets': [1, 2, 3], // column index (start from 0)
+                    'orderable': false, // set orderable false for selected columns
+                },
+                {
                     width: '17%',
                     targets: 3,
                     "className": "text-center",
-                }],
+                }
+            ],
             "order": []
         });
     });

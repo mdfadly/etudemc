@@ -32,6 +32,7 @@
     <link rel="stylesheet" href="<?= base_url() ?>assets/plugins/fullcalendar/fullcalendar.min.css" />
 
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/css/select2.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="<?= base_url() ?>assets/css/datepicker.css">
 
     <script src="<?= base_url('assets/js/fontawesome.min.js'); ?>"></script>
     <style>
@@ -186,28 +187,26 @@
                 </div>
                 <div class="sidebar-header">
                     <div class="user-pic">
-                        <?php if (substr($this->session->userdata('id'), 0, 1) == 3) { ?>
+                        <?php if (substr($this->session->userdata('id'), 0, 1) == 1) { ?>
+                            <img class="img-responsive rounded-circle" src="<?= base_url(); ?>assets/img/avatar.png" alt="User picture">
+                        <?php } else if (substr($this->session->userdata('id'), 0, 1) == 3) { ?>
                             <img class="img-responsive rounded-circle" src="<?= base_url(); ?>assets/img/avatar.png" alt="User picture">
                         <?php } else { ?>
-                            <!-- <img class="img-responsive rounded-circle" src="" alt="User picture"> -->
-                            <?php foreach ($teacher as $t) : ?>
-                                <?php if ($t['id_teacher'] == $this->session->userdata('id')) : ?>
-                                    <div class="cover-profile">
-                                        <img class="avatar" src="<?= base_url(); ?>assets/img/pict_guru/<?= $t['pict_teacher'] ?>" alt="User picture">
-                                    </div>
-                                    <!-- <img width="50px" height="50px" class="img-responsive rounded-circle" src="<?= base_url(); ?>assets/img/pict_guru/<?= $t['pict_teacher'] ?>" alt="User picture"> -->
-                                <?php endif; ?>
-                            <?php endforeach; ?>
+                            <div class="cover-profile">
+                                <img class="avatar" src="<?= base_url(); ?>assets/img/pict_guru/<?= $teacher[0]['pict_teacher'] ?>" alt="User picture">
+                            </div>
                         <?php } ?>
                     </div>
                     <div class="user-info">
                         <span class="user-status">&nbsp;</span>
                         <span class="user-name">
                             <strong>
-                                <?php if (substr($this->session->userdata('id'), 0, 1) == 3) { ?>
+                                <?php if (substr($this->session->userdata('id'), 0, 1) == 1) { ?>
+                                    <?= $student[0]['parent_student'] ?>
+                                <?php } else if (substr($this->session->userdata('id'), 0, 1) == 3) { ?>
                                     Hello, Admin
                                 <?php } else { ?>
-                                    <?= $this->session->userdata('name'); ?>
+                                    <?= $teacher[0]['name_teacher'] ?>
                                 <?php } ?>
                             </strong>
                         </span>
@@ -226,6 +225,56 @@
                                 <span>Dashboard</span>
                             </a>
                         </li> -->
+                        <?php if (substr($this->session->userdata('id'), 0, 1) == "1") : ?>
+                            <li>
+                                <a href="<?= site_url() ?>portal/profile-parent/<?= $this->session->userdata('username'); ?>" class="<?php echo $this->uri->segment(2) == 'profile-parent' ? 'active' : '' ?>">
+                                    <i class="fa fa-user"></i>
+                                    <span>Profile</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="<?= site_url() ?>portal/offline-lesson" class="<?php echo $this->uri->segment(2) == 'offline-lesson' ? 'active' : '' ?>">
+                                    <i class="fa fa-graduation-cap"></i>
+                                    <span>Offline Lesson</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="<?= site_url() ?>portal/online-pratical" class="<?php echo $this->uri->segment(2) == 'online-pratical' ? 'active' : '' ?>">
+                                    <i class="fa fa-graduation-cap"></i>
+                                    <span>Online Lesson</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="<?= site_url() ?>portal/online-theory" class="<?php echo $this->uri->segment(2) == 'online-theory' ? 'active' : '' ?>">
+                                    <i class="fa fa-graduation-cap"></i>
+                                    <span>Theory Lesson</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="<?= site_url() ?>portal/order-book" class="<?php echo $this->uri->segment(2) == 'order-book' ? 'active' : '' ?>">
+                                    <i class="fa fa-book-open"></i>
+                                    <span>Order Book</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="<?= site_url() ?>portal/join-event" class="<?php echo $this->uri->segment(2) == 'join-event' ? 'active' : '' ?>">
+                                    <i class="fa fa-graduation-cap"></i>
+                                    <span>Join The Event</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="<?= site_url() ?>portal/repository-student" class="<?php echo $this->uri->segment(2) == 'repository-student' ? 'active' : '' ?>">
+                                    <i class="fa fa-user"></i>
+                                    <span>Repository</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="<?= site_url() ?>portal/invoice-student" class="<?php echo $this->uri->segment(2) == 'invoice-student' ? 'active' : '' ?>">
+                                    <i class="fa fa-credit-card"></i>
+                                    <span>Invoice</span>
+                                </a>
+                            </li>
+                        <?php endif; ?>
                         <?php if (substr($this->session->userdata('id'), 0, 1) == "2") : ?>
                             <li>
                                 <a href="<?= site_url() ?>portal/profile/<?= $this->session->userdata('username') ?>" class="<?php echo $this->uri->segment(2) == 'profile' ? 'active' : '' ?>">
@@ -277,11 +326,10 @@
                             </li>
                         <?php endif; ?>
                         <?php if (substr($this->session->userdata('id'), 0, 1) == "3") : ?>
-
                             <li>
-                                <a href="<?= site_url() ?>portal/data_student" class="<?php echo $this->uri->segment(2) == 'data_student' ? 'active' : '' ?>">
+                                <a href="<?= site_url() ?>portal/data_parent" class="<?= $this->uri->segment(2) == 'data_student' ||  $this->uri->segment(2) == 'data_parent' ? 'active' : '' ?>">
                                     <i class="fa fa-user"></i>
-                                    <span>Data Student</span>
+                                    <span>Data Client</span>
                                 </a>
                             </li>
                             <li>
@@ -333,6 +381,12 @@
                                 </a>
                             </li>
                             <li>
+                                <a href="<?= site_url() ?>portal/discount" class="<?php echo $this->uri->segment(2) == 'discount' ? 'active' : '' ?>">
+                                    <i class="fa fa-dollar-sign"></i>
+                                    <span>Discount Coupons</span>
+                                </a>
+                            </li>
+                            <li>
                                 <a href="<?= site_url() ?>portal/invoice" class="<?php echo $this->uri->segment(2) == 'invoice' ? 'active' : '' ?>">
                                     <i class="fa fa-credit-card"></i>
                                     <span>Invoice</span>
@@ -344,12 +398,7 @@
                                     <span>Fee Report</span>
                                 </a>
                             </li>
-                            <!-- <li>
-                                <a href="<?= site_url() ?>portal/convert" class="<?php echo $this->uri->segment(2) == 'convert' ? 'active' : '' ?>">
-                                    <i class="fa fa-dollar-sign"></i>
-                                    <span>Convert Rate</span>
-                                </a>
-                            </li> -->
+
 
                         <?php endif; ?>
                         <li>

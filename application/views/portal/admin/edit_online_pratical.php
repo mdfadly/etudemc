@@ -156,11 +156,11 @@
                             <input type="text" class="form-control" id="instrument" value="<?= $online_pratical[0]['instrument'] ?>" required name="instrument">
                         </div> -->
                         <!-- <div class="form-group">
-                            <label for="pack_pratical">Pack practical</label>
+                            <label for="pack_pratical">Total Practical Meeting</label>
                             <input type="number" class="form-control" id="pack_pratical" value="<?= $online_pratical[0]['total_pack_practical'] ?>" readonly required name="pack_pratical">
                         </div>
                         <div class="form-group">
-                            <label for="pack_theory">Pack theory</label>
+                            <label for="pack_theory">Total Theory Meeting</label>
                             <input type="number" class="form-control" id="pack_theory" value="<?= $online_pratical[0]['total_pack_theory'] ?>" readonly required name="pack_theory">
                         </div> -->
                         <!-- <div class="form-group">

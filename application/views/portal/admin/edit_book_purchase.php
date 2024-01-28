@@ -38,6 +38,7 @@
                     </div>
                     <div class="form-group">
                         <label for="qty">Qty</label>
+                        <input type="hidden" class="form-control" id="qty_before" required value="<?= $book_purchase[0]['qty'] ?>" name="qty_before">
                         <input type="number" class="form-control" id="qty" required value="<?= $book_purchase[0]['qty'] ?>" name="qty">
                     </div>
                     <div>
@@ -45,7 +46,8 @@
                         <input type="hidden" required class="form-control" id="id_book" value="<?= $book_stock[0]['id_book'] ?>" required name="id_book">
                         <input type="hidden" class="form-control" id="title_stock" required name="title_stock" value="<?= $book_stock[0]['title'] ?>">
                         <input type="hidden" class="form-control" id="publisher_stock" required name="publisher_stock" value="<?= $book_stock[0]['publisher'] ?>">
-                        <input type="hidden" class="form-control" id="qty_stock" required value="<?= (intval($book_stock[0]['qty']) - intval($book_purchase[0]['qty'])) ?>" name="qty_stock">
+                        <input type="hidden" class="form-control" id="qty_stock" required value="<?= (intval($book_stock[0]['qty'])) ?>" name="qty_stock">
+
                         <input type="hidden" class="form-control" id="distributor_stock" required name="distributor_stock" value="<?= $book_stock[0]['distributor'] ?>">
                         <input type="hidden" class="form-control" id="distributor_price_stock" required name="distributor_price_stock" value="<?= $book_stock[0]['distributor_price'] ?>">
                         <input type="hidden" class="form-control" id="selling_price_stock" required name="selling_price_stock" value="<?= $book_stock[0]['selling_price'] ?>">

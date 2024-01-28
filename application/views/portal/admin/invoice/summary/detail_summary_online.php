@@ -46,7 +46,7 @@
                     </div>
                     <div class="col-lg-5 col-12 mt-5">
                         <h4 class="name text-center" style="color:black">
-                            Summary Online Invoice
+                            Summary Invoice
                         </h4>
                     </div>
                 </div>
@@ -87,7 +87,11 @@
                                         <?= $temp_invoice_temp_lesson[$i][2] ?>
                                     </td>
                                     <td class="text-center">
-                                        <?php $tot_fee = $total_lesson_price[$temp_invoice_temp_lesson[$i][0]] ?>
+                                        <?php if (substr($temp_invoice_temp_lesson[$i][0], 0, 6) == 'INV001') { ?>
+                                            <?php $tot_fee = $temp_invoice_temp_lesson[$i][3] - $discount_coupon_offline[$temp_invoice_temp_lesson[$i][0]] ?>
+                                        <?php } else { ?>
+                                            <?php $tot_fee = 0 ?>
+                                        <?php }  ?>
                                         Rp <?= number_format($tot_fee, 0, ',', '.')  ?>
                                     </td>
                                     <td class="text-center">

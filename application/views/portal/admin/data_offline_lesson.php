@@ -24,16 +24,12 @@
                     <table id="example" class="table table-striped table-white display " style="width:100%">
                         <thead>
                             <tr>
-                                <th>No.</th>
                                 <th>ID Student</th>
                                 <th>Student Name</th>
-                                <th>ID Teacher</th>
-                                <th>Teacher Name</th>
-                                <th>Instrument</th>
+                                <th>Pick The Date</th>
+                                <th>Purchase Date</th>
+                                <th>Expired Date</th>
                                 <th>Detail</th>
-                                <!-- <th>Duration</th> -->
-                                <!-- <th>Rate</th> -->
-                                <!-- <th>Edit</th> -->
                             </tr>
                         </thead>
                         <tbody>
@@ -57,16 +53,40 @@
             "processing": true,
             "serverSide": true,
             "ajax": {
-                "url": "<?= site_url('portal/C_Admin/get_ajax_offline_lesson') ?>",
+                "url": "<?= site_url('portal/C_Admin/get_ajax_offline_lesson2') ?>",
                 "type": "POST"
             },
-            "columnDefs": [{
-                'targets': [0, 5, 6], // column index (start from 0)
-                'orderable': false, // set orderable false for selected columns
-            }, {
-                targets:6,
-                "className": "text-center",
-            },],
+            'columnDefs': [{
+                    'targets': [0, 2, 3, 4, 5], // column index (start from 0)
+                    'orderable': false, // set orderable false for selected columns
+                },
+                {
+                    width: '17%',
+                    targets: 0
+                },
+                {
+                    width: '25%',
+                    targets: 1
+                },
+                {
+                    width: '17%',
+                    targets: 2,
+                    "className": "text-center",
+                },
+                {
+                    width: '17%',
+                    targets: 3
+                },
+                {
+                    width: '17%',
+                    targets: 4
+                },
+                {
+                    width: '17%',
+                    targets: 5,
+                    "className": "text-center",
+                },
+            ],
             "order": []
         });
     });

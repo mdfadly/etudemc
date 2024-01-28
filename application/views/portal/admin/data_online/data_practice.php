@@ -54,16 +54,12 @@
                     <table id="example" class="table table-striped table-white display " style="width:100%">
                         <thead>
                             <tr>
-                                <!-- <th>No.</th> -->
                                 <th>ID Student</th>
                                 <th>Student Name</th>
-                                <!-- <th>Theacer Practical Name</th> -->
-                                <!-- <th>Theacer Theory Name</th> -->
                                 <th>Pick The Date</th>
                                 <th>Purchase Date</th>
                                 <th>Expired Date</th>
                                 <th>Detail</th>
-                                <!-- <th>Action</th> -->
                             </tr>
                         </thead>
                         <tbody>

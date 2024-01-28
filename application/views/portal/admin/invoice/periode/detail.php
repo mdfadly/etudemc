@@ -273,7 +273,7 @@
                                                     </div>
 
                                                     <div class="col-lg-2 col-2 mb-2">
-                                                        <a href="<?= site_url() ?>portal/C_Admin/delete_data_other_invoice/<?= $oi['id_other_invoice'] ?>/<?= $this->uri->segment(4) ?>/<?= $ortu[0]['id_parent'] ?>" class="btn btn-danger" onclick="return confirm('are you sure want to delete this data?')">
+                                                        <a href="<?= site_url() ?>portal/C_Admin/delete_data_other_invoice/<?= $oi['id_other_invoice'] ?>/<?= $this->uri->segment(4) ?>/<?= $ortu[0]['id_parent'] ?>" class="btn btn-danger" onclick="return confirm('this data will be deleted. are you sure?')">
                                                             <i class="fa fa-trash"></i>
                                                         </a>
                                                     </div>

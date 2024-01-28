@@ -25,20 +25,21 @@
 
             <div class="col-lg-12 pt-3">
                 <span class="mr-1 pb-2" style="border-bottom:2px solid #62A8D6">
-                    Event List
+                    Student Event
                 </span>
                 |
                 <a href="<?= site_url() ?>portal/event/teacher" class="btn ml-1 mr-1 pl-4 pr-4" style="background-color:#f1f3f8; font-size:12px">
                     Teacher Event
                 </a>
-                |
+                <!-- |
                 <a href="<?= site_url() ?>portal/event/student" class="btn ml-1 pl-4 pr-4" style="background-color:#f1f3f8; font-size:12px">
                     Student Event
-                </a>
+                </a> -->
             </div>
             <div class="col-lg-12 text-lg-right pt-lg-1 pt-3">
                 <a href="<?= site_url() ?>portal/event/add" class="btn btn-primary mr-3">
-                    Add Data
+                    <i class="fa fa-plus mr-2"></i>
+                    Add Event
                 </a>
             </div>
             <div class="col-lg-12 col-12">
@@ -49,10 +50,9 @@
                                 <th>No</th>
                                 <th>Event Name</th>
                                 <th>Event Date</th>
-                                <th>Teacher/Student</th>
-                                <!-- <th>Event Price</th> -->
+                                <th>Event Price</th>
                                 <th>Status</th>
-                                <th>Detail</th>
+                                <th>Participant</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -80,7 +80,7 @@
             "serverSide": true,
 
             "ajax": {
-                "url": "<?= site_url('portal/C_Admin/get_ajax_event') ?>",
+                "url": "<?= site_url('portal/C_Admin/get_ajax_event2') ?>",
                 "type": "POST"
             },
             'columnDefs': [{
@@ -89,7 +89,7 @@
             }, {
                 targets: 5,
                 "className": "text-center",
-            },]
+            }, ]
         });
     });
 </script>

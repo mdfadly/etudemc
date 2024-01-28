@@ -64,7 +64,7 @@
                         </div>
                         <?php if(count($event_child) > 1): ?>
                             <div class="form-group">
-                                <a href="<?= site_url() ?>portal/C_Admin/delete_data_event_detail/<?= $e['id_event'] ?>" class="btn btn-danger" title="Hapus Data Ini" onclick="return confirm('are you sure want to delete this data?')"><i class="fa fa-trash icon-white"></i></a>
+                                <a href="<?= site_url() ?>portal/C_Admin/delete_data_event_detail/<?= $e['id_event'] ?>" class="btn btn-danger" title="Hapus Data Ini" onclick="return confirm('this data will be deleted. are you sure?')"><i class="fa fa-trash icon-white"></i></a>
                             </div>
                         <?php endif; ?>
                         <hr>

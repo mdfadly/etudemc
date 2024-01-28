@@ -1,3 +1,8 @@
+<style>
+    .hiden {
+        display: none;
+    }
+</style>
 <main class="page-content">
     <div class="container-fluid">
         <div class="row">
@@ -21,32 +26,31 @@
         </div>
 
         <hr>
-        <h2 style="font-weight:bold">Add Data Offline Lesson</h2>
+        <h2 style="font-weight:bold">Buy Package</h2>
         <div class="row">
             <div class="col-lg-12 col-12 mt-4">
-                <form action="<?= site_url('portal/C_Admin/add_data_offline_lesson') ?>" method="POST">
+                <form action="<?= site_url('portal/C_Admin/add_data_offline_lesson2') ?>" method="POST">
+                    <h5 style="font-weight:bold">Data Student</h5>
+                    <hr>
                     <div class="form-group">
-                        <label for="id_teacher">Teacher Name</label><br>
-                        <select class="form-control select-form" style="width:100%;" name="id_teacher">
-                            <option>Choose Teacher</option>
-                            <?php foreach ($teacher as $t) : ?>
-                                <option value="<?= $t['id_teacher'] ?>"><?= $t['name_teacher'] ?></option>
-                            <?php endforeach; ?>
-                        </select>
+                        <label for="">Student ID</label>
+                        <input type="text" class="form-control" readonly id="temp_id_student" name="">
                     </div>
                     <div class="form-group">
-                        <label for="id_student">Student Name</label><br>
-                        <select class="form-control select-form" style="width:100%;" name="id_student">
-                            <option>Choose Student</option>
+                        <label for="id_student">Student Name</label>
+                        <select class="form-control select-form" name="id_student" onchange="studentIdFunc(event)">
+                            <option>--- Choose Student ---</option>
                             <?php foreach ($student as $t) : ?>
                                 <option value="<?= $t['id_student'] ?>"><?= $t['name_student'] ?></option>
                             <?php endforeach; ?>
                         </select>
                     </div>
-                    <!--<div class="form-group">-->
-                    <!--    <label for="instrument">Instrument</label>-->
-                    <!--    <input type="text" class="form-control" id="instrument" required name="instrument">-->
-                    <!--</div>-->
+                    <div class="form-group">
+                        <label for="id_paket">Name of Package</label>
+                        <select class="form-control select-form" id="paket" name="id_paket" onchange="paketIdFunc(event)">
+                            <option>--- Choose Package ---</option>
+                        </select>
+                    </div>
                     <div class="form-group">
                         <label for="instrument">Instrument</label>
                         <select class="form-control" style="width:100%;" name="instrument" id="instrument" onchange="instrumentFunc(event)">
@@ -62,49 +66,79 @@
 
                         </div>
                     </div>
+                    <br />
+                    <h5 style="font-weight:bold">Data Teacher</h5>
+                    <hr>
                     <div class="form-group">
-                        <label for="id_paket">Name of Package</label>
-                        <select class="form-control select-form" id="paket" name="id_paket" onchange="paketIdFunc(event)">
-                            <option>Choose package</option>
-                            <?php foreach ($paket as $t) : ?>
-                                <option value="<?= $t['id'] ?>&<?= $t['price_idr'] ?>&<?= $t['price_dollar'] ?>&<?= $t['price_euro'] ?>&<?= $t['duration'] ?>"><?= $t['name'] ?></option>
+                        <label for="id_teacher">Teacher Name</label><br>
+                        <select class="form-control select-form" style="width:100%;" name="id_teacher">
+                            <option>--- Choose Teacher ---</option>
+                            <?php foreach ($teacher as $t) : ?>
+                                <option value="<?= $t['id_teacher'] ?>"><?= $t['name_teacher'] ?></option>
                             <?php endforeach; ?>
                         </select>
                     </div>
-                    <div class="form-group">
+                    <div class="form-group hiden">
                         <label for="">Duration</label>
-                        <input type="text" class="form-control" readonly id="duration_temp">
-                        <input type="hidden" class="form-control" readonly id="duration" name="duration">
+                        <input type="text" class="form-control" readonly id="duration" name="duration">
                     </div>
                     <div class="form-group">
-                        <label for="rate">Rate</label>
+                        <label for="pack_theory">Teacher Fee Percentage</label>
+                        <input type="number" class="form-control" id="teacher_percentage" value="0" required name="teacher_percentage">
+                    </div>
+                    <div class="form-group">
+                        <label for="total_discount_rate">Potongan Fee Percentage</label>
+                        <input type="number" class="form-control" id="total_discount_rate" value="0" required name="total_discount_rate">
+                        <!-- <select class="form-control select-form" style="width:100%;" name="total_discount_rate">
+                            <option>--- Pilihan Potongan ---</option>
+                            <option value="0">Tidak ada potongan</option>
+                            <option value="4">4 potongan</option>
+                            <option value="10">10 potongan</option>
+                        </select> -->
+                    </div>
+
+                    <br />
+                    <h5 style="font-weight:bold">Data Package</h5>
+                    <hr>
+                    <input type="hidden" class="form-control" readonly id="temp_paket" name="temp_paket">
+                    <input type="hidden" class="form-control" value="0" readonly id="temp_harga_paket" name="temp_harga_paket">
+                    <div>
+                        <div class="form-group">
+                            <label for="created_at">Purchase Date</label>
+                            <input type="date" class="form-control" id="created_at" required name="created_at">
+                        </div>
+                    </div>
+
+                    <div id="check_practical_pack" class="form-group">
+                        <label style="font-weight:bold" for="pack_pratical">Detail of Package</label>
+                        <br>
+                        Total Package
+                        <input type="number" class="form-control" id="total_package" required name="total_package">
+                    </div>
+                    <div class="form-group">
+                        <label for="">Select Currency:</label>
+                        <select class="form-control" style="width:100%;" name="rate_dollar" id="rate_dollar">
+                            <option value="1">IDR</option>
+                            <option value="2">$</option>
+                            <option value="3">€</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="temp_rate">Rate</label>
+                        <input type="text" class="form-control" readonly id="temp_rate_rupiah" name="temp_rate_rupiah">
+                        <input type="hidden" class="form-control" readonly id="temp_rate" name="rate_package">
+                    </div>
+                    <div class="form-group">
+                        <label for="discount">Discount</label>
+                        <input type="text" class="form-control" id="discount_rupiah" name="discount_rupiah" value="0">
+                        <input type="hidden" class="form-control" id="discount" name="discount" value="0">
+                        <small>Percentage (%)</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="rate">Total Price</label>
                         <input type="text" class="form-control" readonly id="rate_rupiah" name="rate_rupiah">
                         <input type="hidden" class="form-control" readonly id="rate" name="rate">
                     </div>
-                    <!-- <div class="form-group">
-                        <label for="duration">Duration</label>
-                        <select class="form-control" name="duration">
-                            <option value="30'">30'</option>
-                            <option value="45'">45'</option>
-                            <option value="60'">60'</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="rate">Rate</label>
-                        <select class="form-control" name="rate" id="rate" onchange="rateFunc(event)">
-                            <option value="350000">Rp350.000</option>
-                            <option value="400000">Rp400.000</option>
-                            <option value="450000">Rp450.000</option>
-                            <option value="500000">Rp500.000</option>
-                            <option value="550000">Rp550.000</option>
-                            <option value="Others2">Others</option>
-                        </select>
-                        <div id="inputOthers2">
-
-                        </div>
-                    </div> -->
-                    <!-- <input type="text" class="form-control" id="rupiah" />
-                    <input type="hidden" class="form-control" id="rate" name="rate"> -->
                     <button type="submit" class="btn btn-primary btn-block">Submit</button>
                 </form>
             </div>
@@ -117,23 +151,131 @@
         $('.select-form').select2();
     });
 
+    function studentIdFunc(e) {
+        var temp_val = e.target.value;
+        document.getElementById("temp_id_student").value = temp_val;
+        $.ajax({
+            url: "<?= base_url('portal/C_Admin/getDataPaket') ?>",
+            dataType: "JSON",
+            type: "POST",
+            data: {
+                'id_student': temp_val,
+                'tipe': "Offline",
+            },
+            success: function(data) {
+                console.log(data);
+                let html = "<option>--- Choose Package ---</option>";
+                if (data.length > 0) {
+                    paketFunction(`${data[0].id_paket}&${data[0].price_idr}&${data[0].price_dollar}&${data[0].price_euro}&${data[0].duration}`);
+                    html = "";
+                }
+                for (let i = 0; i < data.length; i++) {
+                    const element = data[i];
+                    html += `<option value="${data[i].id_paket}&${data[i].price_idr}&${data[i].price_dollar}&${data[i].price_euro}&${data[i].duration}">${data[i].name_paket}</option>`
+                }
+                $('#paket').html(html);
+            }
+        });
+        $.ajax({
+            url: "<?= base_url('portal/C_Admin/getDataFeePercentage') ?>",
+            dataType: "JSON",
+            type: "POST",
+            data: {
+                'id_student': temp_val,
+            },
+            success: function(data) {
+                console.log(data)
+                document.getElementById("teacher_percentage").value = data;
+            }
+        });
+    }
+
+    function paketFunction(e) {
+        var temp_val = e;
+        console.log(temp_val);
+
+        //reset 0
+        var reset = 0;
+        document.getElementById("duration").value = "";
+        document.getElementById("total_package").value = reset;
+        document.getElementById("temp_rate_rupiah").value = formatRupiah(String(reset));
+        document.getElementById("temp_rate").value = reset;
+        document.getElementById("temp_harga_paket").value = reset;
+        document.getElementById('discount').value = reset;
+        document.getElementById("rate_rupiah").value = formatRupiah(String(reset));
+        document.getElementById("rate").value = reset;
+
+        console.log(temp_val.split('&')[4])
+        let durationTemp = "-";
+        if (temp_val.split('&')[4] !== 'null') {
+            durationTemp = temp_val.split('&')[4] + "'";
+        }
+        document.getElementById("duration").value = durationTemp;
+        document.getElementById("temp_paket").value = temp_val.split('&')[0];
+        var jmlhPaket = document.getElementById("total_package").value;
+
+        var temp = "";
+        var temp_harga_paket = '';
+        if (document.getElementById("rate_dollar").value == 1) {
+            temp = temp_val.split('&')[1] * jmlhPaket;
+            temp_harga_paket = temp_val.split('&')[1];
+        } else if (document.getElementById("rate_dollar").value == 2) {
+            temp = temp_val.split('&')[2] * jmlhPaket;
+            temp_harga_paket = temp_val.split('&')[2];
+        } else {
+            temp = temp_val.split('&')[3] * jmlhPaket;
+            temp_harga_paket = temp_val.split('&')[3];
+        }
+        var discount = document.getElementById('discount').value;
+        document.getElementById("temp_rate_rupiah").value = formatRupiah(String(temp));
+        document.getElementById("temp_rate").value = temp;
+        document.getElementById("temp_harga_paket").value = temp_harga_paket;
+        document.getElementById("rate_rupiah").value = formatRupiah(String(temp - discount));
+        document.getElementById("rate").value = temp - discount;
+    }
+
     function paketIdFunc(e) {
         var temp_val = e.target.value;
         console.log(temp_val);
 
+        //reset 0
         var reset = 0;
-        document.getElementById("duration").value = reset;
-        document.getElementById("duration_temp").value = reset;
+        document.getElementById("duration").value = "";
+        document.getElementById("total_package").value = reset;
+        document.getElementById("temp_rate_rupiah").value = formatRupiah(String(reset));
+        document.getElementById("temp_rate").value = reset;
+        document.getElementById("temp_harga_paket").value = reset;
+        document.getElementById('discount').value = reset;
         document.getElementById("rate_rupiah").value = formatRupiah(String(reset));
         document.getElementById("rate").value = reset;
 
-        var temp_harga_paket = temp_val.split('&')[1];
-        var duration = temp_val.split('&')[4];
+        console.log(temp_val.split('&')[4])
+        let durationTemp = "-";
+        if (temp_val.split('&')[4] !== 'null') {
+            durationTemp = temp_val.split('&')[4] + "'";
+        }
+        document.getElementById("duration").value = durationTemp;
+        document.getElementById("temp_paket").value = temp_val.split('&')[0];
+        var jmlhPaket = document.getElementById("total_package").value;
 
-        document.getElementById("duration").value = duration;
-        document.getElementById("duration_temp").value = duration + "'";
-        document.getElementById("rate_rupiah").value = formatRupiah(String(temp_harga_paket));
-        document.getElementById("rate").value = temp_harga_paket;
+        var temp = "";
+        var temp_harga_paket = '';
+        if (document.getElementById("rate_dollar").value == 1) {
+            temp = temp_val.split('&')[1] * jmlhPaket;
+            temp_harga_paket = temp_val.split('&')[1];
+        } else if (document.getElementById("rate_dollar").value == 2) {
+            temp = temp_val.split('&')[2] * jmlhPaket;
+            temp_harga_paket = temp_val.split('&')[2];
+        } else {
+            temp = temp_val.split('&')[3] * jmlhPaket;
+            temp_harga_paket = temp_val.split('&')[3];
+        }
+        var discount = document.getElementById('discount').value;
+        document.getElementById("temp_rate_rupiah").value = formatRupiah(String(temp));
+        document.getElementById("temp_rate").value = temp;
+        document.getElementById("temp_harga_paket").value = temp_harga_paket;
+        document.getElementById("rate_rupiah").value = formatRupiah(String(temp - discount));
+        document.getElementById("rate").value = temp - discount;
     }
 
     function instrumentFunc(e) {
@@ -147,16 +289,35 @@
         }
     }
 
-    function rateFunc(e) {
-        var temp_val = e.target.value;
-        console.log(temp_val);
-        if (temp_val === 'Others2') {
-            var new_input = `<input type="text" class="form-control" placeholder="input other rate" id="others2" required name="others2">`;
-            $('#inputOthers2').append(new_input);
-        } else {
-            $('#others2').remove();
-        }
-    }
+    var total_package = document.getElementById('total_package');
+    total_package.addEventListener('keyup', function(e) {
+        var persentase = document.getElementById('discount').value;
+        var temp_harga_paket = document.getElementById("temp_harga_paket").value;
+
+        let totPaket = temp_harga_paket * total_package.value;
+        let discount = (totPaket * persentase / 100);
+
+        document.getElementById("temp_rate_rupiah").value = formatRupiah(String(totPaket));
+        document.getElementById("temp_rate").value = totPaket;
+        document.getElementById("rate_rupiah").value = formatRupiah(String(totPaket - discount));
+        document.getElementById("rate").value = totPaket - discount;
+
+    });
+
+    var discount_rupiah = document.getElementById('discount_rupiah');
+    var discount = document.getElementById('discount');
+    var temp_rate = document.getElementById('temp_rate');
+    var valuee2 = '';
+    discount_rupiah.addEventListener('keyup', function(e) {
+        discount_rupiah.value = formatRupiah(this.value);
+        valuee2 = discount_rupiah.value;
+        discount.value = valuee2.split('.').join("");
+
+        let persentase = temp_rate.value - (temp_rate.value * discount.value / 100);
+
+        document.getElementById("rate_rupiah").value = formatRupiah(String(persentase));
+        document.getElementById("rate").value = persentase;
+    });
 
     function formatRupiah(angka, prefix) {
         var number_string = angka.replace(/[^,\d]/g, '').toString(),

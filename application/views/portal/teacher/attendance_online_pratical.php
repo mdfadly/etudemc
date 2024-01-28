@@ -13,23 +13,23 @@
         border: 1px solid #eee;
         border-left-width: 5px;
         border-radius: 3px;
+    }
 
-        h4 {
-            margin-top: 0;
-            margin-bottom: 5px;
-        }
+    .callout h4 {
+        margin-top: 0;
+        margin-bottom: 5px;
+    }
 
-        p:last-child {
-            margin-bottom: 0;
-        }
+    .callout p:last-child {
+        margin-bottom: 0;
+    }
 
-        code {
-            border-radius: 3px;
-        }
+    .callout code {
+        border-radius: 3px;
+    }
 
-        &+.bs-callout {
-            margin-top: -5px;
-        }
+    .callout.bs-callout {
+        margin-top: -5px;
     }
 
     .callout-primary {
@@ -91,10 +91,10 @@
                     </div>
                     <div class="pt-2" id="counter_pack">
                         <?php if ($jenis == 1) : ?>
-                            Practical lesson = <span class="badge badge-primary"> <?= intval($pack_online[0]['total_pack_practical']) - intval(count($count_pratical)) ?> lesson</span>
+                            Lesson Package : <span class="badge badge-primary"> <?= round((intval($pack_online[0]['total_pack_practical']) - intval(count($count_pratical))) / 2) ?> package (<?= intval($pack_online[0]['total_pack_practical']) - intval(count($count_pratical)) ?> meeting)</span>
                             <input type="hidden" id="countPractical" name="countPractical" value="<?= intval($pack_online[0]['total_pack_practical']) - intval(count($count_pratical)) ?>">
                         <?php else : ?>
-                            Theory Lesson = <span class="badge badge-primary"> <?= intval($pack_online[0]['total_pack_theory']) - intval(count($count_theory)) ?> lesson</span>
+                            Lesson Package : <span class="badge badge-primary"> <?= intval($pack_online[0]['total_pack_theory']) - intval(count($count_theory)) ?> package (<?= intval($pack_online[0]['total_pack_theory']) - intval(count($count_theory)) ?> meeting)</span>
                             <input type="hidden" id="countTheory" name="countTheory" value="<?= intval($pack_online[0]['total_pack_theory']) - intval(count($count_theory)) ?>">
                         <?php endif; ?>
                         <input type="hidden" id="countCancel" name="countCancel" value="0">
@@ -103,12 +103,12 @@
             </div>
             <div class="col-lg-12 border p-3" style="font-size:17px;">
                 <?php if ($jenis == 1) : ?>
-                    <span class="mr-4" style="color:#ffc93c">
+                    <span class="mr-4" style="color:#67E543">
                         <i class="fa fa-square"></i>
                         Practical
                     </span>
                 <?php else : ?>
-                    <span class="mr-4" style="color:#056676">
+                    <span class="mr-4" style="color:#0676BD">
                         <i class="fa fa-square"></i>
                         Theory
                     </span>
@@ -159,7 +159,8 @@
                             <input type="hidden" class="form-control" name="id_schedule_online" id="id_schedule_online_back" aria-describedby="date_form">
                             <input type="hidden" class="form-control" name="date" id="date_back" aria-describedby="date_form">
                             <h5 class="col-lg-12">Please input date to change the schedule </h5>
-                            <input type="date" class="form-control" name="date_reschedule" id="date_reschedule" value="" aria-describedby="date_form" required>
+                            <input type="text" class="form-control datepicker" name="date_reschedule" id="date_reschedule" value="" aria-describedby="date_form" required>
+                            <small class="form-text" style="color:red; font-weight:bold">Choose Date</small>
                             <br>
                             <button id="btn_cancel_attendance" class="btn btn-warning text-white col-lg-5 col-5">Submit</button>
                         </div>
@@ -199,7 +200,8 @@
                             <input type="hidden" class="form-control" name="id_schedule_online" id="id_schedule_online_back" aria-describedby="date_form">
                             <input type="hidden" class="form-control" name="date" id="date_back" aria-describedby="date_form">
                             <h5 class="col-lg-12">Please input date to change the schedule </h5>
-                            <input type="date" class="form-control" name="date_reschedule" id="date_reschedule_nolesson" value="" aria-describedby="date_form" required>
+                            <input type="text" class="form-control datepicker" name="date_reschedule" id="date_reschedule_nolesson" value="" aria-describedby="date_form" required>
+                            <small class="form-text" style="color:red; font-weight:bold">Choose Date</small>
                             <br>
                             <button id="btn_cancel_nolesson" class="btn btn-warning text-white col-lg-5 col-5">Submit</button>
                         </div>
@@ -213,9 +215,18 @@
 <script src="<?php echo base_url() ?>assets/plugins/fullcalendar/lib/moment.min.js"></script>
 <script src="<?php echo base_url() ?>assets/plugins/fullcalendar/fullcalendar.min.js"></script>
 <script src="<?php echo base_url() ?>assets/plugins/fullcalendar/gcal.js"></script>
+<script src="<?= base_url('assets/js/bootstrap-datepicker.js') ?>"></script>
 <script>
+    $(".datepicker").datepicker({
+        weekStart: 1,
+        format: 'yyyy-mm-dd',
+        autoclose: true,
+        todayHighlight: true,
+    });
     $(document).ready(function() {
         cekPackage();
+        $(".next").html('<i class="fa fa-arrow-right"></i>');
+        $(".prev").html('<i class="fa fa-arrow-left"></i>');
     });
 
     function cekPackage(today) {
@@ -235,11 +246,6 @@
 </script>
 <script>
     var calendar = $('#calendar').fullCalendar({
-        <?php
-        $startdate = strtotime(substr($pack_online[0]['created_at'], 0, 10));
-        $enddate = strtotime("+5 months", $startdate);
-        $temp_date =  date("Y-m-d", $enddate);
-        ?>
         height: 650,
         firstDay: 1,
         dayMaxEvents: 1,
@@ -268,16 +274,29 @@
         },
         eventRender: function(event, element, view) {
             var dateString = event.start.format("YYYY-MM-DD");
-            if (event.title.substr(0, 2) == "Re") {
-                if (event.jenis == 1) {
+            if (event.title.substr(0, 2) == "No") {
+                $(view.el[0]).find('.fc-day[data-date=' + dateString + ']').css({
+                    "background-color": "#D0CAB2",
+                    "color": "white",
+                });
+            }
+            if (event.status == 3) {
+                if (event.title.substr(0, 2) == "Re") {
+                    if (event.jenis == 1) {
+                        $(view.el[0]).find('.fc-day[data-date=' + dateString + ']').css({
+                            "background-color": "#67E543",
+                            "color": "white",
+                        });
+                    }
+                    if (event.jenis == 2) {
+                        $(view.el[0]).find('.fc-day[data-date=' + dateString + ']').css({
+                            "background-color": "#0D99FF",
+                            "color": "white",
+                        });
+                    }
+                } else {
                     $(view.el[0]).find('.fc-day[data-date=' + dateString + ']').css({
-                        "background-color": "#fddb3a",
-                        "color": "white",
-                    });
-                }
-                if (event.jenis == 2) {
-                    $(view.el[0]).find('.fc-day[data-date=' + dateString + ']').css({
-                        "background-color": "#5eaaa8",
+                        "background-color": "#ff4b5c",
                         "color": "white",
                     });
                 }
@@ -286,13 +305,13 @@
                 if (event.jenis == 1) {
                     if (event.status == 1) {
                         $(view.el[0]).find('.fc-day[data-date=' + dateString + ']').css({
-                            "background-color": "#f0a500",
+                            "background-color": "#43E514",
                             "color": "white",
                         });
                     }
                     if (event.status == 2 || event.status == 4) {
                         $(view.el[0]).find('.fc-day[data-date=' + dateString + ']').css({
-                            "background-color": "#fddb3a",
+                            "background-color": "#67E543",
                             "color": "white",
                         });
                     }
@@ -303,21 +322,26 @@
                 if (event.jenis == 2) {
                     if (event.status == 1) {
                         $(view.el[0]).find('.fc-day[data-date=' + dateString + ']').css({
-                            "background-color": "#056676",
+                            "background-color": "#0676BD",
                             "color": "white",
                         });
                     }
                     if (event.status == 2 || event.status == 4) {
                         $(view.el[0]).find('.fc-day[data-date=' + dateString + ']').css({
-                            "background-color": "#5eaaa8",
+                            "background-color": "#0D99FF",
                             "color": "white",
                         });
                     }
-
                     $(view.el[0]).find('.fc-day-top[data-date=' + dateString + ']').css({
                         "color": "white"
                     });
                 }
+            }
+            if (event.status == 5) {
+                $(view.el[0]).find('.fc-day[data-date=' + dateString + ']').css({
+                    "background-color": "#ff4b5c",
+                    "color": "white",
+                });
             }
         },
         eventClick: function(event, jsEvent, view) {
@@ -429,7 +453,6 @@
                         if ('<?= $f['status_approved'] ?>' === '1') {
                             alert("Can't add, fee report has been approved!");
                         } else {
-                            // alert("Ada tanggalan");
                             updateData();
                             document.getElementById("id_schedule_online_update").value = "";
                             $('#calendarModalUpdate').modal('hide');
@@ -437,13 +460,11 @@
                     }
                 <?php endforeach ?>
             } else {
-                // alert("baru");
                 updateData();
                 document.getElementById("id_schedule_online_update").value = "";
                 $('#calendarModalUpdate').modal('hide');
             }
         <?php else : ?>
-            // alert("Jika baru");
             updateData();
             document.getElementById("id_schedule_online_update").value = "";
             $('#calendarModalUpdate').modal('hide');
@@ -672,9 +693,9 @@
         var price = "<?= $pack_online[0]['price_idr_paket'] ?>";
         if (<?= $pack_online[0]['status_pack_practical'] ?> === 1 && <?= $pack_online[0]['status_pack_theory'] ?> === 1) {
             price = price - 100000;
-        }
-        if (<?= $jenis ?> === 2) {
-            price = 100000;
+            if (<?= $jenis ?> === 2) {
+                price = 100000;
+            }
         }
         var paket = "<?= $pack_online[0]['paket'] ?>";
         var teacher_percentage = "<?= $pack_online[0]['teacher_percentage'] ?>";
@@ -686,6 +707,9 @@
             price = "<?= $pack_online[0]['price_dollar'] ?>";
         }
         var is_new = "<?= $pack_online[0]['is_new'] ?>";
+        const potongan = <?= $pack_online[0]['total_discount_rate'] ?>;
+        const price_paket_theory = <?= $pack_online[0]['price_paket_theory'] ?>;
+        const price_paket_pratical = <?= $pack_online[0]['price_paket_pratical'] ?>;
 
         $.ajax({
             url: "<?= base_url('portal/C_Teacher/update_schedule_package') ?>",
@@ -702,6 +726,9 @@
                 'paket': paket,
                 'teacher_percentage': teacher_percentage,
                 'is_new': is_new,
+                'potongan': potongan,
+                'price_paket_theory': price_paket_theory,
+                'price_paket_pratical': price_paket_pratical,
             },
             success: function(data) {
                 calendar.fullCalendar('refetchEvents');
@@ -790,9 +817,9 @@
         var price = "<?= $pack_online[0]['price_idr_paket'] ?>";
         if (<?= $pack_online[0]['status_pack_practical'] ?> === 1 && <?= $pack_online[0]['status_pack_theory'] ?> === 1) {
             price = price - 100000;
-        }
-        if (<?= $jenis ?> === 2) {
-            price = 100000;
+            if (<?= $jenis ?> === 2) {
+                price = 100000;
+            }
         }
         var paket = "<?= $pack_online[0]['paket'] ?>";
         var id_list_pack = "<?= $pack_online[0]['id_list_pack'] ?>";
@@ -805,6 +832,9 @@
             price = "<?= $pack_online[0]['price_dollar'] ?>";
         }
         var is_new = "<?= $pack_online[0]['is_new'] ?>";
+        const potongan = <?= $pack_online[0]['total_discount_rate'] ?>;
+        const price_paket_theory = <?= $pack_online[0]['price_paket_theory'] ?>;
+        const price_paket_pratical = <?= $pack_online[0]['price_paket_pratical'] ?>;
 
         $.ajax({
             url: "<?= base_url('portal/C_Teacher/reschedule_package') ?>",
@@ -820,6 +850,9 @@
                 'id_list_pack': id_list_pack,
                 'teacher_percentage': teacher_percentage,
                 'is_new': is_new,
+                'potongan': potongan,
+                'price_paket_theory': price_paket_theory,
+                'price_paket_pratical': price_paket_pratical,
             },
             success: function(data) {
                 calendar.fullCalendar('refetchResources');
@@ -838,9 +871,9 @@
         var price = "<?= $pack_online[0]['price_idr_paket'] ?>";
         if (<?= $pack_online[0]['status_pack_practical'] ?> === 1 && <?= $pack_online[0]['status_pack_theory'] ?> === 1) {
             price = price - 100000;
-        }
-        if (<?= $jenis ?> === 2) {
-            price = 100000;
+            if (<?= $jenis ?> === 2) {
+                price = 100000;
+            }
         }
         var paket = "<?= $pack_online[0]['paket'] ?>";
         var id_list_pack = "<?= $pack_online[0]['id_list_pack'] ?>";
@@ -853,6 +886,9 @@
             price = "<?= $pack_online[0]['price_dollar'] ?>";
         }
         var is_new = "<?= $pack_online[0]['is_new'] ?>";
+        const potongan = <?= $pack_online[0]['total_discount_rate'] ?>;
+        const price_paket_theory = <?= $pack_online[0]['price_paket_theory'] ?>;
+        const price_paket_pratical = <?= $pack_online[0]['price_paket_pratical'] ?>;
 
         $.ajax({
             url: "<?= base_url('portal/C_Teacher/reschedule_package') ?>",
@@ -868,6 +904,9 @@
                 'id_list_pack': id_list_pack,
                 'teacher_percentage': teacher_percentage,
                 'is_new': is_new,
+                'potongan': potongan,
+                'price_paket_theory': price_paket_theory,
+                'price_paket_pratical': price_paket_pratical,
             },
             success: function(data) {
                 calendar.fullCalendar('refetchResources');

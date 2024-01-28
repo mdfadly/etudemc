@@ -28,17 +28,25 @@
     <link rel="stylesheet" href="<?= base_url() ?>assets/plugins/fullcalendar/fullcalendar.min.css" />
 
     <script src="<?= base_url('assets/js/fontawesome.min.js'); ?>"></script>
+    <style>
+        @media only screen and (orientation : portrait) {
+            body {
+                -webkit-transform: scale(0.85);
+            }
+        }
+    </style>
+    <style>
+        @media only screen and (orientation : landscape) {
+            body {
+                -webkit-transform: scale(0.95);
+            }
+        }
+    </style>
 </head>
 
 <body>
     <div class="container mt-5 mb-5">
         <div class="card">
-            <!-- <div class="card-header">
-                Fee Report
-                <strong>01/01/01/2018</strong>
-                <span class="float-right"> <strong>Status:</strong> Pending</span>
-
-            </div> -->
             <div class="card-body">
                 <div class="row p-4">
                     <div class="col-lg-7 col-12">
@@ -271,20 +279,23 @@
                                     <td class="text-center text-danger" style="font-weight:bold">
                                         <?php if ($temp_id_student_online_temp[$i][5] == 1) : ?>
                                             <?php if ($temp_id_student_online_temp[$i][4] == 50) : ?>
-                                                <?= ($tipe_rate50_paket_pratical_before[$temp_id_student_online_temp[$i][7]] % 2) == 1 ? "-1" : ""   ?>
+                                                <?= ($tipe_rate50_paket_pratical_before[$temp_id_student_online_temp[$i][7]] % 2) == 1 ? "1" : ""   ?>
                                             <?php endif ?>
                                             <?php if ($temp_id_student_online_temp[$i][4] == 70) : ?>
-                                                <?= ($tipe_rate_paket_pratical_before[$temp_id_student_online_temp[$i][7]] % 2) == 1 ? "-1" : ""   ?>
+                                                <?= ($tipe_rate_paket_pratical_before[$temp_id_student_online_temp[$i][7]] % 2) == 1 ? "1" : ""   ?>
                                             <?php endif ?>
                                             <?php if ($temp_id_student_online_temp[$i][4] == 80) : ?>
-                                                <?= ($tipe_rate_paket_pratical_before[$temp_id_student_online_temp[$i][7]] % 2) == 1 ? "-1" : ""   ?>
+                                                <?= ($tipe_rate_paket_pratical_before[$temp_id_student_online_temp[$i][7]] % 2) == 1 ? "1" : ""   ?>
                                             <?php endif ?>
                                         <?php endif ?>
                                     </td>
                                     <td class="text-center text-danger" style="font-weight:bold">
                                         <?php if ($temp_id_student_online_temp[$i][5] == 1) : ?>
+                                            <?php $modulo_temp_before = $tipe_rate50_paket_pratical_before[$temp_id_student_online_temp[$i][7]] % 2 ?>
                                             <?php if ($temp_id_student_online_temp[$i][4] == 50) : ?>
-                                                <?php if (($tipe_rate50_paket_pratical_before[$temp_id_student_online_temp[$i][7]] + $tipe_rate50_paket_pratical[$temp_id_student_online_temp[$i][7]]) == 8 && $tipe_rate50_paket_pratical[$temp_id_student_online_temp[$i][7]] == 1) : ?>
+                                                <?php if ($modulo_temp_before == 1) : ?>
+                                                    <?php $kurang_before = $tipe_rate50_paket_pratical[$temp_id_student_online_temp[$i][7]] - 1 ?>
+                                                    <?= ($kurang_before % 2) == 1 ? "-1" : ""   ?>
                                                 <?php else : ?>
                                                     <?= ($tipe_rate50_paket_pratical[$temp_id_student_online_temp[$i][7]] % 2) == 1 ? "-1" : ""   ?>
                                                 <?php endif ?>
@@ -298,7 +309,7 @@
                                         <?php endif ?>
                                     </td>
                                     <td class="text-center">
-                                        <?php $total_fee_online = $temp_id_student_online_temp[$i][3] ?>
+                                        <?php $total_fee_online = $temp_id_student_online_temp[$i][9] ?>
                                         <?= "Rp " . number_format($total_fee_online, 0, ',', '.'); ?>
                                     </td>
                                     <td class="text-center">
@@ -453,7 +464,7 @@
                                         <?= $total_pack_offline ?>
                                     </td>
                                     <td class="text-center">
-                                        <?php $total_fee_offline = $temp_id_student_offline_lesson_temp[$i][3] ?>
+                                        <?php $total_fee_offline = $temp_id_student_offline_lesson_temp[$i][11] ?>
                                         <?= "Rp " . number_format($total_fee_offline, 0, ',', '.'); ?>
                                     </td>
                                     <td class="text-center">
@@ -533,10 +544,6 @@
                                         <?php $tot_other_invoice += $event[$i]['price'] ?>
                                         <?php $total_rate_event += $event[$i]['price'] ?>
                                         <?= "Rp " . number_format($event[$i]['price'], 0, ',', '.'); ?>
-                                        <!-- <?php if (number_format($event[$i]['discount'], 0, ',', '.') > 0) : ?>
-                                            <br>
-                                            <small style="color:red">(Discount <?= $currency . " " . number_format($event[$i]['discount'], 0, ',', '.'); ?>)</small>
-                                        <?php endif; ?> -->
                                     </td>
                                 </tr>
                             <?php endfor; ?>
@@ -599,8 +606,8 @@
                                                 Event - <?= $temp_other_discount_event[$i][4] ?>
                                             </td>
                                             <td class="text-center">
-                                                <?php $tot_other_invoice += -($temp_other_discount_event[$i][2]) ?>
-                                                <?php $teacher_fee_others_category += -($temp_other_discount_event[$i][2]) ?>
+                                                <?php $tot_other_invoice += - ($temp_other_discount_event[$i][2]) ?>
+                                                <?php $teacher_fee_others_category += - ($temp_other_discount_event[$i][2]) ?>
                                                 <span class="text-danger" style="font-weight:bold">
                                                     - Rp <?= number_format($temp_other_discount_event[$i][2], 0, ',', '.'); ?>
                                                 </span>
@@ -640,17 +647,17 @@
                                                     </select>
                                                 <?php else : ?>
                                                     <?php switch ($oi['other_category']) {
-                                                                        case "1":
-                                                                            echo "Bonus";
-                                                                            break;
-                                                                        case "2":
-                                                                            echo "Cashback";
-                                                                            break;
-                                                                        case "3":
-                                                                            echo "Potongan";
-                                                                            break;
-                                                                    } ?>
-                                                    <?php endif; ?>
+                                                        case "1":
+                                                            echo "Bonus";
+                                                            break;
+                                                        case "2":
+                                                            echo "Cashback";
+                                                            break;
+                                                        case "3":
+                                                            echo "Potongan";
+                                                            break;
+                                                    } ?>
+                                                <?php endif; ?>
                                             </td>
                                             <td class="text-center">
                                                 <?php if (substr($this->session->userdata('id'), 0, 1) == "3") : ?>
@@ -672,7 +679,7 @@
                                                         </div>
 
                                                         <div class="col-lg-2 col-2 mb-2">
-                                                            <a href="<?= site_url() ?>portal/C_Admin/delete_data_other_feereport/<?= $oi['id_other_feereport'] ?>/<?= $this->uri->segment(4) ?>/<?= $teacher[0]['id_teacher'] ?>" class="btn btn-danger" onclick="return confirm('are you sure want to delete this data?')">
+                                                            <a href="<?= site_url() ?>portal/C_Admin/delete_data_other_feereport/<?= $oi['id_other_feereport'] ?>/<?= $this->uri->segment(4) ?>/<?= $teacher[0]['id_teacher'] ?>" class="btn btn-danger" onclick="return confirm('this data will be deleted. are you sure?')">
                                                                 <i class="fa fa-trash"></i>
                                                             </a>
                                                         </div>
@@ -720,7 +727,7 @@
                             <p style="text-align:left;">
                                 Rp
                                 <span style="float:right;" id="total_feereport">
-                                    <?= number_format(intval($total_rate_event) + intval($teacher_fee_online_lesson) + intval($teacher_fee_offline_lesson) + intval($teacher_fee_others_category), 0, ',', '.'); ?>
+                                    <?= number_format(intval($teacher_fee_offline_lesson) + intval($teacher_fee_online_lesson) - intval($total_rate_event) + intval($teacher_fee_others_category), 0, ',', '.'); ?>
                                 </span>
                             </p>
                         </h5>
@@ -729,7 +736,7 @@
 
                 <?php if (count($id_student_nadia_online_temp) > 0) : ?>
                     <?php $euro = 0;
-                        $dollar = 0; ?>
+                    $dollar = 0; ?>
                     <?php for ($i = 0; $i < count($id_student_nadia_online_temp); $i++) : ?>
                         <?php $temp_id_student_nadia_online_temp[$i] = explode("&", $id_student_nadia_online_temp[$i]); ?>
                         <?php if ($temp_id_student_nadia_online_temp[$i][7] == '2') : ?>
@@ -1028,7 +1035,7 @@
                 var other_price<?= $oi['id_other_feereport'] ?> = document.getElementById('other_price<?= $oi['id_other_feereport'] ?>').value;
                 document.getElementById('rupiah_other_price<?= $oi['id_other_feereport'] ?>').value = convertToRupiah(other_price<?= $oi['id_other_feereport'] ?>);
 
-                var total_feereport = parseInt(<?= $total_rate_event ?>) + parseInt(<?= $teacher_fee_online_lesson ?>) + parseInt(<?= $teacher_fee_offline_lesson ?>) + parseInt(<?= $teacher_fee_others_category ?>);
+                var total_feereport = parseInt(<?= $teacher_fee_online_lesson ?>) + parseInt(<?= $teacher_fee_offline_lesson ?>) - parseInt(<?= $total_rate_event ?>) + parseInt(<?= $teacher_fee_others_category ?>);
 
                 document.getElementById('total_feereport').innerHTML = convertToRupiah(total_feereport);
                 document.getElementById('teacher_fee_others_category').innerHTML = convertToRupiah(parseInt(<?= $teacher_fee_others_category ?>));
@@ -1044,7 +1051,7 @@
                     rupiah_other_price<?= $oi['id_other_feereport'] ?>.value = convertToRupiah(value_input);
                     other_price<?= $oi['id_other_feereport'] ?>.value = value_input;
 
-                    let total_feereport_new = parseInt(<?= $total_rate_event ?>) + parseInt(<?= $teacher_fee_online_lesson ?>) + parseInt(<?= $teacher_fee_offline_lesson ?>) + (parseInt(tot_sementara) + parseInt(value_input));
+                    let total_feereport_new = parseInt(<?= $teacher_fee_online_lesson ?>) + parseInt(<?= $teacher_fee_offline_lesson ?>) - parseInt(<?= $total_rate_event ?>) + (parseInt(tot_sementara) + parseInt(value_input));
 
 
                     console.log(e)

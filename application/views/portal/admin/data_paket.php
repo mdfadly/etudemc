@@ -12,7 +12,6 @@
         <h2 style="font-weight:bold">Data Package</h2>
         <hr>
         <div class="row">
-
             <div class="col-lg-12 text-right ">
                 <a href="<?= site_url() ?>portal/data_paket/add" class="btn btn-primary mr-3">
                     <i class="fa fa-plus mr-2"></i>
@@ -27,8 +26,8 @@
                                 <th>No.</th>
                                 <th>Name of Package</th>
                                 <th>Type of Class</th>
-                                <th>Practical</th>
-                                <th>Theory</th>
+                                <th>Category Class</th>
+                                <!-- <th>Detail Class</th> -->
                                 <th>Detail</th>
                             </tr>
                         </thead>
@@ -57,10 +56,10 @@
                 "type": "POST"
             },
             "columnDefs": [{
-                'targets': [0,5], // column index (start from 0)
+                'targets': [0, 4], // column index (start from 0)
                 'orderable': false, // set orderable false for selected columns
             }, {
-                targets: 5,
+                targets: 4,
                 "className": "text-center",
             }, ],
             "order": []
