@@ -1685,7 +1685,7 @@ class M_Admin extends CI_Model
 
     public function getData_list_package_offline($id_list_package_offline = null, $id_parent = null, $periode = null, $periode_end = null)
     {
-        $this->db->select('op.*, s.name_student, s.id_parent, s.parent_student, t.name_teacher, p.price_idr, p.price_dollar, p.price_euro, p.name, s.teacher_percentage, s.is_new');
+        $this->db->select('op.*, s.name_student, s.id_parent, s.parent_student, t.name_teacher, p.name as name_paket, p.price_idr as price_idr_paket, p.price_dollar, p.price_euro, p.name, s.teacher_percentage, s.is_new');
         $this->db->from('list_package_offline as op');
         $this->db->join('paket as p', 'op.paket = p.id', 'left');
         $this->db->join('student as s', 'op.id_student = s.id_student', 'left');
@@ -3871,10 +3871,12 @@ class M_Admin extends CI_Model
         $this->db->insert('schedule_package_offline', $data);
     }
 
-    function update_event_schedule_package_offline($data, $id_schedule_package)
+    function update_event_schedule_package_offline($id_schedule_package_offline, $status)
     {
-        $this->db->where('id_schedule_package_offline', $id_schedule_package);
-        $this->db->update('schedule_package_offline', $data);
+        $data =  [
+            'status' => $status,
+        ];
+        $this->db->update('schedule_package_offline', $data, ['id_schedule_package_offline' => $id_schedule_package_offline]);
     }
 
     function delete_event_schedule_package_offline($id_schedule_package)

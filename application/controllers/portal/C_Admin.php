@@ -301,13 +301,13 @@ class C_Admin extends CI_Controller
                 $status_pack = '<span class="badge badge-primary text-white">Choose the date !</span>';
             } else {
                 if ($count_praktek == $count_done) {
-                    $status_pack = '<span class="badge badge-danger">Out of Progress</span>';
+                    $status_pack = '<span class="badge badge-danger">InActive</span>';
                 } else if (($count_ongoing == 2) && $count_done > 0) {
                     $status_pack = '<span class="badge badge-warning text-white">2 pack more!</span>';
                 } else if (($count_ongoing == 1) && $count_done > 0) {
                     $status_pack = '<span class="badge badge-warning text-white">1 pack more!</span>';
                 } else {
-                    $status_pack = '<span class="badge text-white" style="background-color:#00B050">In Progress</span>';
+                    $status_pack = '<span class="badge text-white" style="background-color:#00B050">Active</span>';
                 }
             }
             // $row[] = $status_pack ." - ". $count_ongoing ." - " . $count_done ." - " . $count_cancel;
@@ -506,7 +506,7 @@ class C_Admin extends CI_Controller
                     } else if (($count_ongoing == 2 || $count_ongoing == 1) && $count_done > 0) {
                         $status_pack = '<span class="badge badge-warning text-white">1 pack more!</span>';
                     } else {
-                        $status_pack = '<span class="badge text-white" style="background-color:#00B050">In Progress</span>';
+                        $status_pack = '<span class="badge text-white" style="background-color:#00B050">Active</span>';
                     }
                 }
                 // $row[] = $status_pack ." - ". $count_ongoing ." - " . $count_done ." - " . $count_cancel;
@@ -731,7 +731,7 @@ class C_Admin extends CI_Controller
                     } else if (($count_ongoing == 2 || $count_ongoing == 1) && $count_done > 0) {
                         $status_pack = '<span class="badge badge-warning text-white">1 pack more!</span>';
                     } else {
-                        $status_pack = '<span class="badge text-white" style="background-color:#00B050">In Progress</span>';
+                        $status_pack = '<span class="badge text-white" style="background-color:#00B050">Active</span>';
                     }
                 }
                 // $row[] = $status_pack ." - ". $count_ongoing ." - " . $count_done ." - " . $count_cancel;
@@ -955,7 +955,7 @@ class C_Admin extends CI_Controller
                     } else if (($count_ongoing == 1) && $count_done > 0) {
                         $status_pack = '<span class="badge badge-warning text-white">1 pack more!</span>';
                     } else {
-                        $status_pack = '<span class="badge text-white" style="background-color:#00B050">In Progress</span>';
+                        $status_pack = '<span class="badge text-white" style="background-color:#00B050">Active</span>';
                     }
                 }
                 // $row[] = $status_pack ." - ". $count_ongoing ." - " . $count_done ." - " . $count_cancel;
@@ -3481,14 +3481,10 @@ class C_Admin extends CI_Controller
     function update_schedule_package_offline()
     {
         $id_list_package_offline = $this->input->post('id_list_package_offline');
-        $data = array(
-            'id_teacher'  => $this->input->post('id_teacher'),
-            'id_student'  => $this->input->post('id_student'),
-            'id_list_package_offline'  => $this->input->post('id_list_package_offline'),
-            'date_schedule' => $this->input->post('tgl'),
-            'status' => $this->input->post('status'),
-        );
-        $data2 = $this->M_Admin->update_event_schedule_package_offline($data, $this->input->post('id_schedule_online'));
+        $status =  $this->input->post('status');
+        $id_schedule_online = $this->input->post('id_schedule_online');
+
+        $this->M_Admin->update_event_schedule_package_offline($id_schedule_online, $status);
 
         $pack_online = $this->M_Admin->getData_list_package_offline($id_list_package_offline);
         $schedule_pack = $this->M_Admin->getData_schedule_package_offline(null, $id_list_package_offline, 0);

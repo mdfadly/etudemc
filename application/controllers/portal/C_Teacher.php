@@ -93,16 +93,16 @@ class C_Teacher extends CI_Controller
 
             $status_pack = "";
             if ($count_ongoing == 0 && $count_done == 0 && $count_cancel == 0) {
-                $status_pack = '<span class="badge badge-danger text-white">Out of Progress</span>';
+                $status_pack = '<span class="badge badge-danger text-white">InActive</span>';
             } else {
                 if (count($data_schedule) == $count_done) {
-                    $status_pack = '<span class="badge badge-danger">Out of Progress</span>';
+                    $status_pack = '<span class="badge badge-danger">InActive</span>';
                 } else if (($count_ongoing == 2) && $count_done > 0) {
                     $status_pack = '<span class="badge badge-warning text-white">2 pack more!</span>';
                 } else if (($count_ongoing == 1) && $count_done > 0) {
                     $status_pack = '<span class="badge badge-warning text-white">1 pack more!</span>';
                 } else {
-                    $status_pack = '<span class="badge text-white" style="background-color:#00B050">In Progress</span>';
+                    $status_pack = '<span class="badge text-white" style="background-color:#00B050">Active</span>';
                 }
             }
             $row[] = $status_pack;
@@ -186,16 +186,16 @@ class C_Teacher extends CI_Controller
 
             $status_pack = "";
             if ($count_ongoing == 0 && $count_done == 0 && $count_cancel == 0) {
-                $status_pack = '<span class="badge badge-danger text-white">Out of Progress</span>';
+                $status_pack = '<span class="badge badge-danger text-white">InActive</span>';
             } else {
                 if (count($data_schedule) == $count_done) {
-                    $status_pack = '<span class="badge badge-danger">Out of Progress</span>';
+                    $status_pack = '<span class="badge badge-danger">InActive</span>';
                 } else if (($count_ongoing == 3 || $count_ongoing == 4) && $count_done > 0) {
                     $status_pack = '<span class="badge badge-warning text-white">2 pack more!</span>';
                 } else if (($count_ongoing == 2 || $count_ongoing == 1) && $count_done > 0) {
                     $status_pack = '<span class="badge badge-warning text-white">1 pack more!</span>';
                 } else {
-                    $status_pack = '<span class="badge text-white" style="background-color:#00B050">In Progress</span>';
+                    $status_pack = '<span class="badge text-white" style="background-color:#00B050">Active</span>';
                 }
             }
             $row[] = $status_pack;
@@ -292,16 +292,16 @@ class C_Teacher extends CI_Controller
 
             $status_pack = "";
             if ($count_ongoing == 0 && $count_done == 0 && $count_cancel == 0) {
-                $status_pack = '<span class="badge badge-danger text-white">Out of Progress</span>';
+                $status_pack = '<span class="badge badge-danger text-white">InActive</span>';
             } else {
                 if (count($data_schedule) == $count_done) {
-                    $status_pack = '<span class="badge badge-danger">Out of Progress</span>';
+                    $status_pack = '<span class="badge badge-danger">InActive</span>';
                 } else if ($count_ongoing == 2 && $count_done > 0) {
                     $status_pack = '<span class="badge badge-warning text-white">2 pack more!</span>';
                 } else if (($count_ongoing == 1) && $count_done > 0) {
                     $status_pack = '<span class="badge badge-warning text-white">1 pack more!</span>';
                 } else {
-                    $status_pack = '<span class="badge text-white" style="background-color:#00B050">In Progress</span>';
+                    $status_pack = '<span class="badge text-white" style="background-color:#00B050">Active</span>';
                 }
             }
             $row[] = $status_pack;
