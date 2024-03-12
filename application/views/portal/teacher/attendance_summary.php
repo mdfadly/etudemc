@@ -29,7 +29,7 @@
                         </span>
                     </div>
                     <div class="col-lg-3 col-6">
-                        <span class="mr-4" style="color:#67E543">
+                        <span class="mr-4" style="color:#5356FF">
                             <i class="fa fa-square"></i>
                             Online Lesson
                         </span>

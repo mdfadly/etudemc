@@ -288,9 +288,9 @@ class C_Parent extends CI_Controller
                 }
                 if ($row['status'] == 2) {
                     if (fmod($z++, 2) == 1) {
-                        $title = 'Paket ' . $x . ' a';
+                        $title = 'Paket ' . $x . ' A';
                     } else {
-                        $title = 'Paket ' . $x++ . ' b';
+                        $title = 'Paket ' . $x++ . ' B';
                     }
                     $color = '#DE7CD9';
                 }
@@ -315,9 +315,9 @@ class C_Parent extends CI_Controller
             if ($row['status'] == 3 && $row['date_update_cancel'] != NULL) {
                 $title = 'Reschedule';
                 if (fmod($z++, 2) == 1) {
-                    $title = 'Re - Lesson ' . $x . ' a';
+                    $title = 'Re - Lesson ' . $x . ' A';
                 } else {
-                    $title = 'Re - Lesson ' . $x++ . ' b';
+                    $title = 'Re - Lesson ' . $x++ . ' B';
                 }
                 $color = '#DE7CD9';
                 $temp_date = $row['date_update_cancel'];
@@ -360,11 +360,11 @@ class C_Parent extends CI_Controller
                     }
                     if ($row['status'] == 2) {
                         if (fmod($z++, 2) == 1) {
-                            $title = 'Paket ' . $x . ' a';
+                            $title = 'Paket ' . $x . ' A';
                         } else {
-                            $title = 'Paket ' . $x++ . ' b';
+                            $title = 'Paket ' . $x++ . ' B';
                         }
-                        $color = '#67E543';
+                        $color = '#5356FF';
                     }
                     if ($row['status'] == 3) {
                         // $title = 'Cancel';
@@ -390,9 +390,9 @@ class C_Parent extends CI_Controller
                     }
                     if ($row['status'] == 2) {
                         if (fmod($z++, 2) == 1) {
-                            $title = 'Paket ' . $x . ' a';
+                            $title = 'Paket ' . $x . ' A';
                         } else {
-                            $title = 'Paket ' . $x++ . ' b';
+                            $title = 'Paket ' . $x++ . ' B';
                         }
                         $color = '#0D99FF';
                     }
@@ -418,12 +418,12 @@ class C_Parent extends CI_Controller
             if ($row['status'] == 3 && $row['date_update_cancel'] != NULL) {
                 $title = 'Reschedule';
                 if (fmod($z++, 2) == 1) {
-                    $title = 'Re - Lesson ' . $x . ' a';
+                    $title = 'Re - Lesson ' . $x . ' A';
                 } else {
-                    $title = 'Re - Lesson ' . $x++ . ' b';
+                    $title = 'Re - Lesson ' . $x++ . ' B';
                 }
                 if ($row['jenis'] == 1) {
-                    $color = '#67E543';
+                    $color = '#5356FF';
                 }
                 if ($row['jenis'] == 2) {
                     $color = '#0D99FF';
@@ -433,7 +433,7 @@ class C_Parent extends CI_Controller
             if ($row['status'] == 3 && $row['date_update_cancel'] == NULL) {
                 $title = 'Cancel';
                 if ($row['jenis'] == 1) {
-                    $color = '#67E543';
+                    $color = '#5356FF';
                 }
                 if ($row['jenis'] == 2) {
                     $color = '#0D99FF';

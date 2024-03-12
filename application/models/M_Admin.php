@@ -136,8 +136,8 @@ class M_Admin extends CI_Model
         }
     }
 
-    var $column_order_list_package_offline = array(null, 'op.id_student', 's.name_student', null, null, 'op.created_at', null);
-    var $column_search_list_package_offline = array('op.id_student', 's.name_student', 'op.created_at');
+    var $column_order_list_package_offline = array('op.id_student', 's.name_student', null, null, null, null);
+    var $column_search_list_package_offline = array('op.id_student', 's.name_student', 'op.created_at', null, null, null);
     var $order_list_package_offline = array('op.id_list_package_offline' => 'asc');
 
     private function _get_datatables_query_list_package_offline()

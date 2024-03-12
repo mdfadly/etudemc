@@ -103,7 +103,7 @@
             </div>
             <div class="col-lg-12 border p-3" style="font-size:17px;">
                 <?php if ($jenis == 1) : ?>
-                    <span class="mr-4" style="color:#67E543">
+                    <span class="mr-4" style="color:#5356FF">
                         <i class="fa fa-square"></i>
                         Practical
                     </span>
@@ -284,7 +284,7 @@
                 if (event.title.substr(0, 2) == "Re") {
                     if (event.jenis == 1) {
                         $(view.el[0]).find('.fc-day[data-date=' + dateString + ']').css({
-                            "background-color": "#67E543",
+                            "background-color": "#5356FF",
                             "color": "white",
                         });
                     }
@@ -311,7 +311,7 @@
                     }
                     if (event.status == 2 || event.status == 4) {
                         $(view.el[0]).find('.fc-day[data-date=' + dateString + ']').css({
-                            "background-color": "#67E543",
+                            "background-color": "#5356FF",
                             "color": "white",
                         });
                     }

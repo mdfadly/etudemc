@@ -3294,7 +3294,7 @@ class C_Admin extends CI_Controller
                 }
                 if ($row['status'] == 2) {
                     $title = 'Done';
-                    $color = '#67E543';
+                    $color = '#5356FF';
                 }
                 if ($row['status'] == 3) {
                     $title = 'Cancel';
@@ -3359,7 +3359,7 @@ class C_Admin extends CI_Controller
             if ($row['status'] == 3 && $row['date_update_cancel'] != NULL) {
                 $title = 'Reschedule';
                 if ($row['jenis'] == 1) {
-                    $color = '#67E543';
+                    $color = '#5356FF';
                 }
                 if ($row['jenis'] == 2) {
                     $color = '#0D99FF';
