@@ -156,6 +156,19 @@
                         <?= $student[0]['username_parent'] ?>
                     </div>
                 </div>
+                <div class="form-group row">
+                    <label for="address" class="col-4 col-lg-3">Password</label>
+                    <div class="col-8 col-lg-8 row">
+                        <div class="col-6 col-lg-6">
+                            <input type="password" autocomplete="off" minlength="8" maxlength="20" class="form-control regist-form pwd" readonly value="<?= $student[0]['password_parent'] ?>" name="password" id="inputPassword">
+                        </div>
+                        <div class="col-lg-2 col-2">
+                            <button id="btn-eye" onclick="openPass()" class="btn btn-default reveal" type="button">
+                                <i class="iconEye fa fa-eye-slash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
                 <!-- <div class="form-group row">
                     <label for="address" class="col-4 col-lg-3">Password</label>
                     <div class="col-8 col-lg-8">
@@ -169,6 +182,22 @@
 <script src="<?= base_url('assets/js/jquery-3.4.0.min.js'); ?>"></script>
 <!-- Optional JavaScript -->
 <script>
+    function openPass() {
+            $('.iconEye').removeClass('fa-eye-slash');
+            $('.iconEye').addClass('fa-eye');
+            $(".pwd").replaceWith($('.pwd').clone().attr('type', 'text'));
+            $('#btn-eye').removeAttr("onclick");
+            $('#btn-eye').attr("onclick", 'closePass()');
+        }
+
+        function closePass() {
+            $('.iconEye').removeClass('fa-eye');
+            $('.iconEye').addClass('fa-eye-slash');
+            $(".pwd").replaceWith($('.pwd').clone().attr('type', 'password'));
+            $('#btn-eye').removeAttr("onclick");
+            $('#btn-eye').attr("onclick", 'openPass()');
+
+        }
     $(document).ready(function() {
         var x = window.matchMedia("(max-width: 990px)");
         myFunction(x); // Call listener function at run time
@@ -185,5 +214,7 @@
                 // document.getElementById("divImg").style.paddingLeft = "200px";
             }
         };
+
+        
     });
 </script>

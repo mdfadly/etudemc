@@ -1413,7 +1413,8 @@ class M_Admin extends CI_Model
         // $today = date("Y-m-d");
         $today = $this->input->post('created_at');
         $startdate = strtotime($today);
-        $enddate = strtotime("+3 months", $startdate);
+        // $enddate = strtotime("+3 months", $startdate);
+        $enddate = strtotime("+8 week", $startdate);
         $temp_date =  date("Y-m-d", $enddate);
 
         $id_teacher = $this->input->post('id_teacher');
@@ -1871,7 +1872,8 @@ class M_Admin extends CI_Model
         // $today = date("Y-m-d");
         $today = $this->input->post('created_at');
         $startdate = strtotime($today);
-        $enddate = strtotime("+3 months", $startdate);
+        // $enddate = strtotime("+3 months", $startdate);
+        $enddate = strtotime("+8 week", $startdate);
         $temp_date =  date("Y-m-d", $enddate);
 
         $id_teacher_practical = NULL;
