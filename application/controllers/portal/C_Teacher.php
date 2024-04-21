@@ -2593,6 +2593,24 @@ class C_Teacher extends CI_Controller
         echo $event_join;
     }
 
+    function change_date_package_offline()
+    {
+        $this->cekLogin();
+        $data = [];
+        if($this->input->post('status_date_change') == '2'){
+            $data = array(
+                'date_schedule' => $this->input->post('date_change'),
+            );
+        }
+        if($this->input->post('status_date_change') == '3'){
+            $data = array(
+                'date_update_cancel' => $this->input->post('date_change'),
+            );
+        }
+
+        $this->M_Teacher->update_change_date_package_offline($data, $this->input->post('active_schedule_id'));
+    }
+
     public function cek_package($id_pack, $jenis = NULL)
     {
         $this->cekLogin();
@@ -3807,6 +3825,24 @@ class C_Teacher extends CI_Controller
 
         $event_join = implode(" ", $temp_event);
         echo $event_join;
+    }
+
+    function change_date_package()
+    {
+        $this->cekLogin();
+        $data = [];
+        if($this->input->post('status_date_change') == '2'){
+            $data = array(
+                'date_schedule' => $this->input->post('date_change'),
+            );
+        }
+        if($this->input->post('status_date_change') == '3'){
+            $data = array(
+                'date_update_cancel' => $this->input->post('date_change'),
+            );
+        }
+
+        $this->M_Teacher->update_change_date_package($data, $this->input->post('active_schedule_id'));
     }
 
     public function insert_schedule_package()

@@ -242,6 +242,24 @@
                         </div>
                     </div>
                 </div>
+                <div id="calendarModalChangeDate" class="modal fade" id="staticBackdrop" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h4>Change Date Attendance</h4>
+                                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span> <span class="sr-only">close</span></button>
+                            </div>
+                            <div id="modalBody" class="modal-body text-center">
+                                <h5 class="col-lg-12">Please input date to change the "Existing Lesson Date" </h5>
+                                <input type="hidden" class="form-control" name="active_schedule_id" id="active_schedule_id">
+                                <input type="hidden" class="form-control" name="status_date_change" id="status_date_change">
+                                <input type="date" class="form-control" name="date_change" id="date_change">
+                                <br>
+                                <button id="btn_change_date_attendance" class="btn btn-warning text-white col-lg-5 col-5">Submit</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -285,8 +303,6 @@
             tanggalEx = <?= substr($pack_online[0]['end_at'], 8, 2) ?>;
             var exDate = new Date(tahunEx, bulanEx, tanggalEx);
             exDate.setDate(exDate.getDate() + 1);
-            // console.log(myDate);
-            // console.log(exDate);
             var monthsToAdd = 3;
             var addDate = new Date();
             addDate.setMonth(myDate.getMonth() + monthsToAdd);
@@ -389,15 +405,9 @@
             var addDate = new Date();
             addDate.setMonth(myDate.getMonth() + monthsToAdd);
             addDate.setDate(addDate.getDate() - 1);
-            // console.log(date);
-            // console.log(myDate);
-            // console.log(addDate);
             var today = new Date();
             let prac_meet = document.getElementById("total_practical_meet").innerHTML;
             let theory_meet = document.getElementById("total_theory_meet").innerHTML;
-
-            prac_meet.replace(/\D/g, "") > 0 ? console.log(prac_meet.replace(/\D/g, "")) : null;
-            theory_meet.replace(/\D/g, "") > 0 ? console.log(theory_meet.replace(/\D/g, "")) : null;
 
             if (prac_meet.replace(/\D/g, "") > 0 || theory_meet.replace(/\D/g, "") > 0) {
                 $('#modalTitle').html(date.format("MMM, DD Y"));
@@ -435,17 +445,23 @@
                 $('#calendarModalUpdate').modal();
             }
             if (event.status == 2) {
-                alert('Attendance was done');
-                console.log('halo 2');
+                alert('Attendance was Done');
+                $('#calendarModalChangeDate').modal();
+                document.getElementById("active_schedule_id").value = event.id;
+                document.getElementById("status_date_change").value = event.status;
             }
             if (event.status == 4) {
-                alert('Attendance was done');
-                console.log('halo 4');
+                alert('Attendance was Done');
             }
-
             if (event.status == 3) {
-                alert('Attendance was cancel');
-                console.log('halo 3');
+                if (event.title.substr(0, 2) == "Re") {
+                    alert('Attendance was Done');
+                    $('#calendarModalChangeDate').modal();
+                    document.getElementById("active_schedule_id").value = event.id;
+                    document.getElementById("status_date_change").value = event.status;
+                }else{
+                    alert('Attendance was cancel');
+                }
             }
             if (event.status == 5 || event.status == 7) {
                 var date_event = event.date;
@@ -693,6 +709,16 @@
         }
     });
 
+    $('#btn_change_date_attendance').click(function() {
+        var date_change = $("#date_change").val();
+        if (date_change !== "") {
+            changeDateAttendance();
+            $('#calendarModalChangeDate').modal('hide');
+        } else {
+            alert("please input date valid!")
+        }
+    });
+
     function myFunction(e) {
         var temp_val = e.target.value;
         document.getElementById("jenis").value = temp_val;
@@ -885,7 +911,6 @@
         var id_list_pack = "<?= $pack_online[0]['id_list_pack'] ?>";
         var tgl = $("#date_active").val();
         var jenis = $("#jenis_active").val();
-        // console.log("cancel " + jenis)
         $.ajax({
             url: "<?= base_url('portal/C_Teacher/update_schedule_package') ?>",
             type: "POST",
@@ -951,6 +976,27 @@
                 'id_list_pack': id_list_pack,
                 'teacher_percentage': teacher_percentage,
                 'is_new': is_new,
+            },
+            success: function(data) {
+                calendar.fullCalendar('refetchEvents');
+                location.reload();
+                alert("Updated Successfully");
+            }
+        });
+    }
+
+    function changeDateAttendance() {
+        var active_schedule_id = $("#active_schedule_id").val();
+        var date_change = $("#date_change").val();
+        var status_date_change = $("#status_date_change").val();
+
+        $.ajax({
+            url: "<?= base_url('portal/C_Teacher/change_date_package') ?>",
+            type: "POST",
+            data: {
+                'active_schedule_id': active_schedule_id,
+                'date_change': date_change,
+                'status_date_change': status_date_change,
             },
             success: function(data) {
                 calendar.fullCalendar('refetchEvents');

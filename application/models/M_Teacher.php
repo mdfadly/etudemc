@@ -1023,6 +1023,18 @@ class M_Teacher extends CI_Model
         $this->db->insert('schedule_package', $data);
     }
 
+    function update_change_date_package($data, $id_schedule_pack)
+    {
+        $this->db->where('id_schedule_pack', $id_schedule_pack);
+        $this->db->update('schedule_package', $data);
+    }
+
+    function update_change_date_package_offline($data, $id_schedule_package_offline)
+    {
+        $this->db->where('id_schedule_package_offline', $id_schedule_package_offline);
+        $this->db->update('schedule_package_offline', $data);
+    }
+
     function update_event_schedule_package($data, $id_schedule_pack)
     {
         $this->db->where('id_schedule_pack', $id_schedule_pack);
